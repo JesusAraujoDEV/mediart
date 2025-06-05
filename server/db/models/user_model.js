@@ -55,9 +55,18 @@ class User extends Model {
       foreignKey: 'owner_user_id'
     });
 
-    // Un usuario tiene muchas entradas en su Biblioteca (Library)
+    // ¡CORRECCIÓN AQUÍ!
+    // Relación Many-to-Many: Un Usuario puede guardar muchas Playlists
+    this.belongsToMany(models.Playlist, {
+      as: 'savedPlaylists', // Alias para acceder a las playlists que este usuario ha guardado
+      through: models.Library, // La tabla intermedia es Library
+      foreignKey: 'user_id', // Clave foránea en Library que apunta a User
+      otherKey: 'playlist_id' // Clave foránea en Library que apunta a Playlist
+    });
+
+    // Si quieres un acceso directo a los registros de la tabla intermedia 'library' (esto no es estrictamente necesario si usas belongsToMany pero puede ser útil para acceder a saved_at):
     this.hasMany(models.Library, {
-      as: 'savedPlaylists',
+      as: 'libraryEntries', // Los registros de la tabla library asociados a este usuario
       foreignKey: 'user_id'
     });
 
