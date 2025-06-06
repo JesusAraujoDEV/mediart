@@ -20,15 +20,24 @@
       type="image/x-icon"
     />
   </head>
-  <div id="layout" class="w-full h-fit">
+  <div id="layout" class="w-full h-fit text-white font-[Raleway]">
     <slot />
   </div>
 </template>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&family=Sail&display=swap');
+
 #layout {
   background: url("~/assets/layout/backgroundNeat.webp") no-repeat center center
     fixed;
   background-size: cover;
 }
+
+.glassEffect {
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid #ffffff20;
+}
+
 </style>
