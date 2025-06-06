@@ -2,7 +2,7 @@
   <title>Mediart - Login</title>
   <NuxtLayout>
     <NuxtPage />
-    <div class="w-screen h-dvh flex justify-center items-center">
+    <main class="w-screen h-dvh flex justify-center items-center">
       <div
         class="md:w-1/3 max-md:w-5/6 h-fit max-md:aspect-auto gap-3 flex flex-col relative items-center justify-center glassEffect p-8 py-16 aspect-square rounded-lg"
       >
@@ -38,7 +38,7 @@
           />
         </NuxtLink>
       </div>
-    </div>
+    </main>
   </NuxtLayout>
 </template>
 

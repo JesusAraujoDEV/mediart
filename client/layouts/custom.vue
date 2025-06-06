@@ -25,21 +25,6 @@
     class="w-full h-fit text-white font-[Raleway] overflow-hidden relative"
   >
     <slot />
-    <img
-      class="absolute -left-30 top-1/7 max-md:w-1/3 w-1/3 rotate-12"
-      src="~/assets/resources/backgroundHeadset.webp"
-      alt="hand"
-    />
-    <img
-      class="absolute right-0 top-1/7 max-md:w-1/3 w-1/4"
-      src="~/assets/resources/backgroundHand.webp"
-      alt="hand"
-    />
-    <img
-      class="absolute right-45 -bottom-30 max-md:w-1/3 w-1/7 -rotate-45"
-      src="~/assets/resources/backgroundBook.webp"
-      alt="Book"
-    />
   </div>
 </template>
 

@@ -2,7 +2,7 @@
   <title>Mediart - Registro</title>
   <NuxtLayout>
     <NuxtPage />
-    <div class="w-screen h-dvh flex justify-center items-center">
+    <main class="w-screen h-dvh flex justify-center items-center">
       <div
         class="md:w-1/3 max-md:w-5/6 h-fit max-md:aspect-auto gap-5 flex flex-col relative items-center justify-center glassEffect p-8 aspect-square rounded-lg"
       >
@@ -45,7 +45,7 @@
           />
         </NuxtLink>
       </div>
-    </div>
+    </main>
   </NuxtLayout>
 </template>
 
