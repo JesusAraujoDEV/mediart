@@ -9,19 +9,19 @@ const bio = Joi.string().max(600);
 
 
 const createUserSchema = Joi.object({
-  username,
-  email,
-  password_hash,
-  profile_picture_url,
-  bio
+  username: username.required(),
+  email: email.required(),
+  password_hash: password_hash.required(),
+  profile_picture_url: profile_picture_url.optional(), // Opcional, pero explícito
+  bio: bio.optional()  
 });
 
 const updateUserSchema = Joi.object({
-  username,
-  email,
-  password_hash,
-  profile_picture_url,
-  bio
+  username: username,
+  email: email,
+  password_hash: password_hash,
+  profile_picture_url: profile_picture_url,
+  bio: bio
 });
 
 const getUserSchema = Joi.object({
