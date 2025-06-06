@@ -26,7 +26,7 @@ const UserSchema = {
   },
   profilePictureUrl: {
     allowNull: true,
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING,
     field: 'profile_picture_url'
   },
   bio: {
