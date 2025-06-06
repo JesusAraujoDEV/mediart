@@ -75,6 +75,12 @@ class Item extends Model {
       foreignKey: 'item_id', // Clave foránea en PlaylistItem que apunta a Item
       otherKey: 'playlist_id' // Clave foránea en PlaylistItem que apunta a Playlist
     });
+
+    // Relación One-to-Many con PlaylistItem (para acceder directamente a las entradas de la tabla intermedia)
+    this.hasMany(models.PlaylistItem, {
+      as: 'playlistEntries', // O un alias similar como 'itemInPlaylists'
+      foreignKey: 'item_id'
+    });
   }
 
   static config(sequelize) {
