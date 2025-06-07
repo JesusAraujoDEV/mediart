@@ -10,3 +10,9 @@ services:
       - 5432:5432
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - mediart-network
+
+networks:
+  mediart-network:
+    driver: bridge

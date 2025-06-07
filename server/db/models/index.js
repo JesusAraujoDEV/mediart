@@ -1,6 +1,6 @@
 const { User, UserSchema } = require('./user_model');
 const { Playlist, PlaylistSchema } = require('./playlist_model');
-const { Item, ItemSchema } = require('./items_model');
+const { Item, ItemSchema } = require('./item_model');
 const { UserFollow, UserFollowSchema } = require('./user_follow_model');
 const { PlaylistItem, PlaylistItemSchema } = require('./playlist_item_model');
 const { Library, LibrarySchema } = require('./library_model');

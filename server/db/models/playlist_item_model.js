@@ -1,6 +1,6 @@
 const { Model, DataTypes, Sequelize } = require('sequelize');
-const { PLAYLIST_TABLE } = require('./playlist_model'); // Asegúrate que 'playlist_model' exporta PLAYLIST_TABLE
-const { ITEM_TABLE } = require('./item_model'); // Asegúrate de que es 'item_model' y no 'items_model'
+const { PLAYLIST_TABLE } = require('./playlist_model');
+const { ITEM_TABLE } = require('./item_model');
 
 const PLAYLIST_ITEM_TABLE = 'playlist_items'; // ¡Correcto! Esta es la tabla 'playlist_items'
 

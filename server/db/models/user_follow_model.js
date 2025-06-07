@@ -1,7 +1,7 @@
 const { Model, DataTypes, Sequelize } = require('sequelize');
 const { USER_TABLE } = require('./user_model');
 
-const USER_FOLLOW_TABLE = 'user_follows ';
+const USER_FOLLOW_TABLE = 'user_follows';
 
 const UserFollowSchema = {
   id: {
@@ -36,6 +36,12 @@ const UserFollowSchema = {
     allowNull: false,
     type: DataTypes.DATE,
     field: 'created_at',
+    defaultValue: Sequelize.NOW,
+  },
+  updatedAt: {
+    allowNull: false,
+    type: DataTypes.DATE,
+    field: 'updated_at',
     defaultValue: Sequelize.NOW,
   }
 }

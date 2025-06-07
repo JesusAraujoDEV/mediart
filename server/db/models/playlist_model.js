@@ -31,7 +31,7 @@ const PlaylistSchema = {
   },
   isCollaborative: {
     allowNull: false,
-    type: DataTypes.BOOL,
+    type: DataTypes.BOOLEAN,
     field: 'is_collaborative'
   },
   createdAt: {
