@@ -1,29 +1,29 @@
 const express = require('express');
 
-const UsersService = require('./../services/user_service');
+const ItemsService = require('./../services/item_service');
 const validatorHandler = require('./../middlewares/validator_handler');
-const { updateUserSchema, createUserSchema, getUserSchema } = require('./../schemas/user_schema');
+const { updateItemSchema, createItemSchema, getItemSchema } = require('./../schemas/item_schema');
 
 const router = express.Router();
-const service = new UsersService();
+const service = new ItemsService();
 
 
 router.get('/', async (req, res, next) => {
   try {
-    const users = await service.find();
-    res.json(users);
+    const items = await service.find();
+    res.json(items);
   } catch (error) {
     next(error);
   }
 });
 
 router.get('/:id',
-  validatorHandler(getUserSchema, 'params'),
+  validatorHandler(getItemSchema, 'params'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const user = await service.findOne(id);
-      res.json(user);
+      const items = await service.findOne(id);
+      res.json(items);
     } catch (error) {
       next(error);
     }
@@ -31,12 +31,12 @@ router.get('/:id',
 );
 
 router.post('/',
-  validatorHandler(createUserSchema, 'body'),
+  validatorHandler(createItemSchema, 'body'),
   async (req, res, next) => {
     try {
       const body = req.body;
-      const newUser = await service.create(body);
-      res.status(201).json(newUser);
+      const newItem = await service.create(body);
+      res.status(201).json(newItem);
     } catch (error) {
       next(error);
     }
@@ -44,14 +44,14 @@ router.post('/',
 );
 
 router.patch('/:id',
-  validatorHandler(getUserSchema, 'params'),
-  validatorHandler(updateUserSchema, 'body'),
+  validatorHandler(getItemSchema, 'params'),
+  validatorHandler(updateItemSchema, 'body'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
       const body = req.body;
-      const user = await service.update(id, body);
-      res.json(user);
+      const item = await service.update(id, body);
+      res.json(item);
     } catch (error) {
       next(error);
     }
@@ -59,7 +59,7 @@ router.patch('/:id',
 );
 
 router.delete('/:id',
-  validatorHandler(getUserSchema, 'params'),
+  validatorHandler(getItemSchema, 'params'),
   async (req, res, next) => {
     try {
       const { id } = req.params;

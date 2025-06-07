@@ -7,7 +7,7 @@ const description = Joi.string().max(500);
 const coverUrl = Joi.string().max(255);
 const releaseDate = Joi.date();
 const externalId = Joi.number().integer();
-const avgRating = Joi.number().float();
+const avgRating = Joi.number();
 const vibeTags = Joi.array().items(Joi.string());
 
 const createItemSchema = Joi.object({
