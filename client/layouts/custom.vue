@@ -42,4 +42,15 @@
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid #ffffff20;
 }
+
+.icon {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+.icon:active {
+  transform: scale(0.95);
+}
+
 </style>
