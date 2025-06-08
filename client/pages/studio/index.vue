@@ -1,5 +1,5 @@
 <template>
-  <title>MediartStudio</title>
+  <title>MediartStudio - Inicio</title>
   <main class="w-screen h-dvh flex items-center justify-center gap-4">
     <NavigationStudio />
     <div class="relative w-1/3 max-md:w-2/3">

@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="absolute top-0 left-0 w-fit glassEffect p-2 m-3 rounded-lg flex items-center gap-2"
+    class="absolute top-0 left-0 w-fit glassEffect p-2 m-3 rounded-lg flex items-center gap-4"
   >
     <NuxtLink to="/">
       <img
@@ -8,6 +8,13 @@
         class="icon"
         src="~/assets/mediart/mediartLogo.webp"
         alt="Logo"
+      />
+    </NuxtLink>
+    <NuxtLink to="/studio/profile">
+      <img
+        class="icon rounded-full"
+        src="~/assets/resources/studio/previewProfile.webp"
+        alt="Profile Preview"
       />
     </NuxtLink>
   </nav>
