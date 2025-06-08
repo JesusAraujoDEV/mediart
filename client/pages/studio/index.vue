@@ -1,5 +1,7 @@
 <template>
+  <title>MediartStudio</title>
   <main class="w-screen h-dvh flex items-center justify-center gap-4">
+    <NavigationStudio />
     <div class="relative w-1/3 max-md:w-2/3">
       <div
         class="glassEffect rounded-lg p-3 text-white flex flex-wrap items-center gap-2 min-h-[48px]"
@@ -56,6 +58,7 @@ definePageMeta({
 });
 
 import { ref, computed, onMounted } from "vue";
+import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 
 const inputValue = ref("");
 const selectedTags = ref<string[]>([]);
