@@ -13,22 +13,22 @@
         >
           <label class="w-full mb-0" for="Email">Correo Electrónico</label>
           <div class="flex flex-row w-full relative h-12 mb-6">
-            <Icon name="material-symbols:mail-outline" size='1.2rem' class="absolute top-1/2 -translate-y-1/2 left-1 -z-1"/>
+            <Icon name="material-symbols:mail-outline" size='1.2rem' class="absolute top-1/2 -translate-y-1/2 right-1 mr-1 -z-1"/>
             <input
               type="email"
               placeholder="tu@email.com"
-              class="w-full pl-8 rounded border border-gray-300"
+              class="w-full pl-2 rounded border border-gray-300"
               id="Email"
             />
           </div>
 
           <label class="w-full mb-0" for="Password">Contraseña</label>
           <div class="flex flex-row w-full relative h-12">
-            <Icon name="material-symbols:lock-outline" size='1.2rem' class="absolute top-1/2 -translate-y-1/2 left-1 -z-1"/>
+            <Icon name="material-symbols:lock-outline" size='1.2rem' class="absolute top-1/2 -translate-y-1/2 right-1 mr-1 -z-1"/>
             <input
               type="password"
               placeholder="••••••••"
-              class="w-full pl-8 rounded border border-gray-300"
+              class="w-full pl-2 rounded border border-gray-300"
               id="Password"
             />
           </div>
