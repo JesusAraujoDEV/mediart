@@ -38,8 +38,8 @@
 }
 
 .glassEffect {
-  backdrop-filter: blur(10px);
-  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(30px);
+  background-color: rgba(255, 255, 255, 0.127);
   border: 1px solid #ffffff20;
 }
 

@@ -26,7 +26,7 @@
   >
     <slot />
     <img
-      class="absolute -left-30 top-1/7 max-md:w-1/3 w-1/3 rotate-12 floating-object"
+      class="absolute -left-30 top-1/7 max-md:w-1/3 w-1/3 rotate-12 "
       src="~/assets/resources/backgroundHeadset.webp"
       alt="hand"
     />
