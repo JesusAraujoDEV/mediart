@@ -26,17 +26,17 @@
   >
     <slot />
     <img
-      class="absolute -left-30 top-1/7 max-md:w-1/3 w-1/3 rotate-12"
+      class="absolute -left-30 top-1/7 max-md:w-1/3 w-1/3 rotate-12 floating-object"
       src="~/assets/resources/backgroundHeadset.webp"
       alt="hand"
     />
     <img
-      class="absolute right-0 top-1/7 max-md:w-1/3 w-1/4"
+      class="absolute right-0 top-1/7 max-md:w-1/3 w-1/4 floating-object"
       src="~/assets/resources/backgroundHand.webp"
       alt="hand"
     />
     <img
-      class="absolute right-45 -bottom-30 max-md:w-1/3 w-1/7 -rotate-45"
+      class="absolute right-45 -bottom-30 max-md:w-1/3 w-1/7 -rotate-45 floating-object"
       src="~/assets/resources/backgroundBook.webp"
       alt="Book"
     />
@@ -45,6 +45,7 @@
 
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&family=Sail&display=swap");
+@import "../styles/float.css";
 
 #layout {
   background: url("~/assets/layout/backgroundNeat.webp") no-repeat center center

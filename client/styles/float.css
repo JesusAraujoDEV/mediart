@@ -1,0 +1,17 @@
+.floating-object {
+    transform-origin: center center; 
+    animation: float 3s ease-in-out infinite; /* Nombre, duración, tipo de easing, repeticiones */
+}
+
+/* Definición de la animación */
+@keyframes float {
+    0% {
+        transform: translateY(0px); /* Posición inicial */
+    }
+    50% {
+        transform: translateY(-20px); /* Sube 20px */
+    }
+    100% {
+        transform: translateY(0px); /* Vuelve a la posición inicial */
+    }
+}
