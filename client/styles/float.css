@@ -9,7 +9,7 @@
         transform: translateY(0px); /* Posición inicial */
     }
     50% {
-        transform: translateY(-20px); /* Sube 20px */
+        transform: translateY(-30px); /* Sube 30px */
     }
     100% {
         transform: translateY(0px); /* Vuelve a la posición inicial */
