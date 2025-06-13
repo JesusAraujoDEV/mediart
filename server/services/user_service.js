@@ -2,7 +2,7 @@ const boom = require('@hapi/boom');
 const { models } = require('../libs/sequelize');
 const bcrypt = require('bcrypt');
 
-class UsersService {
+class UserService {
 
   constructor(){
   }
@@ -127,4 +127,4 @@ class UsersService {
 
 }
 
-module.exports = UsersService;
+module.exports = UserService;

@@ -1,25 +1,25 @@
 const express = require('express');
 const passport = require('passport');
-const OrdersService = require('./../services/order_service');
+const PlaylistService = require('./../services/playlist_service');
 
 const router = express.Router();
 
-const service = new OrdersService();
+const playlistService = new PlaylistService();
 
-router.get('/my-orders',
-  passport.authenticate('jwt', {session:false}),
-  async (req, res, next) => {
-    try {
-        const user = req.user;
-        const orders = await service.findByUser(user.sub);
-        console.log(orders);
-        res.json({
-            orders
-        });
-    } catch (error) {
-      next(error);
+router.get(
+    '/owned-playlists',
+    passport.authenticate('jwt', { session: false }),
+    async (req, res, next) => {
+      try {
+        const userId = req.user.sub;
+  
+        const ownedPlaylists = await playlistService.findByOwner(userId);
+  
+        res.json(ownedPlaylists);
+      } catch (error) {
+        next(error);
+      }
     }
-  }
-);
+  );
 
 module.exports = router;

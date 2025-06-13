@@ -1,12 +1,12 @@
 require('dotenv').config();
-const UsersService = require('./user_service');
+const UserService = require('./user_service');
 const boom = require('@hapi/boom');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { config } = require('../config/config');
 
-const service = new UsersService();
+const service = new UserService();
 
 class AuthService{
     async getUser(email, password){

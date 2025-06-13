@@ -1,13 +1,13 @@
 const express = require('express');
 
-const PlaylistsService = require('./../services/playlist_service');
+const PlaylistService = require('./../services/playlist_service');
 const validatorHandler = require('./../middlewares/validator_handler');
 const { updatePlaylistSchema, createPlaylistSchema, getPlaylistSchema } = require('./../schemas/playlist_schema');
 const passport = require('passport');
 const { addItemsToPlaylistUnifiedSchema } = require('../schemas/playlist_item_schema');
 
 const router = express.Router();
-const service = new PlaylistsService();
+const service = new PlaylistService();
 
 
 router.get('/', async (req, res, next) => {

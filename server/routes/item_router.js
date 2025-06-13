@@ -1,11 +1,11 @@
 const express = require('express');
 
-const ItemsService = require('./../services/item_service');
+const ItemService = require('./../services/item_service');
 const validatorHandler = require('./../middlewares/validator_handler');
 const { updateItemSchema, createItemSchema, getItemSchema } = require('./../schemas/item_schema');
 
 const router = express.Router();
-const service = new ItemsService();
+const service = new ItemService();
 
 
 router.get('/', async (req, res, next) => {

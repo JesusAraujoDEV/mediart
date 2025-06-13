@@ -1,7 +1,7 @@
 const boom = require('@hapi/boom');
 const { models } = require('../libs/sequelize');
 
-class PlaylistsService {
+class PlaylistService {
 
   constructor(){
   }
@@ -57,6 +57,28 @@ class PlaylistsService {
         ]
       }
     );
+    return playlists;
+  }
+
+  async findByOwner(userId) {
+    const playlists = await models.Playlist.findAll({
+      where: {
+        ownerUserId: userId
+      },
+      include: [
+        {
+          model: models.User,
+          as: 'owner',
+          attributes: ['id', 'username', 'email']
+        },
+        {
+          model: models.Item,
+          as: 'items',
+          through: { attributes: [] }
+        }
+      ]
+    });
+
     return playlists;
   }
 
@@ -199,4 +221,4 @@ class PlaylistsService {
 
 }
 
-module.exports = PlaylistsService;
+module.exports = PlaylistService;
