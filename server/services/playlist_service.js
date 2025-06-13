@@ -12,7 +12,27 @@ class PlaylistsService {
     if (!user) {
       throw boom.notFound('User not found');
     }
+
+    // 1. Crear la nueva playlist
     const newPlaylist = await models.Playlist.create(data);
+
+    // 2. ¡CORRECCIÓN AQUÍ!: Guardar la playlist recién creada en la librería del usuario que la creó
+    // En lugar de usar el método mágico, insertamos directamente en la tabla 'Library'
+    try {
+        await models.Library.create({
+            userId: user.id,         // Aseguramos que userId sea el ID del usuario
+            playlistId: newPlaylist.id, // Aseguramos que playlistId sea el ID de la nueva playlist
+            // savedAt no es necesario pasarlo explícitamente porque tiene defaultValue: Sequelize.NOW
+        });
+    } catch (libraryError) {
+        // Opcional: Si la inserción en Library falla, podrías considerar eliminar la playlist recién creada
+        // para mantener la consistencia de la base de datos, o al menos registrar el error.
+        console.error("Error creating Library entry for new playlist:", libraryError);
+        // Si no quieres que la playlist se cree sin guardarse en la librería, puedes lanzar un error.
+        // Si quieres que se cree igual y registrar solo el error de librería, puedes omitir el throw.
+        throw boom.internal('Failed to save playlist to user library after creation.', libraryError);
+    }
+
     return newPlaylist;
   }
 
