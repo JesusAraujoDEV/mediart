@@ -22,6 +22,7 @@ app.use('/uploads', express.static('uploads')); // Ahora tus fuentes serán acce
 //   }
 // }
 // app.use(cors(options));
+require('./utils/auth');
 
 app.use(express.json());
 
