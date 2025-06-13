@@ -20,8 +20,10 @@ class UserService {
   }
 
   async savePlaylist(userId, playlistId) {
-    const user = await this.findOne(userId);
-    console.log(user);
+    const userExists = await models.User.findByPk(userId, { attributes: ['id'] });
+    if (!userExists) {
+      throw boom.notFound('User not found');
+    }
 
     const playlist = await models.Playlist.findByPk(playlistId);
     if (!playlist) {
@@ -48,7 +50,10 @@ class UserService {
   }
 
   async unsavePlaylist(userId, playlistId) {
-    const user = await this.findOne(userId);
+    const userExists = await models.User.findByPk(userId, { attributes: ['id'] });
+    if (!userExists) {
+      throw boom.notFound('User not found');
+    }
 
     const libraryEntry = await models.Library.findOne({
       where: {
@@ -183,6 +188,100 @@ class UserService {
       throw boom.notFound('User not found');
     }
     return user;
+  }
+
+  async findMyFollowers(userId) {
+    const userWithFollowers = await models.User.findByPk(userId, {
+      attributes: ['id'],
+      include: [
+        {
+          model: models.User,
+          as: 'followersUsers',
+          attributes: ['id', 'username', 'email', 'profilePictureUrl']
+        }
+      ]
+    });
+
+    if (!userWithFollowers) {
+      throw boom.notFound('User not found');
+    }
+
+    return userWithFollowers.followersUsers;
+  }
+
+  async findMyFollowings(userId) {
+    const userWithFollowings = await models.User.findByPk(userId, {
+      attributes: ['id'],
+      include: [
+        {
+          model: models.User,
+          as: 'followingUsers',
+          attributes: ['id', 'username', 'email', 'profilePictureUrl']
+        }
+      ]
+    });
+
+    if (!userWithFollowings) {
+      throw boom.notFound('User not found');
+    }
+
+    return userWithFollowings.followingUsers;
+  }
+
+  async followUser(followerUserId, followedUserId) {
+    const followerUser = await models.User.findByPk(followerUserId, { attributes: ['id'] });
+    if (!followerUser) {
+      throw boom.notFound('Follower user not found');
+    }
+
+    const followedUser = await models.User.findByPk(followedUserId, { attributes: ['id'] });
+    if (!followedUser) {
+      throw boom.notFound('User to follow not found');
+    }
+
+    if (followerUserId === followedUserId) {
+      throw boom.badRequest('Cannot follow yourself');
+    }
+
+    const existingFollow = await models.UserFollow.findOne({
+      where: {
+        followerUserId: followerUserId,
+        followedUserId: followedUserId
+      }
+    });
+
+    if (existingFollow) {
+      throw boom.conflict('Already following this user.');
+    }
+
+    const newFollow = await models.UserFollow.create({
+      followerUserId: followerUserId,
+      followedUserId: followedUserId
+    });
+
+    return { message: 'User followed successfully', followEntry: newFollow };
+  }
+
+  async unfollowUser(followerUserId, followedUserId) {
+    const followerUser = await models.User.findByPk(followerUserId, { attributes: ['id'] });
+    if (!followerUser) {
+      throw boom.notFound('Follower user not found');
+    }
+
+    const followEntry = await models.UserFollow.findOne({
+      where: {
+        followerUserId: followerUserId,
+        followedUserId: followedUserId
+      }
+    });
+
+    if (!followEntry) {
+      throw boom.notFound('Not following this user.');
+    }
+
+    await followEntry.destroy();
+
+    return { message: 'User unfollowed successfully' };
   }
 
   async update(id, changes) {

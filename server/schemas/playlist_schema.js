@@ -7,19 +7,19 @@ const description = Joi.string().max(500);
 const isCollaborative = Joi.bool();
 
 const createPlaylistSchema = Joi.object({
-    name: name.required(),
-    description: description.optional(),
-    isCollaborative: isCollaborative.optional(), // Opcional, pero explícito
-  });
-  
-  const updatePlaylistSchema = Joi.object({
-    name: name.optional(),
-    description: description.optional(),
-    isCollaborative: isCollaborative.optional(),
-  });
-  
-  const getPlaylistSchema = Joi.object({
-    id: id.required()
-  });
-  
-  module.exports = { createPlaylistSchema, updatePlaylistSchema, getPlaylistSchema }
+  name: name.required(),
+  description: description.optional(),
+  isCollaborative: isCollaborative.optional(), // Opcional, pero explícito
+});
+
+const updatePlaylistSchema = Joi.object({
+  name: name.optional(),
+  description: description.optional(),
+  isCollaborative: isCollaborative.optional(),
+});
+
+const getPlaylistSchema = Joi.object({
+  id: id.required()
+});
+
+module.exports = { createPlaylistSchema, updatePlaylistSchema, getPlaylistSchema }
