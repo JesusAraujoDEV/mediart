@@ -10,7 +10,7 @@
         alt="Logo"
       />
     </NuxtLink>
-    <NuxtLink to="/studio/profile">
+    <NuxtLink :to="`/studio/${actualUser ? actualUser : 'anonymous'}`">
       <img
         class="icon rounded-full"
         src="~/assets/resources/studio/previewProfile.webp"
@@ -19,6 +19,14 @@
     </NuxtLink>
   </nav>
 </template>
+
+<script setup lang="ts">
+const config = useRuntimeConfig();
+const userString = localStorage.getItem("user");
+
+const actualUser = userString ? JSON.parse(userString) : null;
+console.log("Actual User:", actualUser);
+</script>
 
 <style scoped>
 #logoNavbar {

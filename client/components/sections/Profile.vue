@@ -47,6 +47,8 @@ const userProfile = ref<UserProfile>({
 
 const isLoading = ref(true);
 
+const config = useRuntimeConfig();
+
 // La idea es que agarre la url de arriba el nombre y busque el usuario y todo como si fuera linkedin
 const defaultProfile: UserProfile = {
   username: "Usuario Anónimo",
@@ -57,27 +59,25 @@ const defaultProfile: UserProfile = {
 
 onMounted(async () => {
   try {
-    // const response = await useFetch('/api/user/profile');
-    // userProfile.value = response.data.value;
-
-    const response = await new Promise<UserProfile>((resolve, reject) => {
-      setTimeout(() => {
-        const success = Math.random() > 0.3; // Simula un 70% de éxito
-        if (success) {
-          resolve({
-            username: "Mediart Studio",
-            email: "contacto@mediart.com",
-            profilePictureUrl:
-              "https://images.unsplash.com/photo-1506198901356-9d32785d0d7e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Ejemplo de URL de imagen
-            bio: "Somos un estudio creativo dedicado a la producción de arte digital y experiencias interactivas. Nos encanta innovar y conectar con otros artistas.",
-          });
-        } else {
-          reject(new Error("Error al cargar el perfil del usuario."));
-        }
-      }, 1500);
+    const response = await useFetch(`${config.public.backend}/api/auth/login`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
 
-    userProfile.value = response;
+    if (!response.data.value) {
+      throw new Error("No se pudo obtener el perfil del usuario.");
+    }
+
+    if (response.data.value && (response.data.value as any).token) {
+      localStorage.setItem(
+        "token",
+        JSON.stringify((response.data.value as any).token)
+      );
+    }
+
+    userProfile.value = response.data.value as UserProfile;
   } catch (error) {
     console.error("No se pudo cargar el perfil del usuario:", error);
     userProfile.value = defaultProfile;
