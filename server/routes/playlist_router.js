@@ -4,6 +4,7 @@ const PlaylistsService = require('./../services/playlist_service');
 const validatorHandler = require('./../middlewares/validator_handler');
 const { updatePlaylistSchema, createPlaylistSchema, getPlaylistSchema } = require('./../schemas/playlist_schema');
 const passport = require('passport');
+const { addItemsToPlaylistUnifiedSchema } = require('../schemas/playlist_item_schema');
 
 const router = express.Router();
 const service = new PlaylistsService();
@@ -76,5 +77,44 @@ router.delete('/:id',
     }
   }
 );
+
+// AÑADIR ITEMS
+router.post(
+  '/:id/items', // :id es el ID de la playlist
+  passport.authenticate('jwt', { session: false }), // 1. Protege la ruta con JWT
+  validatorHandler(getPlaylistSchema, 'params'), // 2. Valida que el ID de la playlist en los params sea un número
+  validatorHandler(addItemsToPlaylistUnifiedSchema, 'body'), // 3. Valida el cuerpo de la solicitud (itemId o itemIds)
+  async (req, res, next) => {
+    try {
+      const { id: playlistId } = req.params;
+      const { itemId, itemIds } = req.body;
+      const userId = req.user.sub;
+
+      // --- Lógica de Autorización: Obtener la playlist y verificar si el usuario autenticado es el dueño ---
+      const playlist = await service.findOne(playlistId);
+
+      if (playlist.ownerUserId !== userId) {
+        throw boom.forbidden('You are not the owner of this playlist.');
+      }
+      // --- Fin Lógica de Autorización ---
+
+      let rta;
+      if (itemId) {
+        // PASAMOS EL OBJETO 'playlist' AL SERVICIO
+        rta = await service.addItemToPlaylist(playlist, itemId);
+      } else if (itemIds && itemIds.length > 0) {
+        // PASAMOS EL OBJETO 'playlist' AL SERVICIO
+        rta = await service.addItemsToPlaylist(playlist, itemIds);
+      } else {
+        throw boom.badRequest('Must provide itemId or itemIds.');
+      }
+
+      res.status(201).json(rta);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 
 module.exports = router;
