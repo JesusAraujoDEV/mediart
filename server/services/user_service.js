@@ -70,6 +70,31 @@ class UserService {
     return user;
   }
 
+  async findSavedPlaylistsByUserId(userId) { // Cambia el parámetro a userId
+    const user = await models.User.findByPk(userId, {
+      include: [
+        {
+          model: models.Playlist,
+          as: 'savedPlaylists',
+          through: { attributes: ['savedAt'] },
+          include: [
+            {
+              model: models.Item,
+              as: 'items',
+              through: { attributes: [] }
+            }
+          ]
+        }
+      ]
+    });
+
+    if (!user) {
+      throw boom.notFound('User not found'); // Si el usuario no existe
+    }
+
+    return user.savedPlaylists; // Devuelve el array de playlists guardadas
+  }
+
   async findOne(id) {
     const user = await models.User.findByPk(id, {
       include: [
