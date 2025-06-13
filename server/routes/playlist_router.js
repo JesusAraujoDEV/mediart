@@ -3,6 +3,7 @@ const express = require('express');
 const PlaylistsService = require('./../services/playlist_service');
 const validatorHandler = require('./../middlewares/validator_handler');
 const { updatePlaylistSchema, createPlaylistSchema, getPlaylistSchema } = require('./../schemas/playlist_schema');
+const passport = require('passport');
 
 const router = express.Router();
 const service = new PlaylistsService();
@@ -31,11 +32,16 @@ router.get('/:id',
 );
 
 router.post('/',
+  passport.authenticate('jwt', { session: false }),
   validatorHandler(createPlaylistSchema, 'body'),
   async (req, res, next) => {
     try {
-      const body = req.body;
-      const newPlaylist = await service.create(body);
+      const bodyWithUserId = {
+        ...req.body, 
+        ownerUserId: req.user.sub // Sobreescribe o añade el userId del token
+      };
+      console.log(bodyWithUserId);
+      const newPlaylist = await service.create(bodyWithUserId);
       res.status(201).json(newPlaylist);
     } catch (error) {
       next(error);

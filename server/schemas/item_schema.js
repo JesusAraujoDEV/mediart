@@ -6,7 +6,8 @@ const type = Joi.string().valid('movie', 'song', 'artist', 'tvshow', 'book', 'vi
 const description = Joi.string().max(500);
 const coverUrl = Joi.string().max(255);
 const releaseDate = Joi.date();
-const externalId = Joi.number().integer();
+const externalId = Joi.string();
+const externalSource = Joi.string();
 const avgRating = Joi.number();
 const vibeTags = Joi.array().items(Joi.string());
 
@@ -17,6 +18,7 @@ const createItemSchema = Joi.object({
     coverUrl: coverUrl.optional(),
     releaseDate: releaseDate.optional(), 
     externalId: externalId.optional(),
+    externalSource: externalSource.optional(),
     avgRating: avgRating.optional(),
     vibeTags: vibeTags.optional(),
 });
@@ -28,6 +30,7 @@ const updateItemSchema = Joi.object({
     coverUrl: coverUrl.optional(),
     releaseDate: releaseDate.optional(),
     externalId: externalId.optional(),
+    externalSource: externalSource.optional(),
     avgRating: avgRating.optional(),
     vibeTags: vibeTags.optional(),
 });

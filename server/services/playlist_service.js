@@ -7,6 +7,11 @@ class PlaylistsService {
   }
 
   async create(data) {
+    const user = await models.User.findByPk(data.ownerUserId);
+    console.log(user);
+    if (!user) {
+      throw boom.notFound('User not found');
+    }
     const newPlaylist = await models.Playlist.create(data);
     return newPlaylist;
   }
