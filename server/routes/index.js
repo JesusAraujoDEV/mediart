@@ -3,6 +3,7 @@ const express = require('express');
 const usersRouter = require('./user_router');
 const itemsRouter = require('./item_router');
 const playlistsRouter = require('./playlist_router');
+const authRouter = require('./auth_router');
 
 
 function routerApi(app){
@@ -11,6 +12,7 @@ function routerApi(app){
   router.use('/users', usersRouter);
   router.use('/items', itemsRouter);
   router.use('/playlists', playlistsRouter);
+  router.use('/auth', authRouter);
 
 }
 

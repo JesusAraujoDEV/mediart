@@ -5,7 +5,8 @@ const config = {
   port: process.env.PORT || 3000,
   isProd: process.env.NODE_ENV === 'production',
   db_url: `postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB}`,
-  
+  apiKey: process.env.API_KEY,
+  jwtSecret: process.env.JWT_SECRET,
   // PostgreSQL Configuration
   postgres: {
     user: process.env.POSTGRES_USER,

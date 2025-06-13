@@ -5,7 +5,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { config } = require('../config/config');
-const { password } = require('pg/lib/defaults');
 
 const service = new UsersService();
 
@@ -13,21 +12,22 @@ class AuthService{
     async getUser(email, password){
         const user = await service.findOneByEmail(email);
         if(!user){
-            throw boom.unauthorized();
+            throw boom.unauthorized('Invalid credentials');
         }
-        const isMatch = await bcrypt.compare(password, user.password);
+
+        const isMatch = await bcrypt.compare(password, user.passwordHash); 
         if (!isMatch) {
-            throw boom.unauthorized();
+            throw boom.unauthorized('Invalid credentials'); // Mensaje más descriptivo
         }
-        delete user.dataValues.password;
-        //delete user.dataValues.recoveryToken;
+
+        delete user.dataValues.passwordHash;
+        //delete user.dataValues.recoveryToken; 
         return user;
     }
 
     signToken(user){
         const payload = {
-            sub: user.id,
-            role: user.role
+            sub: user.id
         }
         const token = jwt.sign(payload, config.jwtSecret); 
         return{
