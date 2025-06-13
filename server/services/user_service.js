@@ -53,6 +53,15 @@ class UsersService {
     return users; // Renombrado 'client' a 'users'
   }
 
+  async findOneByEmail(email) {
+    const user = await models.User.findOne(
+      {
+        where: { email }
+      }
+    );
+    return user;
+  }
+
   async findOne(id) {
     const user = await models.User.findByPk(id, {
       include: [
