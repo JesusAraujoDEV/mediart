@@ -2,6 +2,8 @@ const express = require('express');
 const passport = require('passport');
 const PlaylistService = require('./../services/playlist_service');
 const UserService = require('./../services/user_service');
+const validatorHandler = require('../middlewares/validator_handler');
+const {createPlaylistSchema, getPlaylistSchema, updatePlaylistSchema} = require('./../schemas/playlist_schema');
 
 
 const router = express.Router();
@@ -35,6 +37,42 @@ router.get(
       const savedPlaylists = await userService.findSavedPlaylistsByUserId(userId);
 
       res.json(savedPlaylists);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  '/saved-playlists/:id',
+  passport.authenticate('jwt', { session: false }),
+  validatorHandler(getPlaylistSchema, 'params'),
+  async (req, res, next) => {
+    try {
+      const userId = req.user.sub;
+      const { id } = req.params;
+
+      const rta = await userService.savePlaylist(userId, id);
+
+      res.status(201).json(rta);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.delete(
+  '/saved-playlists/:id',
+  passport.authenticate('jwt', { session: false }),
+  validatorHandler(getPlaylistSchema, 'params'),
+  async (req, res, next) => {
+    try {
+      const userId = req.user.sub;
+      const { id } = req.params;
+
+      const rta = await userService.unsavePlaylist(userId, id);
+
+      res.status(200).json(rta);
     } catch (error) {
       next(error);
     }

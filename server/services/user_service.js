@@ -19,6 +19,53 @@ class UserService {
     return newUser;
   }
 
+  async savePlaylist(userId, playlistId) {
+    const user = await this.findOne(userId);
+    console.log(user);
+
+    const playlist = await models.Playlist.findByPk(playlistId);
+    if (!playlist) {
+      throw boom.notFound('Playlist not found');
+    }
+
+    const existingEntry = await models.Library.findOne({
+      where: {
+        userId: userId,
+        playlistId: playlistId
+      }
+    });
+
+    if (existingEntry) {
+      throw boom.conflict('Playlist is already saved by this user.');
+    }
+
+    const newLibraryEntry = await models.Library.create({
+      userId: userId,
+      playlistId: playlistId,
+    });
+
+    return { message: 'Playlist saved successfully', libraryEntry: newLibraryEntry };
+  }
+
+  async unsavePlaylist(userId, playlistId) {
+    const user = await this.findOne(userId);
+
+    const libraryEntry = await models.Library.findOne({
+      where: {
+        userId: userId,
+        playlistId: playlistId
+      }
+    });
+
+    if (!libraryEntry) {
+      throw boom.notFound('Playlist is not saved by this user.');
+    }
+
+    await libraryEntry.destroy();
+
+    return { message: 'Playlist unsaved successfully' };
+  }
+
   async find() {
     const users = await models.User.findAll( // Renombrado 'client' a 'users' para mayor claridad
       {
