@@ -95,7 +95,7 @@ const handleLogin = async () => {
       },
       body: JSON.stringify({ 
         email: email.value,
-        passwordHash: password.value,
+        password: password.value,
       }),
     });
 
