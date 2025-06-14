@@ -51,7 +51,10 @@
           >
             <span v-if="!loading">Iniciar Sesión</span>
             <span v-else>Cargando...</span>
-          </button>
+            </button>
+            <NuxtLink to="/forgot" class="hover:underline text-center m-3 text-sm">
+                <p>¿Se te olvido tu contraseña?</p>
+            </NuxtLink>
         </form>
         <NuxtLink to="/">
           <img
