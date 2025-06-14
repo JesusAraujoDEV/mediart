@@ -10,7 +10,7 @@
         alt="Logo"
       />
     </NuxtLink>
-    <NuxtLink :to="`/studio/${actualUser ? actualUser : 'anonymous'}`">
+    <NuxtLink :to="`/profile/${actualUser ? actualUser : 'anonymous'}`">
       <img
         class="icon rounded-full"
         src="~/assets/resources/studio/previewProfile.webp"
@@ -24,8 +24,7 @@
 const config = useRuntimeConfig();
 const userString = localStorage.getItem("user");
 
-const actualUser = userString ? JSON.parse(userString) : null;
-console.log("Actual User:", actualUser);
+const actualUser = userString ? JSON.parse(userString).username : null;
 </script>
 
 <style scoped>
