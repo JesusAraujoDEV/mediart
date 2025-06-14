@@ -28,8 +28,12 @@ const getUserSchema = Joi.object({
   id: id.required()
 });
 
-const getFollowedUserSchema = Joi.object({
-  followedId: id.required() // Espera un parámetro llamado 'followedId' que sea un ID
+const getUserByUsernameSchema = Joi.object({
+  username: username.required()
 });
 
-module.exports = { createUserSchema, updateUserSchema, getUserSchema, getFollowedUserSchema }
+const getFollowedUserSchema = Joi.object({
+  followedId: id.required()
+});
+
+module.exports = { createUserSchema, updateUserSchema, getUserSchema, getFollowedUserSchema, getUserByUsernameSchema }

@@ -122,6 +122,15 @@ class UserService {
     return user;
   }
 
+  async findOneByUsername(username) {
+    const user = await models.User.findOne(
+      {
+        where: { username }
+      }
+    );
+    return user;
+  }
+
   async findSavedPlaylistsByUserId(userId) { // Cambia el parámetro a userId
     const user = await models.User.findByPk(userId, {
       include: [
