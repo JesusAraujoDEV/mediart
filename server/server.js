@@ -1,11 +1,12 @@
 require('dotenv').config(); // Importar dotenv al inicio
 const express = require('express');
 const routerApi = require('./routes');
+const config = require('./config/config');
 
 const { logErrors, errorHandler, ormErrorHandler, boomErrorHandler} = require('./middlewares/error_handler');
 const app = express();
 const cors = require('cors');
-const port = process.env.PORT || 3000;
+const port = config.port || 3000;
 
 // Sirve los archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static('uploads')); // Ahora tus fuentes serán accesibles en /uploads/fonts/nombre_del_archivo.ttf
