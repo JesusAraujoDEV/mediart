@@ -1,25 +1,25 @@
 const tmdbApiService = require('./api/tmdb_api_service');
-// const googleBooksApiService = require('./googlebooks_api_service');
+const googleBooksApiService = require('./api/googlebooks_api_service');
 const spotifyApiService = require('./api/spotify_api_service');
-// const igdbApiService = require('./igdb_api_service');
+// const igdbApiService = require('./api/igdb_api_service');
 
 class SearchService {
   constructor() {
     this.tmdbService = new tmdbApiService();
-    // this.googleBooksService = new googleBooksApiService();
-    this.spotifyService = new spotifyApiService(); // Instancia de Spotify
+    this.googleBooksService = new googleBooksApiService();
+    this.spotifyService = new spotifyApiService();
     // this.igdbService = new igdbApiService();
   }
 
   async searchAll(query) {
     const [
       tmdbResult,
-      // googleBooksResult,
+      googleBooksResult,
       spotifyResult,
       // igdbResult
     ] = await Promise.allSettled([
       this.tmdbService.search(query),
-      // this.googleBooksService.search(query),
+      this.googleBooksService.search(query),
       this.spotifyService.search(query),
       // this.igdbService.search(query)
     ]);
@@ -31,8 +31,8 @@ class SearchService {
       albums: spotifyResult.status === 'fulfilled' ? spotifyResult.value.albums : [],
       movies: tmdbResult.status === 'fulfilled' ? tmdbResult.value.movies : [],
       tvshows: tmdbResult.status === 'fulfilled' ? tmdbResult.value.tvshows : [],
-      books: [],
-      videogames: []
+      books: googleBooksResult.status === 'fulfilled' ? googleBooksResult.value.books : [],
+      videogames: [] // Placeholder
     };
 
     return results;
