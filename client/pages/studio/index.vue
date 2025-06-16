@@ -3,58 +3,60 @@
   <main class="w-screen h-dvh flex flex-col items-center justify-between p-4">
     <NavigationStudio />
 
-    <div class="flex-grow-[0.7] flex items-center justify-center">
-      <div class="w-2/3 h-full max-h-[60vh] bg-gray-800 bg-opacity-50 rounded-lg flex items-center justify-center text-white text-xl">
+    <div class="flex-grow flex w-2/4 max-md:w-5/6 items-center justify-center">
+      <div class="w-2/3 h-full glassEffect max-h-[80vh] max-md:w-full max-md:max-h-[70vh] bg-gray-800 bg-opacity-50 rounded-lg flex items-center justify-center text-white text-xl">
       </div>
     </div>
 
-    <div class="relative w-1/3 max-md:w-2/3 mb-4">
-      <div
-        class="glassEffect shadow-2xl rounded-lg p-3 text-white flex flex-wrap items-center gap-2 min-h-[48px]"
-        @click="focusInput"
-      >
-        <span
-          v-for="tag in selectedTags"
-          :key="tag"
-          class="bg-white/20 rounded-full px-3 py-1 text-sm flex items-center gap-1"
+    <div class="flex items-center justify-center w-full mb-4">
+      <div class="relative w-1/3 max-md:w-2/3">
+        <div
+          class="glassEffect shadow-xl rounded-lg p-3 text-white flex flex-wrap items-center gap-2 min-h-[48px]"
+          @click="focusInput"
         >
-          {{ tag }}
-          <button @click.stop="removeTag(tag)" class="text-xs cursor-pointer">✕</button>
-        </span>
-        <input
-          ref="searchInput"
-          type="text"
-          class="bg-transparent flex-grow outline-none text-white placeholder-white/70"
-          placeholder="Type your query here..."
-          v-model="inputValue"
-          @input="onInput"
-          @focus="showDatalist = true"
-          @blur="hideDatalist"
-          @keydown.enter="addTagFromInput"
-          @keydown.tab="addTagFromInput"
+          <span
+            v-for="tag in selectedTags"
+            :key="tag"
+            class="bg-white/20 rounded-full px-3 py-1 text-sm flex items-center gap-1"
+          >
+            {{ tag }}
+            <button @click.stop="removeTag(tag)" class="text-xs cursor-pointer">✕</button>
+          </span>
+          <input
+            ref="searchInput"
+            type="text"
+            class="bg-transparent flex-grow outline-none text-white placeholder-white/70"
+            placeholder="Type your query here..."
+            v-model="inputValue"
+            @input="onInput"
+            @focus="showDatalist = true"
+            @blur="hideDatalist"
+            @keydown.enter="addTagFromInput"
+            @keydown.tab="addTagFromInput"
+          />
+        </div>
+
+        <ul
+          v-if="showDatalist && filteredSuggestions.length > 0"
+          class="absolute z-10 w-full bg-white/10 backdrop-filter backdrop-blur-lg rounded-lg mt-1 max-h-48 overflow-y-auto"
+        >
+          <li
+            v-for="suggestion in filteredSuggestions"
+            :key="suggestion"
+            @mousedown.prevent="selectSuggestion(suggestion)"
+            class="p-2 cursor-pointer hover:bg-white/30 text-white"
+          >
+            {{ suggestion }}
+          </li>
+        </ul>
+      </div>
+      <svg class="icon ml-3 cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30">
+        <path
+          fill="currentColor"
+          d="M3 20v-6l8-2l-8-2V4l19 8z"
         />
-      </div>
-
-      <ul
-        v-if="showDatalist && filteredSuggestions.length > 0"
-        class="absolute z-10 w-full bg-white/10 backdrop-filter backdrop-blur-lg rounded-lg mt-1 max-h-48 overflow-y-auto"
-      >
-        <li
-          v-for="suggestion in filteredSuggestions"
-          :key="suggestion"
-          @mousedown.prevent="selectSuggestion(suggestion)"
-          class="p-2 cursor-pointer hover:bg-white/30 text-white"
-        >
-          {{ suggestion }}
-        </li>
-      </ul>
+      </svg>
     </div>
-    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path
-        fill="currentColor"
-        d="M3 20v-6l8-2l-8-2V4l19 8z"
-      />
-    </svg>
   </main>
 </template>
 
@@ -170,12 +172,19 @@ const selectSuggestion = (suggestion: string) => {
 };
 
 const addTagFromInput = () => {
-  if (inputValue.value && !selectedTags.value.includes(inputValue.value)) {
+  const lowerCaseInputValue = inputValue.value.toLowerCase();
+
+  const isSuggestion = filteredSuggestions.value.some(
+    (s) => s.toLowerCase() === lowerCaseInputValue
+  );
+
+  if (inputValue.value && isSuggestion && !selectedTags.value.includes(inputValue.value)) {
     selectedTags.value.push(inputValue.value);
     inputValue.value = "";
     showDatalist.value = false;
   }
 };
+
 
 const removeTag = (tag: string) => {
   selectedTags.value = selectedTags.value.filter((t) => t !== tag);
