@@ -1,6 +1,5 @@
-// services/igdb_api_service.js
 const axios = require('axios');
-const { config } = require('../../config/config'); // Importa tu objeto de configuración
+const { config } = require('../../config/config');
 
 class IgdbApiService {
   constructor() {
@@ -9,12 +8,8 @@ class IgdbApiService {
     this.accessToken = null;
     this.tokenExpiry = 0;
     this.baseUrl = 'https://api.igdb.com/v4';
-
-    // Llama al método de autenticación en el constructor para obtener el token inicial
-    //this.#authenticate();
   }
 
-  // Método privado para obtener/refrescar el token de acceso de Twitch para IGDB
   async #authenticate() {
     if (this.accessToken && Date.now() < this.tokenExpiry - 60000) {
       return;
@@ -46,45 +41,50 @@ class IgdbApiService {
 
   async search(query) {
     try {
-      // Asegura que tengamos un token válido antes de hacer la búsqueda
       await this.#authenticate();
 
       if (!this.accessToken) {
         throw new Error('IGDB access token not available. Authentication failed.');
       }
 
-      // La API de IGDB usa POST y el cuerpo de la petición para las consultas
       const response = await axios.post(`${this.baseUrl}/games`,
-        `search "${query}"; fields name, summary, cover.url, first_release_date, genres.name, platforms.name; limit 10;`, // Body con la query
+        `search "${query}"; fields name, summary, cover.url, first_release_date, genres.name, platforms.name, slug, aggregated_rating; limit 10;`,
         {
           headers: {
             'Client-ID': this.clientId,
             'Authorization': `Bearer ${this.accessToken}`,
-            'Content-Type': 'text/plain' // Importante: el cuerpo es texto plano para IGDB
+            'Content-Type': 'text/plain'
           }
         }
       );
 
       const gamesData = response.data;
 
-      const videogames = gamesData.map(game => ({
-        id: game.id,
-        name: game.name,
-        summary: game.summary || 'No summary available.',
-        cover_url: game.cover && game.cover.url ? `https:${game.cover.url}` : null, // IGDB a veces devuelve // en la URL, añadir https:
-        release_date: game.first_release_date ? new Date(game.first_release_date * 1000).toISOString().split('T')[0] : 'N/A', // Convertir timestamp a fecha
-        genres: game.genres ? game.genres.map(g => g.name).join(', ') : 'N/A',
-        platforms: game.platforms ? game.platforms.map(p => p.name).join(', ') : 'N/A',
-        // No hay una URL "externa" directa como TMDB o Spotify, podrías construir una con un ID de juego si la necesitas
-        // external_url: `https://www.igdb.com/games/${game.slug}` // Esto requeriría el slug del juego
-      }));
+      const videogames = gamesData.map(game => {
+        let coverUrl = null;
+        if (game.cover && game.cover.url) {
+          // Reemplazar 't_thumb' por 't_cover_big' y '.jpg' por '.webp'
+          coverUrl = `https:${game.cover.url.replace('t_thumb', 't_cover_big').replace('.jpg', '.webp')}`;
+        }
 
-      return { videogames };
+        return {
+          id: game.id,
+          name: game.name,
+          summary: game.summary || 'No summary available.',
+          cover_url: coverUrl, // <--- ¡CAMBIO AQUÍ!
+          release_date: game.first_release_date ? new Date(game.first_release_date * 1000).toISOString().split('T')[0] : null,
+          genres: game.genres ? game.genres.map(g => g.name) : [],
+          platforms: game.platforms ? game.platforms.map(p => p.name).join(', ') : 'N/A',
+          external_url: game.slug ? `https://www.igdb.com/games/${game.slug}` : null,
+          avg_rating: game.aggregated_rating || null,
+        };
+      });
+
+      return videogames;
 
     } catch (error) {
       console.error('Error searching IGDB:', error.response ? error.response.data : error.message);
-      // Devuelve array vacío en caso de error
-      return { videogames: [] };
+      return [];
     }
   }
 }
