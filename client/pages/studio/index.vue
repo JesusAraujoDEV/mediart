@@ -1,10 +1,16 @@
 <template>
   <title>MediartStudio - Inicio</title>
-  <main class="w-screen h-dvh flex items-center justify-center gap-4">
+  <main class="w-screen h-dvh flex flex-col items-center justify-between p-4">
     <NavigationStudio />
-    <div class="relative w-1/3 max-md:w-2/3">
+
+    <div class="flex-grow-[0.7] flex items-center justify-center">
+      <div class="w-2/3 h-full max-h-[60vh] bg-gray-800 bg-opacity-50 rounded-lg flex items-center justify-center text-white text-xl">
+      </div>
+    </div>
+
+    <div class="relative w-1/3 max-md:w-2/3 mb-4">
       <div
-        class="glassEffect rounded-lg p-3 text-white flex flex-wrap items-center gap-2 min-h-[48px]"
+        class="glassEffect shadow-2xl rounded-lg p-3 text-white flex flex-wrap items-center gap-2 min-h-[48px]"
         @click="focusInput"
       >
         <span
