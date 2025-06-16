@@ -14,6 +14,7 @@
 <script setup lang="ts">
 definePageMeta({
   layout: "custom",
+  middleware: ["auth-middleware"],
 });
 import Library from "~/components/sections/Library.vue";
 import Profile from "~/components/sections/Profile.vue";

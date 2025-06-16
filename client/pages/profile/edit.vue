@@ -130,6 +130,9 @@ import { Icon } from "#components"; // Asegúrate de que esto sea correcto para 
 
 definePageMeta({
   layout: "custom", // O "default" si deseas el diseño de la página de login
+  middleware: [
+    'auth-middleware',
+  ],
 });
 
 interface UserProfile {

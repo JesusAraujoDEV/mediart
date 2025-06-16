@@ -55,6 +55,9 @@
 <script setup lang="ts">
 definePageMeta({
   layout: "custom",
+    middleware: [
+    'auth-middleware',
+  ],
 });
 
 import { ref, computed, onMounted, watch } from "vue"; // Import 'watch'
