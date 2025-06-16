@@ -24,10 +24,6 @@ class GeminiAiService {
     try {
       let promptText = `Dame 10 nombres de ${itemType} que sean similares o tengan las "vibras" de "${itemName}"`;
 
-      if (itemContext) {
-        promptText += ` (por ${itemContext})`;
-      }
-
       promptText += `. Por favor, responde únicamente con los nombres de los ${itemType} separados por comas y sin números ni introducciones, solo la lista y sin formato markdown.`; // <-- Añadido "sin formato markdown"
 
       const requestBody = {

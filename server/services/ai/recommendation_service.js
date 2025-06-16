@@ -28,15 +28,33 @@ class RecommendationService {
         break;
 
       case 'song':
-      case 'artist':
-      case 'album':
-        mappedItem.title = itemData.name;
+        mappedItem.title = itemData.title;
         mappedItem.description = itemData.description || null;
-        mappedItem.coverUrl = itemData.album?.images?.[0]?.url || itemData.images?.[0]?.url || null;
+        mappedItem.coverUrl = itemData.thumbnail_url || null;
         mappedItem.releaseDate = itemData.release_date;
         mappedItem.externalId = itemData.id;
         mappedItem.avgRating = null;
+        mappedItem.vibeTags = [];
+        break;
+
+      case 'artist':
+        mappedItem.title = itemData.name;
+        mappedItem.description = null;
+        mappedItem.coverUrl = itemData.image_url || null;
+        mappedItem.releaseDate = null;
+        mappedItem.externalId = itemData.id;
+        mappedItem.avgRating = null;
         mappedItem.vibeTags = itemData.genres || [];
+        break;
+
+      case 'album':
+        mappedItem.title = itemData.name;
+        mappedItem.description = null;
+        mappedItem.coverUrl = itemData.thumbnail_url || null;
+        mappedItem.releaseDate = itemData.release_date;
+        mappedItem.externalId = itemData.id;
+        mappedItem.avgRating = null;
+        mappedItem.vibeTags = [];
         break;
 
       case 'book':
