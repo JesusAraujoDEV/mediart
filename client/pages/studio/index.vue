@@ -57,7 +57,7 @@ definePageMeta({
   layout: "custom",
 });
 
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue"; // Import 'watch'
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 
 const inputValue = ref("");
@@ -65,42 +65,64 @@ const selectedTags = ref<string[]>([]);
 const suggestions = ref<string[]>([]);
 const showDatalist = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
+const config = useRuntimeConfig();
 
-const defaultSuggestions = [
-  "Taylor Swift",
-  "Cantantes",
-  "Libros",
-  "Juegos",
-  "Películas",
-];
-
-// Simulate a fetch request
+// Function to fetch suggestions from the API
 const fetchSuggestions = async () => {
+  if (inputValue.value.length < 2) { // Optional: only fetch if input has at least 2 characters
+    suggestions.value = [];
+    return;
+  }
   try {
-    // const response = await fetch("https://api.example.com/suggestions");
-    // if (!response.ok) {
-    //   throw new Error("Network response was not ok");
-    // }
-    // const data = await response.json();
-    // suggestions.value = data.suggestions; // Assuming your API returns { suggestions: [...] }
+    const response = await fetch(`${config.public.apiBaseUrl}/api/search?q=${inputValue.value}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.json();
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    suggestions.value = [
-      "The Lord of the Rings",
-      "Harry Potter",
-      "Game of Thrones",
-      "Marvel Movies",
-      "Programming Books",
-      "Indie Games",
-    ];
+    // Process the data to extract suggestions from various categories
+    const newSuggestions: string[] = [];
+
+    if (data.songs) {
+      newSuggestions.push(...data.songs.map((song: any) => song.title));
+    }
+    if (data.artists) {
+      newSuggestions.push(...data.artists.map((artist: any) => artist.name));
+    }
+    if (data.albums) {
+      newSuggestions.push(...data.albums.map((album: any) => album.name));
+    }
+    // Add other categories if needed (movies, tvshows, books, videogames)
+    if (data.movies) {
+      newSuggestions.push(...data.movies.map((movie: any) => movie.title || movie.name)); // Assuming 'title' or 'name' for movies
+    }
+    if (data.tvshows) {
+      newSuggestions.push(...data.tvshows.map((tvshow: any) => tvshow.title || tvshow.name)); // Assuming 'title' or 'name' for tvshows
+    }
+    if (data.books) {
+      newSuggestions.push(...data.books.map((book: any) => book.title || book.name)); // Assuming 'title' or 'name' for books
+    }
+    if (data.videogames) {
+      newSuggestions.push(...data.videogames.map((game: any) => game.title || game.name)); // Assuming 'title' or 'name' for videogames
+    }
+
+    // Remove duplicates and update suggestions
+    suggestions.value = Array.from(new Set(newSuggestions));
+
   } catch (error) {
     console.error("Failed to fetch suggestions:", error);
-    suggestions.value = defaultSuggestions;
+    suggestions.value = []; // Clear suggestions on error
   }
 };
 
 const filteredSuggestions = computed(() => {
   if (!inputValue.value) {
+    // If no input, show recent/popular suggestions (can be empty after initial fetch)
     return suggestions.value.filter(
       (s) => !selectedTags.value.includes(s)
     ).slice(0, 10);
@@ -113,8 +135,19 @@ const filteredSuggestions = computed(() => {
   ).slice(0, 10);
 });
 
+// Trigger fetchSuggestions when inputValue changes
+watch(inputValue, (newValue) => {
+  if (newValue.length > 0) { // Only fetch if there's something to search for
+    fetchSuggestions();
+  } else {
+    suggestions.value = []; // Clear suggestions if input is empty
+  }
+});
+
+
 const onInput = () => {
-  // Logic can be added here for more advanced filtering or fetching as user types
+  // `watch(inputValue, ...)` now handles the fetching logic.
+  // This `onInput` function primarily ensures the datalist is shown.
   showDatalist.value = true;
 };
 
@@ -122,7 +155,7 @@ const selectSuggestion = (suggestion: string) => {
   if (!selectedTags.value.includes(suggestion)) {
     selectedTags.value.push(suggestion);
   }
-  inputValue.value = "";
+  inputValue.value = ""; // Clear input after selection
   showDatalist.value = false;
   searchInput.value?.focus(); // Keep focus on the input
 };
@@ -151,6 +184,7 @@ const hideDatalist = () => {
 };
 
 onMounted(() => {
-  fetchSuggestions();
+  // No initial fetch needed here as `watch(inputValue, ...)` will handle it
+  // when the user starts typing.
 });
 </script>

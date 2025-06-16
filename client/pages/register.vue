@@ -123,7 +123,7 @@ const handleRegister = async () => {
 
   try {
     // Assuming your backend register endpoint is /api/auth/register
-    const registerUrl = `${config.public.backend}/api/auth/register`;
+    const registerUrl = `${config.public.backend}/api/users`;
 
     const response = await fetch(registerUrl, {
       method: "POST",
@@ -134,7 +134,7 @@ const handleRegister = async () => {
         // Data sent in the request body
         email: email.value,
         username: username.value, // Include username in the body
-        password: password.value,
+        passwordHash: password.value,
       }),
     });
 

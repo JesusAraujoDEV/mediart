@@ -2,7 +2,7 @@
   <nav
     class="absolute top-0 left-0 w-fit glassEffect p-2 m-3 rounded-lg flex items-center gap-4"
   >
-    <NuxtLink to="/">
+    <NuxtLink to="/studio">
       <img
         id="logoNavbar"
         class="icon"
@@ -10,7 +10,7 @@
         alt="Logo"
       />
     </NuxtLink>
-    <NuxtLink :to="`/studio/${actualUser ? actualUser : 'anonymous'}`">
+    <NuxtLink :to="`/profile/${actualUser ? actualUser : 'anonymous'}`">
       <img
         class="icon rounded-full"
         src="~/assets/resources/studio/previewProfile.webp"
@@ -24,8 +24,7 @@
 const config = useRuntimeConfig();
 const userString = localStorage.getItem("user");
 
-const actualUser = userString ? JSON.parse(userString) : null;
-console.log("Actual User:", actualUser);
+const actualUser = userString ? JSON.parse(userString).username : null;
 </script>
 
 <style scoped>
