@@ -60,10 +60,10 @@ class RecommendationService {
       case 'book':
         mappedItem.title = itemData.title;
         mappedItem.description = itemData.description;
-        mappedItem.coverUrl = itemData.imageLinks?.thumbnail || null;
-        mappedItem.releaseDate = itemData.publishedDate;
+        mappedItem.coverUrl = itemData.thumbnail_url || null;
+        mappedItem.releaseDate = itemData.published_date === 'N/A' ? null : itemData.published_date;
         mappedItem.externalId = itemData.id;
-        mappedItem.avgRating = itemData.averageRating;
+        mappedItem.avgRating = itemData.avg_rating || null;
         mappedItem.externalUrl = itemData.external_url || null;
         break;
 
@@ -209,14 +209,14 @@ class RecommendationService {
 
   async recommendBooks(itemName) {
     try {
-      // *** CAMBIO AQUÍ: Usar searchGoogleBooks para Books ***
-      const baseBook = (await this.searchService.searchGoogleBooks(itemName))[0];
+      const initialSearchResult = await this.searchService.searchGoogleBooks(itemName);
+      const baseBook = initialSearchResult[0];
 
       let itemContext = '';
-      if (baseBook) {
-        if (baseBook.authors && baseBook.authors.length > 0) {
-          itemContext = `del autor ${baseBook.authors[0]}`;
-        }
+      if (baseBook && baseBook.authors) {
+          itemContext = `del autor ${baseBook.authors}`;
+      } else if (baseBook && baseBook.genres && Array.isArray(baseBook.genres) && baseBook.genres.length > 0) {
+        itemContext = `del género ${baseBook.genres[0]}`;
       }
 
       const recommendedQueries = await this.geminiAiService.generateRecommendations('libros', itemName, itemContext);
@@ -225,15 +225,14 @@ class RecommendationService {
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
 
-      // *** CAMBIO AQUÍ: Mapear promesas para llamar a searchGoogleBooks para cada query ***
       const searchPromises = recommendedQueries.map(query => this.searchService.searchGoogleBooks(query));
       const searchResults = await Promise.allSettled(searchPromises);
 
       for (const result of searchResults) {
-        if (result.status === 'fulfilled' && result.value.length > 0) { // GoogleBooks devuelve array directo
+        if (result.status === 'fulfilled' && result.value.length > 0) {
           const book = result.value[0];
           if (book.id && !addedExternalIds.has(`book-${book.id}`)) {
-            const mappedBook = this._mapToItemSchema(book, 'book', 'GoogleBooks');
+            const mappedBook = this._mapToItemSchema(book, 'book', 'Google Books');
             allRecommendedItems.push(mappedBook);
             addedExternalIds.add(`book-${book.id}`);
           }
@@ -249,19 +248,15 @@ class RecommendationService {
 
   async recommendVideogames(itemName) {
     try {
-      // searchIgdb ahora devuelve un array directamente
       const initialSearchResult = await this.searchService.searchIgdb(itemName);
-      const baseVideogame = initialSearchResult[0]; // Acceder al primer elemento del array
+      const baseVideogame = initialSearchResult[0];
 
       let itemContext = '';
       if (baseVideogame) {
-        // Asegúrate que genres sea un array antes de mapear
         if (baseVideogame.genres && Array.isArray(baseVideogame.genres) && baseVideogame.genres.length > 0) {
-            // Si genres es una cadena separada por comas, divídela
             const genresArray = typeof baseVideogame.genres === 'string' ? baseVideogame.genres.split(',').map(g => g.trim()) : baseVideogame.genres;
             itemContext = `del género ${genresArray[0]}`;
         } else if (baseVideogame.genres && typeof baseVideogame.genres === 'string') {
-            // Esto es para el caso si ya lo estás devolviendo como 'genre1, genre2'
             const genresArray = baseVideogame.genres.split(',').map(g => g.trim());
             if (genresArray.length > 0) {
                 itemContext = `del género ${genresArray[0]}`;
@@ -279,7 +274,6 @@ class RecommendationService {
       const searchResults = await Promise.allSettled(searchPromises);
 
       for (const result of searchResults) {
-        // El valor de result.value ahora es directamente el array de videojuegos
         if (result.status === 'fulfilled' && result.value.length > 0) {
           const videogame = result.value[0]; // Tomar el primer resultado de cada query recomendada
           if (videogame.id && !addedExternalIds.has(`videogame-${videogame.id}`)) {
@@ -299,7 +293,6 @@ class RecommendationService {
 
   async recommendArtists(itemName) {
     try {
-      // *** CAMBIO AQUÍ: Usar searchSpotify para Artists ***
       const initialSearchResult = await this.searchService.searchSpotify(itemName);
       const baseArtist = initialSearchResult.artists[0];
 
@@ -314,7 +307,6 @@ class RecommendationService {
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
 
-      // *** CAMBIO AQUÍ: Mapear promesas para llamar a searchSpotify para cada query ***
       const searchPromises = recommendedQueries.map(query => this.searchService.searchSpotify(query));
       const searchResults = await Promise.allSettled(searchPromises);
 
@@ -338,7 +330,6 @@ class RecommendationService {
 
   async recommendAlbums(itemName) {
     try {
-      // *** CAMBIO AQUÍ: Usar searchSpotify para Albums ***
       const initialSearchResult = await this.searchService.searchSpotify(itemName);
       const baseAlbum = initialSearchResult.albums[0];
 
@@ -355,7 +346,6 @@ class RecommendationService {
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
 
-      // *** CAMBIO AQUÍ: Mapear promesas para llamar a searchSpotify para cada query ***
       const searchPromises = recommendedQueries.map(query => this.searchService.searchSpotify(query));
       const searchResults = await Promise.allSettled(searchPromises);
 
