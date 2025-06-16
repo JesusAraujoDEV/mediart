@@ -11,6 +11,7 @@ const {
 } = require('../schemas/playlist_item_schema');
 const passport = require('passport');
 const boom = require('@hapi/boom');
+const { addCollaboratorSchema, addCollaboratorsSchema } = require('../schemas/collaborator_schema');
 
 const router = express.Router();
 const service = new PlaylistService();
@@ -159,5 +160,41 @@ router.delete(
   }
 );
 
+router.post(
+  '/:id/collaborators',
+  passport.authenticate('jwt', { session: false }),
+  validatorHandler(getPlaylistSchema, 'params'),
+  validatorHandler(addCollaboratorsSchema, 'body'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { userId, userIds } = req.body;
+      const currentUserId = req.user.sub;
+
+      const playlist = await service.findOne(id);
+
+      if (!playlist.isCollaborative) {
+        throw boom.badRequest('This playlist is not configured as collaborative.');
+      }
+
+      if (playlist.ownerUserId !== currentUserId) {
+        throw boom.forbidden('You do not have permission to add collaborators to this playlist.');
+      }
+
+      let result;
+      if (userId) {
+        result = await service.addCollaborator(id, userId);
+      } else if (userIds && userIds.length > 0) {
+        result = await service.addMultipleCollaborators(id, userIds);
+      } else {
+        throw boom.badRequest('Must provide either "userId" or "userIds" to add collaborators.');
+      }
+
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 module.exports = router;

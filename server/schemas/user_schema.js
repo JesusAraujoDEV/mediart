@@ -12,7 +12,7 @@ const createUserSchema = Joi.object({
   username: username.required(),
   email: email.required(),
   passwordHash: passwordHash.required(),
-  profilePictureUrl: profilePictureUrl.optional(), // Opcional, pero explícito
+  profilePictureUrl: profilePictureUrl.optional(),
   bio: bio.optional()  
 });
 

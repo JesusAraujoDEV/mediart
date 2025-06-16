@@ -22,6 +22,7 @@ class PlaylistService {
       await models.Library.create({
         userId: user.id,
         playlistId: newPlaylist.id,
+        isCollaborator: true
       });
     } catch (libraryError) {
       console.error("Error creating Library entry for new playlist:", libraryError);
@@ -41,6 +42,52 @@ class PlaylistService {
     }
 
     return newPlaylist;
+  }
+
+  async addCollaborator(playlistId, userIdToAdd) {
+    const [libraryEntry, created] = await models.Library.findOrCreate({
+      where: {
+        userId: userIdToAdd,
+        playlistId: playlistId
+      },
+      defaults: {
+        userId: userIdToAdd,
+        playlistId: playlistId,
+        isCollaborator: true
+      }
+    });
+
+    if (!created) {
+      if (!libraryEntry.isCollaborator) {
+        await libraryEntry.update({ isCollaborator: true });
+        return { message: `User ${userIdToAdd} updated to be a collaborator.` };
+      }
+      return { message: `User ${userIdToAdd} is already a collaborator and has the playlist in their library.` };
+    }
+
+    return { message: `User ${userIdToAdd} added as a collaborator and playlist saved to their library.` };
+  }
+
+  async addMultipleCollaborators(playlistId, userIdsToAdd) {
+    const playlist = await this.findOne(playlistId);
+    if (!playlist.isCollaborative) {
+      throw boom.badRequest('This playlist is not configured as collaborative.');
+    }
+
+    const results = [];
+    for (const userId of userIdsToAdd) {
+      try {
+        const result = await this.addCollaborator(playlistId, userId);
+        results.push({ userId, status: 'success', message: result.message });
+      } catch (error) {
+        console.error(`Error adding user ${userId} as collaborator to playlist ${playlistId}:`, error);
+        results.push({ userId, status: 'error', message: error.message || 'Failed to add as collaborator' });
+      }
+    }
+    return {
+      message: `Attempted to add ${userIdsToAdd.length} collaborators.`,
+      details: results
+    };
   }
 
   async find() {
