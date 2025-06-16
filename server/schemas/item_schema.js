@@ -9,18 +9,20 @@ const releaseDate = Joi.date();
 const externalId = Joi.string();
 const externalSource = Joi.string();
 const avgRating = Joi.number();
-const vibeTags = Joi.array().items(Joi.string());
+// const vibeTags = Joi.array().items(Joi.string());
+const externalUrl = Joi.string().max(255);
 
 const createItemSchema = Joi.object({
     title: title.required(),
     type: type.required(),
     description: description.optional(),
     coverUrl: coverUrl.optional(),
-    releaseDate: releaseDate.optional(), 
+    releaseDate: releaseDate.optional(),
     externalId: externalId.optional(),
     externalSource: externalSource.optional(),
     avgRating: avgRating.optional(),
-    vibeTags: vibeTags.optional(),
+    // vibeTags: vibeTags.optional(),
+    externalUrl: externalUrl.optional(),
 });
 
 const updateItemSchema = Joi.object({
@@ -32,7 +34,8 @@ const updateItemSchema = Joi.object({
     externalId: externalId.optional(),
     externalSource: externalSource.optional(),
     avgRating: avgRating.optional(),
-    vibeTags: vibeTags.optional(),
+    // vibeTags: vibeTags.optional(),
+    externalUrl: externalUrl.optional(),
 });
 
 const getItemSchema = Joi.object({

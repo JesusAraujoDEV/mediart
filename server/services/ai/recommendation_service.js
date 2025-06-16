@@ -8,7 +8,7 @@ class RecommendationService {
     this.geminiAiService = new GeminiAiService();
   }
 
-  // Helper function to map item data to the desired schema (ESTO NO CAMBIA)
+  // Helper function to map item data to the desired schem
   _mapToItemSchema(itemData, itemType, externalSource) {
     let mappedItem = {
       type: itemType,
@@ -20,11 +20,11 @@ class RecommendationService {
       case 'tvshow':
         mappedItem.title = itemData.title || itemData.name;
         mappedItem.description = itemData.overview;
-        mappedItem.coverUrl = itemData.poster_url || null; // ¡Correcto ahora!
+        mappedItem.coverUrl = itemData.poster_url || null;
         mappedItem.releaseDate = itemData.release_date || itemData.first_air_date;
         mappedItem.externalId = itemData.id ? String(itemData.id) : null;
         mappedItem.avgRating = itemData.vote_average;
-        mappedItem.vibeTags = itemData.genres ? itemData.genres.map(g => g.name || g) : [];
+        mappedItem.externalUrl = itemData.external_url || null;
         break;
 
       case 'song':
@@ -34,7 +34,7 @@ class RecommendationService {
         mappedItem.releaseDate = itemData.release_date;
         mappedItem.externalId = itemData.id;
         mappedItem.avgRating = null;
-        mappedItem.vibeTags = [];
+        mappedItem.externalUrl = itemData.external_url || null;
         break;
 
       case 'artist':
@@ -44,7 +44,7 @@ class RecommendationService {
         mappedItem.releaseDate = null;
         mappedItem.externalId = itemData.id;
         mappedItem.avgRating = null;
-        mappedItem.vibeTags = itemData.genres || [];
+        mappedItem.externalUrl = itemData.external_url || null;
         break;
 
       case 'album':
@@ -54,7 +54,7 @@ class RecommendationService {
         mappedItem.releaseDate = itemData.release_date;
         mappedItem.externalId = itemData.id;
         mappedItem.avgRating = null;
-        mappedItem.vibeTags = [];
+        mappedItem.externalUrl = itemData.external_url || null;
         break;
 
       case 'book':
@@ -64,7 +64,7 @@ class RecommendationService {
         mappedItem.releaseDate = itemData.publishedDate;
         mappedItem.externalId = itemData.id;
         mappedItem.avgRating = itemData.averageRating;
-        mappedItem.vibeTags = itemData.categories || [];
+        mappedItem.externalUrl = itemData.external_url || null;
         break;
 
       case 'videogame':
@@ -74,7 +74,7 @@ class RecommendationService {
         mappedItem.releaseDate = itemData.first_release_date ? new Date(itemData.first_release_date * 1000).toISOString().split('T')[0] : null;
         mappedItem.externalId = itemData.id ? String(itemData.id) : null;
         mappedItem.avgRating = itemData.aggregated_rating || null;
-        mappedItem.vibeTags = itemData.genres ? itemData.genres.map(g => g.name) : [];
+        mappedItem.externalUrl = itemData.external_url || null;
         break;
 
       default:
@@ -90,7 +90,6 @@ class RecommendationService {
 
   async recommendMovies(itemName) {
     try {
-      // *** CAMBIO AQUÍ: Usar searchTmdb en lugar de searchAll para el item base ***
       const initialSearchResult = await this.searchService.searchTmdb(itemName);
       const baseMovie = initialSearchResult.movies[0];
 
@@ -107,7 +106,6 @@ class RecommendationService {
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
 
-      // *** CAMBIO AQUÍ: Mapear promesas para llamar a searchTmdb para cada query ***
       const searchPromises = recommendedQueries.map(query => this.searchService.searchTmdb(query));
       const searchResults = await Promise.allSettled(searchPromises);
 
@@ -131,7 +129,6 @@ class RecommendationService {
 
   async recommendSongs(itemName) {
     try {
-        // *** CAMBIO AQUÍ: Usar searchSpotify en lugar de searchAll para el item base ***
         const initialSearchResult = await this.searchService.searchSpotify(itemName);
         const baseSong = initialSearchResult.songs[0];
 
@@ -150,7 +147,6 @@ class RecommendationService {
         const allRecommendedItems = [];
         const addedExternalIds = new Set();
 
-        // *** CAMBIO AQUÍ: Mapear promesas para llamar a searchSpotify para cada query ***
         const searchPromises = recommendedQueries.map(query => this.searchService.searchSpotify(query));
         const searchResults = await Promise.allSettled(searchPromises);
 
