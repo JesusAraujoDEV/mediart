@@ -37,5 +37,5 @@ const addItemsToPlaylistUnifiedSchema = Joi.alternatives().try(
 
 module.exports = {
   addItemsToPlaylistUnifiedSchema,
-  // recommendedItemSchema,
+  recommendedItemSchema,
 };

@@ -43,8 +43,9 @@ router.post('/',
   validatorHandler(createPlaylistSchema, 'body'),
   async (req, res, next) => {
     try {
+      const body = req.body;
       const bodyWithUserId = {
-        ...req.body,
+        ...body,
         ownerUserId: req.user.sub
       };
       console.log(bodyWithUserId);

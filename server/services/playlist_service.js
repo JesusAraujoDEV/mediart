@@ -9,22 +9,35 @@ class PlaylistService {
   }
 
   async create(data) {
-    const user = await models.User.findByPk(data.ownerUserId);
-    console.log(user);
+    const { items, ...playlistData } = data;
+
+    const user = await models.User.findByPk(playlistData.ownerUserId);
     if (!user) {
       throw boom.notFound('User not found');
     }
 
-    const newPlaylist = await models.Playlist.create(data);
+    const newPlaylist = await models.Playlist.create(playlistData);
 
     try {
-        await models.Library.create({
-            userId: user.id,
-            playlistId: newPlaylist.id,
-        });
+      await models.Library.create({
+        userId: user.id,
+        playlistId: newPlaylist.id,
+      });
     } catch (libraryError) {
-        console.error("Error creating Library entry for new playlist:", libraryError);
-        throw boom.internal('Failed to save playlist to user library after creation.', libraryError);
+      console.error("Error creating Library entry for new playlist:", libraryError);
+      throw boom.internal('Failed to save playlist to user library after creation.', libraryError);
+    }
+
+    if (items && Array.isArray(items) && items.length > 0) {
+      try {
+        const addItemsResult = await this.addItemsToPlaylist(newPlaylist, items);
+        console.log(`Successfully added ${addItemsResult.playlistItems.length} items during playlist creation.`);
+        // Opcional: Podrías añadir los ítems cargados a newPlaylist para la respuesta si es necesario
+        // newPlaylist.dataValues.itemsAdded = addItemsResult.playlistItems.map(pi => pi.itemId);
+      } catch (addItemsError) {
+        console.error(`Error adding items to new playlist ${newPlaylist.id}:`, addItemsError);
+        throw boom.internal('Playlist created, but failed to add initial items.', addItemsError);
+      }
     }
 
     return newPlaylist;
