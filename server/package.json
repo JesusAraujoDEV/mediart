@@ -13,6 +13,7 @@
     "migrations:delete": "sequelize-cli db:migrate:undo:all"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@hapi/boom": "^10.0.1",
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",

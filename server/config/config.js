@@ -30,7 +30,9 @@ const config = {
     spotifyClientSecret: process.env.SPOTIFY_CLIENT_SECRET,
     googleBooks: process.env.GOOGLE_BOOKS_API_KEY,
     igdbClientId: process.env.VIDEOGAMES_CLIENT_ID,
-    igdbClientSecret: process.env.VIDEOGAMES_CLIENT_SECRET
+    igdbClientSecret: process.env.VIDEOGAMES_CLIENT_SECRET,
+    googleGemini: process.env.GOOGLE_GEMINI_API_KEY,
+    deepseek: process.env.DEEPSEEK_API_KEY,
   },
 
 /*

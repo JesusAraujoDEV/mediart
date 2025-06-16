@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 const id = Joi.number().integer();
 const title = Joi.string();
-const type = Joi.string().valid('movie', 'song', 'artist', 'tvshow', 'book', 'videogames');
+const type = Joi.string().valid('movie', 'song', 'artist','album', 'tvshow', 'book', 'videogames');
 const description = Joi.string().max(500);
 const coverUrl = Joi.string().max(255);
 const releaseDate = Joi.date();

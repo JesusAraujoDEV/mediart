@@ -9,7 +9,7 @@ class SpotifyApiService {
     this.accessToken = null;
     this.tokenExpiry = 0;
 
-    this.#authenticate();
+    //this.#authenticate();
   }
 
   async #authenticate() {

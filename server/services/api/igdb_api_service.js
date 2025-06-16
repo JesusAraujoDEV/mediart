@@ -11,7 +11,7 @@ class IgdbApiService {
     this.baseUrl = 'https://api.igdb.com/v4';
 
     // Llama al método de autenticación en el constructor para obtener el token inicial
-    this.#authenticate();
+    //this.#authenticate();
   }
 
   // Método privado para obtener/refrescar el token de acceso de Twitch para IGDB
