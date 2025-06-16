@@ -1,10 +1,16 @@
 const express = require('express');
-
 const PlaylistService = require('./../services/playlist_service');
 const validatorHandler = require('./../middlewares/validator_handler');
-const { updatePlaylistSchema, createPlaylistSchema, getPlaylistSchema } = require('./../schemas/playlist_schema');
+const {
+  getPlaylistSchema,
+  createPlaylistSchema,
+  updatePlaylistSchema
+} = require('./../schemas/playlist_schema');
+const {
+  addItemsToPlaylistUnifiedSchema
+} = require('../schemas/playlist_item_schema');
 const passport = require('passport');
-const { addItemsToPlaylistUnifiedSchema } = require('../schemas/playlist_item_schema');
+const boom = require('@hapi/boom');
 
 const router = express.Router();
 const service = new PlaylistService();
@@ -38,8 +44,8 @@ router.post('/',
   async (req, res, next) => {
     try {
       const bodyWithUserId = {
-        ...req.body, 
-        ownerUserId: req.user.sub // Sobreescribe o añade el userId del token
+        ...req.body,
+        ownerUserId: req.user.sub
       };
       console.log(bodyWithUserId);
       const newPlaylist = await service.create(bodyWithUserId);
@@ -51,14 +57,23 @@ router.post('/',
 );
 
 router.patch('/:id',
+  passport.authenticate('jwt', { session: false }),
   validatorHandler(getPlaylistSchema, 'params'),
   validatorHandler(updatePlaylistSchema, 'body'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
       const body = req.body;
-      const playlist = await service.update(id, body);
-      res.json(playlist);
+      const userId = req.user.sub; // Obtener el ID del usuario autenticado
+
+      const playlist = await service.findOne(id);
+      // Verificar si el usuario autenticado es el dueño de la playlist
+      if (playlist.ownerUserId !== userId) {
+        throw boom.forbidden('You are not the owner of this playlist.');
+      }
+
+      const updatedPlaylist = await service.update(id, body);
+      res.json(updatedPlaylist);
     } catch (error) {
       next(error);
     }
@@ -66,50 +81,77 @@ router.patch('/:id',
 );
 
 router.delete('/:id',
+  passport.authenticate('jwt', { session: false }),
   validatorHandler(getPlaylistSchema, 'params'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
+      const userId = req.user.sub;
+
+      const playlist = await service.findOne(id);
+      if (playlist.ownerUserId !== userId) {
+        throw boom.forbidden('You are not the owner of this playlist.');
+      }
+
       await service.delete(id);
-      res.status(201).json({id});
+      res.status(200).json({ id, message: 'Playlist deleted successfully' });
     } catch (error) {
       next(error);
     }
   }
 );
 
-// AÑADIR ITEMS
 router.post(
-  '/:id/items', // :id es el ID de la playlist
-  passport.authenticate('jwt', { session: false }), // 1. Protege la ruta con JWT
-  validatorHandler(getPlaylistSchema, 'params'), // 2. Valida que el ID de la playlist en los params sea un número
-  validatorHandler(addItemsToPlaylistUnifiedSchema, 'body'), // 3. Valida el cuerpo de la solicitud (itemId o itemIds)
+  '/:id/items',
+  passport.authenticate('jwt', { session: false }),
+  validatorHandler(getPlaylistSchema, 'params'),
+  validatorHandler(addItemsToPlaylistUnifiedSchema, 'body'),
   async (req, res, next) => {
     try {
       const { id: playlistId } = req.params;
-      const { itemId, itemIds } = req.body;
+      const body = req.body;
       const userId = req.user.sub;
 
-      // --- Lógica de Autorización: Obtener la playlist y verificar si el usuario autenticado es el dueño ---
       const playlist = await service.findOne(playlistId);
 
       if (playlist.ownerUserId !== userId) {
         throw boom.forbidden('You are not the owner of this playlist.');
       }
-      // --- Fin Lógica de Autorización ---
 
       let rta;
-      if (itemId) {
-        // PASAMOS EL OBJETO 'playlist' AL SERVICIO
-        rta = await service.addItemToPlaylist(playlist, itemId);
-      } else if (itemIds && itemIds.length > 0) {
-        // PASAMOS EL OBJETO 'playlist' AL SERVICIO
-        rta = await service.addItemsToPlaylist(playlist, itemIds);
+      if (body.itemIds) {
+        rta = await service.addExistingItemsToPlaylist(playlist, body.itemIds);
+      } else if (body.items && Array.isArray(body.items) && body.items.length > 0) {
+        rta = await service.addItemsToPlaylist(playlist, body.items);
       } else {
-        throw boom.badRequest('Must provide itemId or itemIds.');
+        throw boom.badRequest('Request body must contain either "itemIds" (array of existing item IDs) or "items" (array of item objects to add/create).');
       }
 
       res.status(201).json(rta);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.delete(
+  '/:playlistId/items/:itemId',
+  passport.authenticate('jwt', { session: false }),
+  validatorHandler(getPlaylistSchema, 'params'),
+  async (req, res, next) => {
+    try {
+      const { playlistId, itemId } = req.params;
+      const userId = req.user.sub;
+
+      const playlist = await service.findOne(playlistId);
+
+      if (playlist.ownerUserId !== userId) {
+        throw boom.forbidden('You are not the owner of this playlist.');
+      }
+
+      const rta = await service.removeItemFromPlaylist(playlist, itemId);
+
+      res.status(200).json(rta);
     } catch (error) {
       next(error);
     }

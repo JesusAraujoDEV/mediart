@@ -2,27 +2,25 @@ const Joi = require('joi');
 
 const id = Joi.number().integer();
 const title = Joi.string();
-const type = Joi.string().valid('movie', 'song', 'artist','album', 'tvshow', 'book', 'videogames');
-const description = Joi.string().max(500);
-const coverUrl = Joi.string().max(255);
-const releaseDate = Joi.date();
-const externalId = Joi.string();
-const externalSource = Joi.string();
-const avgRating = Joi.number();
-// const vibeTags = Joi.array().items(Joi.string());
-const externalUrl = Joi.string().max(255);
+const type = Joi.string().valid('movie', 'song', 'artist', 'album', 'tvshow', 'book', 'videogame').required();
+const description = Joi.string().max(2000).allow(null, '');
+const coverUrl = Joi.string().uri().max(255).allow(null, '');
+const releaseDate = Joi.date().iso().allow(null);
+const externalId = Joi.string().required();
+const externalSource = Joi.string().valid('Spotify', 'TMDB', 'IGDB', 'Google Books').required();
+const avgRating = Joi.number().min(0).max(100).allow(null);
+const externalUrl = Joi.string().uri().max(255).allow(null, '');
 
 const createItemSchema = Joi.object({
-    title: title.required(),
-    type: type.required(),
-    description: description.optional(),
-    coverUrl: coverUrl.optional(),
-    releaseDate: releaseDate.optional(),
-    externalId: externalId.optional(),
-    externalSource: externalSource.optional(),
-    avgRating: avgRating.optional(),
-    // vibeTags: vibeTags.optional(),
-    externalUrl: externalUrl.optional(),
+    title: title,
+    type: type,
+    description: description,
+    coverUrl: coverUrl,
+    releaseDate: releaseDate,
+    externalId: externalId,
+    externalSource: externalSource,
+    avgRating: avgRating,
+    externalUrl: externalUrl,
 });
 
 const updateItemSchema = Joi.object({
@@ -34,7 +32,6 @@ const updateItemSchema = Joi.object({
     externalId: externalId.optional(),
     externalSource: externalSource.optional(),
     avgRating: avgRating.optional(),
-    // vibeTags: vibeTags.optional(),
     externalUrl: externalUrl.optional(),
 });
 
@@ -42,4 +39,18 @@ const getItemSchema = Joi.object({
     id: id.required()
 });
 
-module.exports = { createItemSchema, updateItemSchema, getItemSchema };
+module.exports = {
+  createItemSchema,
+  updateItemSchema,
+  getItemSchema,
+  id,
+  title,
+  type,
+  description,
+  coverUrl,
+  releaseDate,
+  externalId,
+  externalSource,
+  avgRating,
+  externalUrl,
+};
