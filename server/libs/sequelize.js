@@ -1,6 +1,7 @@
 const { Sequelize } = require('sequelize');
 const { config } = require('./../config/config');
 const { setupModels } = require('./../db/models');
+const fs = require('fs');
 
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('config.isProd:', config.isProd);
@@ -12,15 +13,24 @@ const options = {
 }
 
 if(config.isProd) {
+  // Carga el certificado CA
+  let caCert;
+  try {
+    caCert = fs.readFileSync(__dirname + '/../ca.crt');
+    console.log('CA certificate loaded successfully.');
+  } catch (error) {
+    console.error('Error loading CA certificate:', error);
+  }
+
   options.dialectOptions = {
     ssl: {
       require: true,
-      rejectUnauthorized: false
+      rejectUnauthorized: true,
+      ca: caCert.toString()
     }
   }
 }
 
-// Mueve este console.log aquí, después de que 'options' esté completamente configurada
 console.log('Sequelize final options:', options);
 
 const sequelize = new Sequelize(config.db_url, options);
