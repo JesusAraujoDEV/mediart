@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="absolute top-0 left-0 w-fit glassEffect p-2 m-3 rounded-lg flex items-center gap-4"
+    class="absolute top-0 left-0 w-fit z-40 glassEffect p-2 m-3 rounded-lg flex items-center gap-4"
   >
     <NuxtLink to="/studio">
       <img
@@ -17,13 +17,14 @@
         alt="Profile Preview"
       />
     </NuxtLink>
+    <NuxtLink class="flex items-center cursor-pointer" :to="`/studio/help`">
+      <Icon name="material-symbols:help" size='2em' />
+    </NuxtLink>
   </nav>
 </template>
 
 <script setup lang="ts">
-const config = useRuntimeConfig();
 const userString = localStorage.getItem("user");
-
 const actualUser = userString ? JSON.parse(userString).username : null;
 </script>
 

@@ -5,6 +5,7 @@
     <main
       class="w-screen h-fit md:h-dvh flex gap-4 justify-center items-center p-10 max-md:flex-col"
     >
+      <NavigationStudio />
       <Profile />
       <Library />
     </main>
@@ -18,4 +19,5 @@ definePageMeta({
 });
 import Library from "~/components/sections/Library.vue";
 import Profile from "~/components/sections/Profile.vue";
+import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 </script>
