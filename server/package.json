@@ -6,6 +6,7 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "lint": "eslint",
+    "build": "npm install",
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrations:generate": "sequelize-cli migration:generate --name",
     "migrations:run": "sequelize-cli db:migrate",
