@@ -72,6 +72,18 @@ class Playlist extends Model {
         foreignKey: 'playlist_id', // Clave foránea en Library que apunta a Playlist
         otherKey: 'user_id' // Clave foránea en Library que apunta a User
       });
+
+      this.belongsToMany(models.User, {
+        as: 'collaborators', // Nuevo alias para acceder solo a los colaboradores
+        through: {
+            model: models.Library, // La tabla intermedia sigue siendo Library
+            scope: {
+                isCollaborator: true
+            }
+        },
+        foreignKey: 'playlist_id',
+        otherKey: 'user_id'
+      });
     }
 
   static config(sequelize) {

@@ -33,8 +33,7 @@ class PlaylistService {
       try {
         const addItemsResult = await this.addItemsToPlaylist(newPlaylist, items);
         console.log(`Successfully added ${addItemsResult.playlistItems.length} items during playlist creation.`);
-        // Opcional: Podrías añadir los ítems cargados a newPlaylist para la respuesta si es necesario
-        // newPlaylist.dataValues.itemsAdded = addItemsResult.playlistItems.map(pi => pi.itemId);
+        newPlaylist.dataValues.itemsAdded = addItemsResult.playlistItems.map(pi => pi.itemId);
       } catch (addItemsError) {
         console.error(`Error adding items to new playlist ${newPlaylist.id}:`, addItemsError);
         throw boom.internal('Playlist created, but failed to add initial items.', addItemsError);
@@ -45,6 +44,17 @@ class PlaylistService {
   }
 
   async addCollaborator(playlistId, userIdToAdd) {
+    const userLibraryEntry = await models.Library.findOne({
+      where: {
+        userId: userIdToAdd,
+        playlistId: playlistId,
+      },
+    });
+
+    if (!userLibraryEntry) {
+      throw boom.badRequest(`User ${userIdToAdd} must have playlist ${playlistId} in their library to be added as a collaborator.`);
+    }
+
     const [libraryEntry, created] = await models.Library.findOrCreate({
       where: {
         userId: userIdToAdd,
@@ -58,14 +68,15 @@ class PlaylistService {
     });
 
     if (!created) {
+      // El registro ya existía
       if (!libraryEntry.isCollaborator) {
         await libraryEntry.update({ isCollaborator: true });
-        return { message: `User ${userIdToAdd} updated to be a collaborator.` };
+        return { status: 'success', message: `User ${userIdToAdd} updated to be a collaborator.` };
       }
-      return { message: `User ${userIdToAdd} is already a collaborator and has the playlist in their library.` };
+      return { status: 'success', message: `User ${userIdToAdd} is already a collaborator and has the playlist in their library.` };
     }
 
-    return { message: `User ${userIdToAdd} added as a collaborator and playlist saved to their library.` };
+    return { status: 'success', message: `User ${userIdToAdd} added as a collaborator and playlist saved to their library.` };
   }
 
   async addMultipleCollaborators(playlistId, userIdsToAdd) {
@@ -80,8 +91,8 @@ class PlaylistService {
         const result = await this.addCollaborator(playlistId, userId);
         results.push({ userId, status: 'success', message: result.message });
       } catch (error) {
-        console.error(`Error adding user ${userId} as collaborator to playlist ${playlistId}:`, error);
-        results.push({ userId, status: 'error', message: error.message || 'Failed to add as collaborator' });
+        // Captura el error lanzado por boom.badRequest
+        results.push({ userId, status: 'error', message: error.output?.payload?.message || error.message || 'Failed to add as collaborator' });
       }
     }
     return {
@@ -152,7 +163,12 @@ class PlaylistService {
             model: models.User,
             as: 'savedByUsers',
             through: { attributes: [] }
-        }
+        },
+        {
+          model: models.User,
+          as: 'collaborators',
+          through: { attributes: [] }
+        },
       ]
     });
     if (!playlist) {
