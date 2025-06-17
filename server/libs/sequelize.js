@@ -1,7 +1,6 @@
 const { Sequelize } = require('sequelize');
 const { config } = require('./../config/config');
 const { setupModels } = require('./../db/models');
-const fs = require('fs');
 
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('config.isProd:', config.isProd);
@@ -13,20 +12,19 @@ const options = {
 }
 
 if(config.isProd) {
-  // Carga el certificado CA
-  let caCert;
-  try {
-    caCert = fs.readFileSync(__dirname + '/../ca.crt');
-    console.log('CA certificate loaded successfully.');
-  } catch (error) {
-    console.error('Error loading CA certificate:', error);
+  // Carga el certificado CA de la variable de entorno
+  const caCertEnv = process.env.POSTGRES_CA_CERT; // <-- LEE LA VARIABLE DE ENTORNO
+  if (!caCertEnv) {
+    console.error('ERROR: POSTGRES_CA_CERT environment variable is not set!');
+    // Considera lanzar un error aquí si el certificado es crítico
+    // throw new Error('Database CA certificate not found in environment variables.');
   }
 
   options.dialectOptions = {
     ssl: {
       require: true,
       rejectUnauthorized: true,
-      ca: caCert.toString()
+      ca: caCertEnv.toString() // Usa el valor de la variable de entorno
     }
   }
 }

@@ -1,23 +1,20 @@
 const { config } = require('./../config/config');
-const fs = require('fs');
 
 let sslOptions = {};
 if (config.isProd) {
-  try {
-    const caCert = fs.readFileSync(__dirname + '/../ca.crt'); // Ajusta la ruta si es necesario.
-                                                             // __dirname en db/config.js apunta a 'server/db/'.
-                                                             // Necesitas ir a 'server/' para encontrar 'ca.crt'.
-    sslOptions = {
-      ssl: {
-        require: true,
-        rejectUnauthorized: true, // <--- CAMBIA ESTO A TRUE
-        ca: caCert.toString()     // <--- AÑADE ESTA LÍNEA
-      }
-    };
-    console.log('CA certificate loaded for sequelize-cli config.');
-  } catch (error) {
-    console.error('Error loading CA certificate for sequelize-cli config:', error);
+  const caCertEnv = process.env.POSTGRES_CA_CERT; // <-- LEE LA VARIABLE DE ENTORNO
+  if (!caCertEnv) {
+    console.error('ERROR: POSTGRES_CA_CERT environment variable is not set for sequelize-cli config!');
+    // Opcional: throw new Error('Database CA certificate not found for migrations.');
   }
+  sslOptions = {
+    ssl: {
+      require: true,
+      rejectUnauthorized: true,
+      ca: caCertEnv.toString() // Usa el valor de la variable de entorno
+    }
+  };
+  console.log('CA certificate loaded from environment for sequelize-cli config.');
 }
 
 
@@ -29,8 +26,6 @@ module.exports = {
     production: {
         url: config.db_url,
         dialect: 'postgres',
-        ...sslOptions, // <--- USA SPREAD OPERATOR PARA AÑADIR LAS OPCIONES SSL
-        // o manualmente:
-        // dialectOptions: sslOptions.ssl ? sslOptions.ssl : undefined
+        ...sslOptions,
     },
 }
