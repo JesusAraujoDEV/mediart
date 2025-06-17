@@ -1,22 +1,19 @@
 const { config } = require('./../config/config');
 
-let sslOptions = {};
+let sslConfigCli = {};
 if (config.isProd) {
-  const caCertEnv = process.env.POSTGRES_CA_CERT; // <-- LEE LA VARIABLE DE ENTORNO
+  const caCertEnv = process.env.POSTGRES_CA_CERT;
   if (!caCertEnv) {
     console.error('ERROR: POSTGRES_CA_CERT environment variable is not set for sequelize-cli config!');
-    // Opcional: throw new Error('Database CA certificate not found for migrations.');
+    throw new Error('Database CA certificate not found for migrations. Cannot connect to PostgreSQL.');
   }
-  sslOptions = {
-    ssl: {
-      require: true,
-      rejectUnauthorized: true,
-      ca: caCertEnv.toString() // Usa el valor de la variable de entorno
-    }
+  sslConfigCli = {
+    // Estas son las opciones SSL para el dialectOptions
+    require: true,
+    rejectUnauthorized: true, // ¡Tal como lo indica Aiven!
+    ca: caCertEnv // El certificado CA completo como string
   };
-  console.log('CA certificate loaded from environment for sequelize-cli config.');
 }
-
 
 module.exports = {
     development: {
@@ -26,6 +23,8 @@ module.exports = {
     production: {
         url: config.db_url,
         dialect: 'postgres',
-        ...sslOptions,
+        dialectOptions: { // Directamente aquí el objeto dialectOptions
+            ssl: sslConfigCli
+        },
     },
 }
