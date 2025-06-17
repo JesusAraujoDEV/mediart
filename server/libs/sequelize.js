@@ -27,9 +27,6 @@ const options = {
   dialect: 'postgres',
   logging: config.isProd ? false : true,
   // Pasar todas las opciones SSL a dialectOptions
-  dialectOptions: {
-    ssl: sslConfig
-  }
 };
 
 console.log('Sequelize final options:', options);

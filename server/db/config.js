@@ -23,8 +23,5 @@ module.exports = {
     production: {
         url: config.db_url,
         dialect: 'postgres',
-        dialectOptions: { // Directamente aquí el objeto dialectOptions
-            ssl: sslConfigCli
-        },
     },
 }
