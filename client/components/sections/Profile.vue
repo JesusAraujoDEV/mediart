@@ -82,11 +82,8 @@ onMounted(async () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          // Consider adding authorization header if profile data is protected
-          // 'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        // Nuxt's useFetch has a built-in `pick` option for optimizing payload
-        // pick: ['username', 'email', 'profilePictureUrl', 'bio']
       }
     );
 

@@ -178,7 +178,6 @@ const handleImageUpload = (event: Event) => {
   const file = target.files?.[0];
   if (file) {
     editableUserProfile.value.profilePictureUrl = URL.createObjectURL(file);
-    // En una aplicación real, subirías este archivo y obtendrías una nueva URL de tu backend
     console.log("Archivo seleccionado para subir:", file);
   }
 };
@@ -247,9 +246,9 @@ const updateProfile = async () => {
 
   try {
     const { data, error } = await useFetch<UserProfile>(
-      `${config.public.backend}/api/users/${userProfile.value.username}`, // Asumiendo actualización por el nombre de usuario original o ID
+      `${config.public.backend}/api/users/${JSON.parse(localStorage.getItem("user")).id}`, // Asumiendo actualización por el nombre de usuario original o ID
       {
-        method: "PUT", // O PATCH, según tu API
+        method: "PATCH", // O PATCH, según tu API
         headers: {
           "Content-Type": "application/json",
           // 'Authorization': `Bearer ${localStorage.getItem('token')}` // Importante: Incluir token de autenticación

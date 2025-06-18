@@ -3,7 +3,7 @@
   <main class="w-screen h-dvh flex flex-col items-center justify-between p-4 text-white">
     <NavigationStudio />
 
-    <div class="flex items-center justify-center w-full mb-4 px-4 max-w-4xl">
+    <div class="flex items-center justify-center w-full mb-4 px-4 max-w-4xl max-md:mt-20">
       <div class="relative flex-grow mr-3">
         <div
           class="glassEffect shadow-xl rounded-full p-3 flex flex-wrap items-center gap-2 min-h-[48px] border border-gray-700"
@@ -22,7 +22,7 @@
           <input
             ref="searchInput"
             type="text"
-            class="bg-transparent flex-grow outline-none text-white placeholder-white/60 min-w-[50px]"
+            class="bg-transparent flex-grow outline-none text-white placeholder-white/60 min-w-[50px] max-md:h-5"
             placeholder="Escribe tu consulta aquí..."
             v-model="inputValue"
             @input="onInput"
@@ -40,11 +40,20 @@
           >
             <li
               v-for="suggestion in filteredSuggestions"
-              :key="suggestion"
-              @mousedown.prevent="selectSuggestion(suggestion)"
-              class="p-2 cursor-pointer hover:bg-gray-700/70 text-white text-sm"
+              :key="suggestion.title"
+              @mousedown.prevent="selectSuggestion(suggestion.title)"
+              class="p-2 cursor-pointer hover:bg-gray-700/70 text-white text-sm flex items-center"
             >
-              {{ suggestion }}
+              <img
+                v-if="suggestion.coverUrl"
+                :src="suggestion.coverUrl"
+                :alt="suggestion.title"
+                class="w-8 h-8 object-cover rounded mr-3 flex-shrink-0"
+              />
+              <div v-else class="w-8 h-8 bg-gray-600 rounded mr-3 flex-shrink-0 flex items-center justify-center text-gray-400 text-xs">
+                ?
+              </div>
+              <span>{{ suggestion.title }}</span>
             </li>
           </ul>
         </Transition>
@@ -64,7 +73,7 @@
       </select>
       <button
         @click="sendData"
-        class="ml-3 p-2 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg flex items-center justify-center text-white"
+        class="ml-3 p-2 rounded-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg flex items-center justify-center text-white"
         aria-label="Generar recomendaciones"
       >
         <svg
@@ -81,7 +90,7 @@
 
     <div class="flex-grow flex w-full max-w-6xl items-center justify-center p-4">
       <div
-        class="w-full h-full glassEffect max-h-[80vh] bg-gray-800/50 rounded-lg p-6 flex flex-col items-center justify-center text-white text-xl shadow-2xl overflow-hidden relative"
+        class="w-full h-full glassEffect max-h-[80vh] bg-gray-800/50 rounded-lg p-6 flex flex-col items-center justify-center text-white text-xl shadow-2xl overflow-y-auto relative custom-main-scroll"
       >
         <div v-if="recommendationsLoading" class="flex flex-col items-center text-center">
           <p class="text-xl mb-4 text-gray-300">Generando recomendaciones...</p>
@@ -97,26 +106,27 @@
           </button>
         </div>
         <div v-else-if="recommendations.length > 0" class="w-full h-full flex flex-col items-center">
-          <h3 class="text-3xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+          <h3 class="text-3xl font-extrabold mb-6">
             Tus Recomendaciones
           </h3>
-          <div class="relative w-full overflow-hidden">
-            <div class="flex space-x-6 pb-4 pt-2 overflow-x-auto custom-scrollbar">
-              <div
-                v-for="item in recommendations"
-                :key="item.externalId || item.title"
-                class="flex-none w-56 bg-gray-700/60 rounded-xl p-4 flex flex-col items-center text-center shadow-lg transform transition-transform duration-300 hover:scale-105 hover:bg-gray-600/70 cursor-pointer border border-gray-600"
-              >
-                <img
-                  v-if="item.coverUrl"
-                  :src="item.coverUrl"
-                  :alt="item.title || 'Cover'"
-                  class="w-40 h-40 object-cover rounded-lg mb-3 shadow-md border border-gray-500"
-                />
-                <div v-else class="w-40 h-40 bg-gray-600 rounded-lg mb-3 flex items-center justify-center text-gray-400 text-sm border border-gray-500">
-                  Sin portada
-                </div>
-                <h4 class="font-bold text-lg text-white mb-1 truncate w-full">{{ item.title }}</h4>
+          <div class="grid grid-cols-1 gap-6 w-full flex-grow pb-4 px-2">
+            <div
+              v-for="item in recommendations"
+              :key="item.externalId || item.title"
+              class="bg-gray-700/60 rounded-xl p-4 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-lg transform transition-transform duration-300 hover:scale-105 hover:bg-gray-600/70 cursor-pointer border border-gray-600"
+            >
+              <img
+                v-if="item.coverUrl"
+                :src="item.coverUrl"
+                :alt="item.title || 'Cover'"
+                class="w-32 h-32 object-cover rounded-lg mb-4 sm:mb-0 sm:mr-4 flex-shrink-0 shadow-md border border-gray-500"
+              />
+              <div v-else class="w-32 h-32 bg-gray-600 rounded-lg mb-4 sm:mb-0 sm:mr-4 flex-shrink-0 flex items-center justify-center text-gray-400 text-sm border border-gray-500">
+                Sin portada
+              </div>
+
+              <div class="flex-grow flex flex-col justify-center items-center sm:items-start">
+                <h4 class="font-bold text-lg text-white mb-1">{{ item.title }}</h4>
                 <p class="text-sm text-gray-300 capitalize mb-1">
                   {{ item.type }} <span class="opacity-70">({{ item.externalSource }})</span>
                 </p>
@@ -138,11 +148,11 @@
               </div>
             </div>
           </div>
-          <div class="flex justify-center gap-6 mt-8">
+          <div class="flex justify-center gap-6 mt-8 pb-4">
             <button @click="acceptRecommendations" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg">
               Aceptar
             </button>
-            <button @click="sendData" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg">
+            <button @click="sendData" class="bg-red-600 hover:bg-red-700 cursor-pointer text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg">
               Regenerar
             </button>
           </div>
@@ -170,7 +180,15 @@ const router = useRouter();
 
 const inputValue = ref("");
 const selectedTags = ref<string[]>([]);
-const suggestions = ref<string[]>([]);
+
+interface SearchSuggestion {
+  title: string;
+  coverUrl?: string | null;
+  type?: string;
+  externalId?: string;
+}
+
+const suggestions = ref<SearchSuggestion[]>([]);
 const showDatalist = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
 const config = useRuntimeConfig();
@@ -232,39 +250,76 @@ const fetchSuggestions = async (query: string) => {
     }
     const data = await response.json();
 
-    const newSuggestions: string[] = [];
+    const newSuggestions: SearchSuggestion[] = [];
 
-    if (data.songs) {
-      newSuggestions.push(...data.songs.map((song: any) => song.title));
-    }
-    if (data.artists) {
-      newSuggestions.push(...data.artists.map((artist: any) => artist.name));
-    }
-    if (data.albums) {
-      newSuggestions.push(...data.albums.map((album: any) => album.name));
-    }
+    // --- Lógica adaptada para obtener la portada según el tipo de contenido ---
     if (data.movies) {
-      newSuggestions.push(
-        ...data.movies.map((movie: any) => movie.title || movie.name)
-      );
+      newSuggestions.push(...data.movies.map((item: any) => ({
+        title: item.title,
+        coverUrl: item.poster_url || null, // Movies use poster_url
+        type: 'movie',
+        externalId: item.id?.toString()
+      })));
     }
     if (data.tvshows) {
-      newSuggestions.push(
-        ...data.tvshows.map((tvshow: any) => tvshow.title || tvshow.name)
-      );
+      newSuggestions.push(...data.tvshows.map((item: any) => ({
+        title: item.title || item.name, // TV shows might use title or name
+        coverUrl: item.poster_url || null, // TV shows use poster_url
+        type: 'tvshow',
+        externalId: item.id?.toString()
+      })));
+    }
+    if (data.songs) {
+      newSuggestions.push(...data.songs.map((item: any) => ({
+        title: item.title,
+        coverUrl: item.thumbnail_url || null, // Songs use thumbnail_url
+        type: 'song',
+        externalId: item.id?.toString()
+      })));
+    }
+    if (data.artists) {
+      newSuggestions.push(...data.artists.map((item: any) => ({
+        title: item.name,
+        coverUrl: item.image_url || null, // Artists use image_url
+        type: 'artist',
+        externalId: item.id?.toString()
+      })));
+    }
+    if (data.albums) {
+      newSuggestions.push(...data.albums.map((item: any) => ({
+        title: item.name,
+        coverUrl: item.thumbnail_url || null, // Albums use thumbnail_url
+        type: 'album',
+        externalId: item.id?.toString()
+      })));
     }
     if (data.books) {
-      newSuggestions.push(
-        ...data.books.map((book: any) => book.title || book.name)
-      );
+      newSuggestions.push(...data.books.map((item: any) => ({
+        title: item.title || item.name,
+        coverUrl: item.thumbnail_url || null, // Books use thumbnail_url
+        type: 'book',
+        externalId: item.id?.toString()
+      })));
     }
     if (data.videogames) {
-      newSuggestions.push(
-        ...data.videogames.map((game: any) => game.title || game.name)
-      );
+      newSuggestions.push(...data.videogames.map((item: any) => ({
+        title: item.name, // Videogames usually use 'name'
+        coverUrl: item.cover_url || null, // Videogames use cover_url
+        type: 'videogame',
+        externalId: item.id?.toString()
+      })));
     }
+    // --- Fin de la lógica adaptada ---
 
-    suggestions.value = Array.from(new Set(newSuggestions));
+    // Filter out duplicates based on title and ensure selected tags are not suggested
+    const uniqueSuggestions = new Map<string, SearchSuggestion>();
+    newSuggestions.forEach(s => {
+        if (!selectedTags.value.includes(s.title)) {
+            uniqueSuggestions.set(s.title, s);
+        }
+    });
+    suggestions.value = Array.from(uniqueSuggestions.values());
+
   } catch (error: any) {
     if (error.name === 'AbortError') {
       console.log('Suggestion fetch request was aborted.');
@@ -285,8 +340,8 @@ const filteredSuggestions = computed(() => {
   return suggestions.value
     .filter(
       (s) =>
-        s.toLowerCase().includes(lowerCaseInput) &&
-        !selectedTags.value.includes(s)
+        s.title.toLowerCase().includes(lowerCaseInput) &&
+        !selectedTags.value.includes(s.title)
     )
     .slice(0, 10);
 });
@@ -314,9 +369,9 @@ const onInput = () => {
   showDatalist.value = true;
 };
 
-const selectSuggestion = (suggestion: string) => {
-  if (!selectedTags.value.includes(suggestion)) {
-    selectedTags.value.push(suggestion);
+const selectSuggestion = (title: string) => {
+  if (!selectedTags.value.includes(title)) {
+    selectedTags.value.push(title);
   }
   inputValue.value = "";
   showDatalist.value = false;
@@ -325,12 +380,14 @@ const selectSuggestion = (suggestion: string) => {
 };
 
 const addTagFromInput = () => {
-  const exactSuggestionMatch = filteredSuggestions.value.find(
-    (s) => s.toLowerCase() === inputValue.value.toLowerCase()
+  const exactSuggestionObject = filteredSuggestions.value.find(
+    (s) => s.title.toLowerCase() === inputValue.value.toLowerCase()
   );
 
-  if (inputValue.value && !selectedTags.value.includes(inputValue.value)) {
-    selectedTags.value.push(exactSuggestionMatch || inputValue.value);
+  const tagToAdd = exactSuggestionObject ? exactSuggestionObject.title : inputValue.value;
+
+  if (tagToAdd && !selectedTags.value.includes(tagToAdd)) {
+    selectedTags.value.push(tagToAdd);
     inputValue.value = "";
     showDatalist.value = false;
     suggestions.value = [];
@@ -400,7 +457,8 @@ const sendData = async () => {
 
     const processedRecommendations: RecommendationItem[] = [];
 
-    // Adapting to backend response format
+    // This part should already handle different cover URLs correctly since `item.coverUrl` is the standard name
+    // from your backend's recommendation endpoint.
     if (Array.isArray(result)) {
       processedRecommendations.push(...result);
     } else {
@@ -429,28 +487,27 @@ const sendData = async () => {
 
 const acceptRecommendations = () => {
   console.log("Recomendaciones aceptadas:", recommendations.value);
-  // Aquí iría la lógica para enviar las recomendaciones aceptadas al backend
   router.push('/studio/profile/');
 };
 </script>
 
 <style scoped>
-/* Estilo para la barra de desplazamiento horizontal */
-.custom-scrollbar::-webkit-scrollbar {
-  height: 8px; /* Ancho de la barra de desplazamiento horizontal */
+/* Estilo para la barra de desplazamiento vertical principal */
+.custom-main-scroll::-webkit-scrollbar {
+  width: 8px; /* Ancho de la barra de desplazamiento vertical */
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
+.custom-main-scroll::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2); /* Fondo de la pista */
   border-radius: 10px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
+.custom-main-scroll::-webkit-scrollbar-thumb {
   background: rgba(120, 120, 120, 0.5); /* Color del "pulgar" de la barra */
   border-radius: 10px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+.custom-main-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(150, 150, 150, 0.7); /* Color al pasar el ratón */
 }
 
