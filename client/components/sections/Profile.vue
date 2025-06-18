@@ -30,28 +30,28 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router"; // Import useRoute to get URL parameters
+import { useRoute } from "vue-router";
+import { useFetch } from '#app'; // Ensure useFetch is imported from '#app'
 
 interface UserProfile {
   username: string;
   email: string;
-  profilePictureUrl?: string; // Made optional as it might be null/undefined from backend
+  profilePictureUrl?: string;
   bio: string;
 }
 
 const userProfile = ref<UserProfile>({
   username: "Cargando...",
   email: "cargando@ejemplo.com",
-  profilePictureUrl: "/resources/studio/previewProfile.webp", // Default local path
+  profilePictureUrl: "/resources/studio/previewProfile.webp",
   bio: "Cargando biografía del estudio...",
 });
 
 const isLoading = ref(true);
 
 const config = useRuntimeConfig();
-const route = useRoute(); // Access the current route to get parameters
+const route = useRoute();
 
-// La idea es que agarre la url de arriba el nombre y busque el usuario y todo como si fuera linkedin
 const defaultProfile: UserProfile = {
   username: "Usuario Anónimo",
   email: "anonimo@example.com",
@@ -60,63 +60,74 @@ const defaultProfile: UserProfile = {
 };
 
 onMounted(async () => {
-  // Get the username from the URL path.
-  // Assuming your route is something like /studio/profile/[username]
   const usernameFromUrl = route.params.username as string;
 
-  // Use the username from the URL if available, otherwise fallback to local storage or a default
   const targetUsername =
     usernameFromUrl ||
-    JSON.parse(localStorage.getItem("user") || "{}").username ||
-    "anonymous";
+    JSON.parse(localStorage.getItem("user") || "{}").username; // Removed || "anonymous" here, handle anonymous explicitly
 
-  if (!targetUsername || targetUsername === "anonymous") {
-    // If no specific username is found, display the default profile immediately
+  if (!targetUsername) { // If no specific username is found, display the default profile immediately
     userProfile.value = defaultProfile;
     isLoading.value = false;
     console.warn(
-      "No specific username found in URL or local storage. Displaying default profile."
+      "No se encontró un nombre de usuario en la URL o en el almacenamiento local. Mostrando perfil predeterminado."
     );
-    return;
+    return; // Exit the function if no targetUsername
   }
 
   try {
-    // Use useFetch for Nuxt 3, it's designed for data fetching
     const { data, error } = await useFetch<UserProfile>(
       `${config.public.backend}/api/users/by-username/${targetUsername}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          // Consider adding authorization header if profile data is protected
+          // 'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
+        // Nuxt's useFetch has a built-in `pick` option for optimizing payload
+        // pick: ['username', 'email', 'profilePictureUrl', 'bio']
       }
     );
 
     if (error.value) {
-      // Handle fetch errors, e.g., network issues, 404, etc.
       console.error("Error al cargar el perfil del usuario:", error.value);
-      throw new Error(
-        error.value.message || "No se pudo obtener el perfil del usuario."
-      );
+      // Fallback to default profile on *any* error (e.g., 404, network)
+      userProfile.value = defaultProfile;
+      return; // Exit the function after handling error
+    }
+
+    if(data.value.bio === null) {
+      // If bio is null, set it to a default message
+      data.value.bio = "Este usuario no ha proporcionado una biografía.";
+    }
+
+    // Check if data.value is defined before accessing its properties
+    if (!data.value) {
+      console.warn("La respuesta del servidor no contiene datos de perfil. Mostrando perfil predeterminado.");
+      userProfile.value = defaultProfile;
+      return; // Exit the function if no data is returned
     }
 
     if (data.value) {
+      // Correctly assign the fetched data
       userProfile.value = {
         ...data.value,
-        // Ensure a fallback for profilePictureUrl if backend doesn't provide it
         profilePictureUrl:
           data.value.profilePictureUrl ||
-          "/resources/studio/previewProfile.webp",
+          "/resources/studio/previewProfile.webp", // Fallback for profile picture
       };
     } else {
-      // No data returned, even without an explicit error. This might mean user not found.
-      throw new Error("No se encontró el perfil del usuario.");
+      // If data.value is null/undefined but no direct error, still fallback
+      console.warn("La respuesta del servidor no contiene datos de perfil. Mostrando perfil predeterminado.");
+      userProfile.value = defaultProfile;
     }
 
-    userProfile.value = response.data.value as UserProfile;
   } catch (err) {
-    console.error("No se pudo cargar el perfil del usuario:", err);
-    userProfile.value = defaultProfile; // Fallback to default profile on error
+    // This catch block will primarily handle errors from `useFetch` itself,
+    // though `error.value` typically catches most HTTP errors.
+    console.error("Excepción inesperada al cargar el perfil:", err);
+    userProfile.value = defaultProfile;
   } finally {
     isLoading.value = false; // Always set loading to false after attempt
   }
