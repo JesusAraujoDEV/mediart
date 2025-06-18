@@ -7,6 +7,7 @@ const config = {
   db_url: process.env.POSTGRES_DB_URL,
   apiKey: process.env.API_KEY,
   jwtSecret: process.env.JWT_SECRET,
+  clientUrl: process.env.CLIENT_URL,
 
   // PostgreSQL Configuration
   postgres: {
