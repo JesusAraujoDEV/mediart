@@ -487,7 +487,7 @@ const sendData = async () => {
 
 const acceptRecommendations = () => {
   console.log("Recomendaciones aceptadas:", recommendations.value);
-  router.push('/studio/profile/');
+  router.push('/profile/');
 };
 </script>
 
