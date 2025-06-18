@@ -6,14 +6,14 @@
       <img
         id="logoNavbar"
         class="icon"
-        src="~/assets/mediart/mediartLogo.webp"
+        src="/mediart/mediartLogo.webp"
         alt="Logo"
       />
     </NuxtLink>
     <NuxtLink :to="`/profile/${actualUser ? actualUser : 'anonymous'}`">
       <img
         class="icon rounded-full"
-        src="~/assets/resources/studio/previewProfile.webp"
+        src="/resources/studio/previewProfile.webp"
         alt="Profile Preview"
       />
     </NuxtLink>

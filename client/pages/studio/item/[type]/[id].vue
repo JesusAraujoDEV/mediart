@@ -22,7 +22,7 @@
 
       <div v-else-if="itemDetails">
         <img
-          :src="itemDetails.thumbnail_url || itemDetails.image_url || '/_nuxt/assets/resources/studio/placeholder-image.webp'"
+          :src="itemDetails.thumbnail_url || itemDetails.image_url || '/resources/studio/placeholder-image.webp'"
           alt="Item Thumbnail"
           :class="{
             'rounded-lg': route.params.type === 'song' || route.params.type === 'album',

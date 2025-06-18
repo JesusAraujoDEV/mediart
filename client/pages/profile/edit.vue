@@ -145,14 +145,14 @@ interface UserProfile {
 const userProfile = ref<UserProfile>({
   username: "",
   email: "",
-  profilePictureUrl: "/_nuxt/assets/resources/studio/previewProfile.webp",
+  profilePictureUrl: "/resources/studio/previewProfile.webp",
   bio: "",
 });
 
 const editableUserProfile = ref<UserProfile>({
   username: "",
   email: "",
-  profilePictureUrl: "/_nuxt/assets/resources/studio/previewProfile.webp",
+  profilePictureUrl: "/resources/studio/previewProfile.webp",
   bio: "",
 });
 
@@ -169,7 +169,7 @@ const router = useRouter();
 const defaultProfile: UserProfile = {
   username: "Usuario Anónimo",
   email: "anonimo@example.com",
-  profilePictureUrl: "/_nuxt/assets/resources/studio/previewProfile.webp",
+  profilePictureUrl: "/resources/studio/previewProfile.webp",
   bio: "Este es un perfil predeterminado. Crea o edita tu perfil.",
 };
 
@@ -224,7 +224,7 @@ const fetchUserProfile = async () => {
         ...data.value,
         profilePictureUrl:
           data.value.profilePictureUrl ||
-          "/_nuxt/assets/resources/studio/previewProfile.webp",
+          "/resources/studio/previewProfile.webp",
       };
       editableUserProfile.value = { ...userProfile.value };
     } else {

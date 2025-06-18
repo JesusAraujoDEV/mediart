@@ -7,7 +7,7 @@
       class="size-36 animate-pulse"
       :src="
         userProfile.profilePictureUrl ||
-        '/_nuxt/assets/resources/studio/previewProfile.webp'
+        '/resources/studio/previewProfile.webp'
       "
       alt="Cargando perfil..."
     />

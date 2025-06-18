@@ -16,7 +16,7 @@
     />
     <link
       rel="shortcut icon"
-      href="~/assets/mediart/favicon.ico"
+      href="/favicon.ico"
       type="image/x-icon"
     />
   </head>
@@ -32,7 +32,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&family=Sail&display=swap");
 
 #layout {
-  background: url("~/assets/layout/backgroundNeat.webp") no-repeat center center
+  background: url("/layout/backgroundNeat.webp") no-repeat center center
     fixed;
   background-size: cover;
 }
