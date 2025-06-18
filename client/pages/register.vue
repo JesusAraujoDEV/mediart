@@ -90,7 +90,7 @@
         <NuxtLink to="/">
           <img
             class="h-8 cursor-pointer transition-all duration-500 hover:scale-105"
-            src="~/assets/mediart/mediartCompleto.webp"
+            src="/mediart/mediartCompleto.webp"
             alt="Mediart Logo"
           />
         </NuxtLink>

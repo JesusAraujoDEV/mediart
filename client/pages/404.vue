@@ -10,7 +10,7 @@
         <NuxtLink to="/">
           <img
             class="h-8 cursor-pointer"
-            src="~/assets/mediart/mediartCompleto.webp"
+            src="/mediart/mediartCompleto.webp"
             alt="Logo de Mediart"
           />
         </NuxtLink>
