@@ -42,7 +42,7 @@ interface UserProfile {
 const userProfile = ref<UserProfile>({
   username: "Cargando...",
   email: "cargando@ejemplo.com",
-  profilePictureUrl: "/_nuxt/assets/resources/studio/previewProfile.webp", // Default local path
+  profilePictureUrl: "/resources/studio/previewProfile.webp", // Default local path
   bio: "Cargando biografía del estudio...",
 });
 
@@ -55,7 +55,7 @@ const route = useRoute(); // Access the current route to get parameters
 const defaultProfile: UserProfile = {
   username: "Usuario Anónimo",
   email: "anonimo@example.com",
-  profilePictureUrl: "/_nuxt/assets/resources/studio/previewProfile.webp",
+  profilePictureUrl: "/resources/studio/previewProfile.webp",
   bio: "Este es un perfil de estudio predeterminado. Crea o edita tu perfil para mostrar tu trabajo.",
 };
 
@@ -106,7 +106,7 @@ onMounted(async () => {
         // Ensure a fallback for profilePictureUrl if backend doesn't provide it
         profilePictureUrl:
           data.value.profilePictureUrl ||
-          "/_nuxt/assets/resources/studio/previewProfile.webp",
+          "/resources/studio/previewProfile.webp",
       };
     } else {
       // No data returned, even without an explicit error. This might mean user not found.
