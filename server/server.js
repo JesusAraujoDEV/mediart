@@ -1,7 +1,7 @@
 require('dotenv').config(); // Importar dotenv al inicio
 const express = require('express');
 const routerApi = require('./routes');
-const config = require('./config/config');
+const {config} = require('./config/config');
 
 const { logErrors, errorHandler, ormErrorHandler, boomErrorHandler} = require('./middlewares/error_handler');
 const app = express();

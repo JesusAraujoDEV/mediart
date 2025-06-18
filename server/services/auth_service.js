@@ -47,7 +47,7 @@ class AuthService{
         };
 
         const token = jwt.sign(payload, config.jwtSecret, {expiresIn: '15min'}); 
-        const link = `http://myfrontend.com/recovey?token=${token}`;
+        const link = `${config.clientUrl}recovey?token=${token}`;
 
         await service.update(user.id, {recoveryToken: token});
 
