@@ -180,7 +180,7 @@
                   Lanzamiento: {{ new Date(item.releaseDate).getFullYear() }}
                 </p>
                 <p v-if="item.avgRating" class="text-xs text-gray-400 mb-2">
-                  Valoración: {{ item.avgRating.toFixed(1) }} / 10
+                  Valoración: {{ parseFloat(item.avgRating as string).toFixed(1) }} / 10
                 </p>
                 <a
                   v-if="item.externalUrl"

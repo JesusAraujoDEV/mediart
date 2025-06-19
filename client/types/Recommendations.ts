@@ -6,15 +6,18 @@ interface SearchSuggestion {
 }
 
 interface RecommendationItem {
-  type: string;
-  externalSource: string;
+  id: number;
   title: string;
-  description?: string | null;
-  coverUrl?: string | null;
-  releaseDate?: string | null;
+  type: string;
+  description: string | null;
+  coverUrl: string | null;
+  releaseDate: string | null;
   externalId: string;
-  avgRating?: number | null;
-  externalUrl?: string | null;
+  externalSource: string;
+  avgRating: string | null | number;
+  externalUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type { SearchSuggestion, RecommendationItem };
