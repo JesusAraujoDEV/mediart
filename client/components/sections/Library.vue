@@ -1,5 +1,5 @@
 <template>
-  <section class="w-2/3 glassEffect overflow-scroll h-full rounded-lg max-md:min-h-screen max-md:w-full p-6 custom-main-scroll">
+  <section class="w-2/3 glassEffect overflow-y-scroll h-full rounded-lg max-md:min-h-screen max-md:w-full p-6 custom-main-scroll">
     <h2 class="text-4xl font-extrabold mb-8 text-center">Mis Playlists Guardadas</h2>
 
     <div v-if="loadingPlaylists" class="flex flex-col items-center text-center">
@@ -58,9 +58,20 @@
         <div class="mt-auto flex justify-end">
           <button
             @click="viewPlaylistDetails(playlist)"
-            class="bg-purple-600 cursor-pointer hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-colors text-lg"
+            :disabled="loadingPlaylistDetails.has(playlist.id.toString())"
+            class="bg-purple-600 cursor-pointer hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-colors text-lg flex items-center justify-center"
+            :class="{ 'opacity-75 cursor-not-allowed': loadingPlaylistDetails.has(playlist.id.toString()) }"
           >
-            Ver más
+            <template v-if="loadingPlaylistDetails.has(playlist.id.toString())">
+              <svg class="animate-spin h-5 w-5 text-white mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Cargando...
+            </template>
+            <template v-else>
+              Ver más
+            </template>
           </button>
         </div>
       </div>
@@ -85,6 +96,8 @@ const config = useRuntimeConfig();
 const savedPlaylists = ref<Playlist[]>([]);
 const loadingPlaylists = ref(false);
 const errorPlaylists = ref<string | null>(null);
+const loadingPlaylistDetails = ref<Set<string>>(new Set()); // Set para IDs de playlists en carga, ahora espera strings
+
 
 // Función para formatear la fecha de guardado
 const formatDate = (dateString: string) => {
@@ -162,8 +175,18 @@ const getUsername = async (userId: number): Promise<string> => {
 };
 
 const viewPlaylistDetails = async (playlist: Playlist) => {
-  const username = await getUsername(playlist.ownerUserId);
-  router.push(`/profile/${username}/playlists/${playlist.id}`);
+  // Convierte el ID numérico a string antes de añadirlo al Set
+  loadingPlaylistDetails.value.add(playlist.id.toString());
+  try {
+    const username = await getUsername(playlist.ownerUserId);
+    router.push(`/profile/${username}/playlists/${playlist.id}`);
+  } catch (error) {
+    console.error("Error al ver detalles de la playlist:", error);
+    // Puedes añadir una notificación de error aquí si lo deseas
+  } finally {
+    // Convierte el ID numérico a string antes de eliminarlo del Set
+    loadingPlaylistDetails.value.delete(playlist.id.toString());
+  }
 };
 
 onMounted(() => {

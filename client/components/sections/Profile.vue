@@ -32,13 +32,7 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useFetch } from '#app'; // Ensure useFetch is imported from '#app'
-
-interface UserProfile {
-  username: string;
-  email: string;
-  profilePictureUrl?: string;
-  bio: string;
-}
+import type { UserProfile } from "~/types/User";
 
 const userProfile = ref<UserProfile>({
   username: "Cargando...",
@@ -94,7 +88,7 @@ onMounted(async () => {
       return; // Exit the function after handling error
     }
 
-    if(data.value.bio === null) {
+    if(data?.value?.bio === null) {
       // If bio is null, set it to a default message
       data.value.bio = "Este usuario no ha proporcionado una biografía.";
     }

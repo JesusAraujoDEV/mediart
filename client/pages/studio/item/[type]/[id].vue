@@ -68,46 +68,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
+import type { Song, Artist, Album, ItemDetails } from "~/types/Item";
 
 definePageMeta({
   layout: "custom",
   middleware: ["auth-middleware"],
 });
-
-// Define interfaces for each item type to ensure type safety
-interface Song {
-  id: string;
-  title: string;
-  artist_name: string;
-  album_name: string;
-  release_date: string;
-  thumbnail_url: string;
-  external_url: string;
-}
-
-interface Artist {
-  id: string;
-  name: string;
-  genres: string[];
-  followers: number;
-  image_url: string;
-  external_url: string;
-}
-
-interface Album {
-  id: string;
-  name: string;
-  artist_name: string;
-  release_date: string;
-  thumbnail_url: string;
-  external_url: string;
-}
-
-// Union type for possible item details
-type ItemDetails = Song | Artist | Album | null;
 
 const route = useRoute();
 const config = useRuntimeConfig();
