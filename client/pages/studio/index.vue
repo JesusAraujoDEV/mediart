@@ -1,9 +1,13 @@
 <template>
   <title>MediartStudio - Inicio</title>
-  <main class="w-screen h-dvh flex flex-col items-center justify-between p-4 text-white">
+  <main
+    class="w-screen h-dvh flex flex-col items-center justify-between p-4 text-white"
+  >
     <NavigationStudio />
 
-    <div class="flex items-center justify-center w-full mb-4 px-4 max-w-4xl max-md:mt-20">
+    <div
+      class="flex items-center justify-center w-full mb-4 px-4 max-w-4xl max-md:mt-20"
+    >
       <div class="relative flex-grow mr-3">
         <div
           class="glassEffect shadow-xl rounded-full p-3 flex flex-wrap items-center gap-2 min-h-[48px] border border-gray-700"
@@ -15,7 +19,10 @@
             class="bg-white/20 rounded-full px-3 py-1 text-sm flex items-center gap-1 backdrop-blur-sm"
           >
             {{ tag }}
-            <button @click.stop="removeTag(tag)" class="text-xs cursor-pointer text-white/80 hover:text-white ml-1">
+            <button
+              @click.stop="removeTag(tag)"
+              class="text-xs cursor-pointer text-white/80 hover:text-white ml-1"
+            >
               ✕
             </button>
           </span>
@@ -50,7 +57,10 @@
                 :alt="suggestion.title"
                 class="w-8 h-8 object-cover rounded mr-3 flex-shrink-0"
               />
-              <div v-else class="w-8 h-8 bg-gray-600 rounded mr-3 flex-shrink-0 flex items-center justify-center text-gray-400 text-xs">
+              <div
+                v-else
+                class="w-8 h-8 bg-gray-600 rounded mr-3 flex-shrink-0 flex items-center justify-center text-gray-400 text-xs"
+              >
                 ?
               </div>
               <span>{{ suggestion.title }}</span>
@@ -88,27 +98,55 @@
       </button>
     </div>
 
-    <div class="flex-grow flex w-full max-w-6xl items-center justify-center p-4">
+    <div
+      class="flex-grow flex w-full max-w-6xl items-center justify-center p-4"
+    >
       <div
         class="w-full h-full glassEffect max-h-[80vh] bg-gray-800/50 rounded-lg p-6 flex flex-col items-center justify-center text-white text-xl shadow-2xl overflow-y-auto relative custom-main-scroll"
       >
-        <div v-if="recommendationsLoading" class="flex flex-col items-center text-center">
+        <div
+          v-if="recommendationsLoading"
+          class="flex flex-col items-center text-center"
+        >
           <p class="text-xl mb-4 text-gray-300">Generando recomendaciones...</p>
-          <svg class="animate-spin h-10 w-10 text-purple-400 mt-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <svg
+            class="animate-spin h-10 w-10 text-purple-400 mt-4"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
           </svg>
         </div>
-        <div v-else-if="recommendationsError" class="text-red-400 text-center flex flex-col items-center">
+        <div
+          v-else-if="recommendationsError"
+          class="text-red-400 text-center flex flex-col items-center"
+        >
           <p class="text-xl mb-4">{{ recommendationsError }}</p>
-          <button @click="sendData" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg">
+          <button
+            @click="sendData"
+            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg"
+          >
             Reintentar
           </button>
         </div>
-        <div v-else-if="recommendations.length > 0" class="w-full h-full flex flex-col items-center">
-          <h3 class="text-3xl font-extrabold mb-6">
-            Tus Recomendaciones
-          </h3>
+        <div
+          v-else-if="recommendations.length > 0"
+          class="w-full h-full flex flex-col items-center"
+        >
+          <h3 class="text-3xl font-extrabold mb-6">Tus Recomendaciones</h3>
           <div class="grid grid-cols-1 gap-6 w-full flex-grow pb-4 px-2">
             <div
               v-for="item in recommendations"
@@ -121,14 +159,22 @@
                 :alt="item.title || 'Cover'"
                 class="w-32 h-32 object-cover rounded-lg mb-4 sm:mb-0 sm:mr-4 flex-shrink-0 shadow-md border border-gray-500"
               />
-              <div v-else class="w-32 h-32 bg-gray-600 rounded-lg mb-4 sm:mb-0 sm:mr-4 flex-shrink-0 flex items-center justify-center text-gray-400 text-sm border border-gray-500">
+              <div
+                v-else
+                class="w-32 h-32 bg-gray-600 rounded-lg mb-4 sm:mb-0 sm:mr-4 flex-shrink-0 flex items-center justify-center text-gray-400 text-sm border border-gray-500"
+              >
                 Sin portada
               </div>
 
-              <div class="flex-grow flex flex-col justify-center items-center sm:items-start">
-                <h4 class="font-bold text-lg text-white mb-1">{{ item.title }}</h4>
+              <div
+                class="flex-grow flex flex-col justify-center items-center sm:items-start"
+              >
+                <h4 class="font-bold text-lg text-white mb-1">
+                  {{ item.title }}
+                </h4>
                 <p class="text-sm text-gray-300 capitalize mb-1">
-                  {{ item.type }} <span class="opacity-70">({{ item.externalSource }})</span>
+                  {{ item.type }}
+                  <span class="opacity-70">({{ item.externalSource }})</span>
                 </p>
                 <p v-if="item.releaseDate" class="text-xs text-gray-400 mb-1">
                   Lanzamiento: {{ new Date(item.releaseDate).getFullYear() }}
@@ -149,17 +195,126 @@
             </div>
           </div>
           <div class="flex justify-center gap-6 mt-8 pb-4">
-            <button @click="acceptRecommendations" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg">
+            <button
+              @click="showPlaylistModal = true"
+              class="bg-green-600 cursor-pointer hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg"
+            >
               Aceptar
             </button>
-            <button @click="sendData" class="bg-red-600 hover:bg-red-700 cursor-pointer text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg">
+            <button
+              @click="sendData"
+              class="bg-red-600 hover:bg-red-700 cursor-pointer text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg"
+            >
               Regenerar
             </button>
           </div>
         </div>
-        <div v-else class="text-center text-gray-400 text-2xl flex flex-col items-center">
+        <div
+          v-else
+          class="text-center text-gray-400 text-2xl flex flex-col items-center"
+        >
           <p class="mb-4">¡Descubre algo nuevo!</p>
-          <p class="text-lg">Usa la barra de búsqueda y el botón de enviar para generar recomendaciones.</p>
+          <p class="text-lg">
+            Usa la barra de búsqueda y el botón de enviar para generar
+            recomendaciones.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div
+      v-if="showPlaylistModal"
+      class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+    >
+      <div
+        class="glassEffect bg-gray-800/90 rounded-lg p-8 w-full max-w-md shadow-2xl border border-gray-700"
+      >
+        <h3 class="text-2xl font-bold text-white mb-6 text-center">
+          Crear Nueva Playlist
+        </h3>
+
+        <div class="mb-4">
+          <label
+            for="playlistName"
+            class="block text-gray-300 text-sm font-bold mb-2"
+            >Nombre de la Playlist:</label
+          >
+          <input
+            type="text"
+            id="playlistName"
+            v-model="newPlaylist.name"
+            class="shadow appearance-none border border-gray-600 rounded w-full py-3 px-4 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-700/70"
+            placeholder="Ej. Mis Favoritos de Junio"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label
+            for="playlistDescription"
+            class="block text-gray-300 text-sm font-bold mb-2"
+            >Descripción:</label
+          >
+          <textarea
+            id="playlistDescription"
+            v-model="newPlaylist.description"
+            rows="3"
+            class="shadow appearance-none border border-gray-600 rounded w-full py-3 px-4 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-700/70 resize-none"
+            placeholder="Una breve descripción de tu playlist..."
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-between mb-8">
+          <span class="text-gray-300 font-bold text-sm">Colaborativa:</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              v-model="newPlaylist.isCollaborative"
+              class="sr-only peer"
+            />
+            <div
+              class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"
+            ></div>
+            <span class="ml-3 text-sm font-medium text-gray-300">{{
+              newPlaylist.isCollaborative ? "Sí" : "No"
+            }}</span>
+          </label>
+        </div>
+
+        <div class="flex justify-end gap-4">
+          <button
+            @click="showPlaylistModal = false"
+            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            @click="createPlaylist"
+            :disabled="!newPlaylist.name.trim() || playlistSaving"
+            class="bg-purple-600 cursor-pointer hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          >
+            <svg
+              v-if="playlistSaving"
+              class="animate-spin h-5 w-5 text-white mr-2"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <span v-else>Crear Playlist</span>
+          </button>
         </div>
       </div>
     </div>
@@ -175,18 +330,16 @@ definePageMeta({
 import { ref, computed, watch, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
+import type {
+  SearchSuggestion,
+  RecommendationItem,
+} from "~/types/Recommendations";
+import Swal from "sweetalert2";
 
 const router = useRouter();
 
 const inputValue = ref("");
 const selectedTags = ref<string[]>([]);
-
-interface SearchSuggestion {
-  title: string;
-  coverUrl?: string | null;
-  type?: string;
-  externalId?: string;
-}
 
 const suggestions = ref<SearchSuggestion[]>([]);
 const showDatalist = ref(false);
@@ -195,24 +348,22 @@ const config = useRuntimeConfig();
 
 const selectedCategory = ref<string>("mix");
 
-interface RecommendationItem {
-  type: string;
-  externalSource: string;
-  title: string;
-  description?: string | null;
-  coverUrl?: string | null;
-  releaseDate?: string | null;
-  externalId: string;
-  avgRating?: number | null;
-  externalUrl?: string | null;
-}
-
 const recommendations = ref<RecommendationItem[]>([]);
 const recommendationsLoading = ref(false);
 const recommendationsError = ref<string | null>(null);
 
 let debounceTimeout: NodeJS.Timeout | null = null;
 let abortController: AbortController | null = null;
+
+// --- Nuevas variables para el modal de la playlist ---
+const showPlaylistModal = ref(false);
+const newPlaylist = ref({
+  name: "",
+  description: "",
+  isCollaborative: false,
+});
+const playlistSaving = ref(false); // <--- Nueva variable de estado para el spinner
+// ----------------------------------------------------
 
 const fetchSuggestions = async (query: string) => {
   if (abortController) {
@@ -234,15 +385,15 @@ const fetchSuggestions = async (query: string) => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         signal: signal,
       }
     );
 
     if (signal.aborted) {
-        console.log("Suggestion fetch was aborted, not processing response.");
-        return;
+      console.log("Suggestion fetch was aborted, not processing response.");
+      return;
     }
 
     if (!response.ok) {
@@ -254,75 +405,88 @@ const fetchSuggestions = async (query: string) => {
 
     // --- Lógica adaptada para obtener la portada según el tipo de contenido ---
     if (data.movies) {
-      newSuggestions.push(...data.movies.map((item: any) => ({
-        title: item.title,
-        coverUrl: item.poster_url || null, // Movies use poster_url
-        type: 'movie',
-        externalId: item.id?.toString()
-      })));
+      newSuggestions.push(
+        ...data.movies.map((item: any) => ({
+          title: item.title,
+          coverUrl: item.poster_url || null, // Movies use poster_url
+          type: "movie",
+          externalId: item.id?.toString(),
+        }))
+      );
     }
     if (data.tvshows) {
-      newSuggestions.push(...data.tvshows.map((item: any) => ({
-        title: item.title || item.name, // TV shows might use title or name
-        coverUrl: item.poster_url || null, // TV shows use poster_url
-        type: 'tvshow',
-        externalId: item.id?.toString()
-      })));
+      newSuggestions.push(
+        ...data.tvshows.map((item: any) => ({
+          title: item.title || item.name, // TV shows might use title or name
+          coverUrl: item.poster_url || null, // TV shows use poster_url
+          type: "tvshow",
+          externalId: item.id?.toString(),
+        }))
+      );
     }
     if (data.songs) {
-      newSuggestions.push(...data.songs.map((item: any) => ({
-        title: item.title,
-        coverUrl: item.thumbnail_url || null, // Songs use thumbnail_url
-        type: 'song',
-        externalId: item.id?.toString()
-      })));
+      newSuggestions.push(
+        ...data.songs.map((item: any) => ({
+          title: item.title,
+          coverUrl: item.thumbnail_url || null, // Songs use thumbnail_url
+          type: "song",
+          externalId: item.id?.toString(),
+        }))
+      );
     }
     if (data.artists) {
-      newSuggestions.push(...data.artists.map((item: any) => ({
-        title: item.name,
-        coverUrl: item.image_url || null, // Artists use image_url
-        type: 'artist',
-        externalId: item.id?.toString()
-      })));
+      newSuggestions.push(
+        ...data.artists.map((item: any) => ({
+          title: item.name,
+          coverUrl: item.image_url || null, // Artists use image_url
+          type: "artist",
+          externalId: item.id?.toString(),
+        }))
+      );
     }
     if (data.albums) {
-      newSuggestions.push(...data.albums.map((item: any) => ({
-        title: item.name,
-        coverUrl: item.thumbnail_url || null, // Albums use thumbnail_url
-        type: 'album',
-        externalId: item.id?.toString()
-      })));
+      newSuggestions.push(
+        ...data.albums.map((item: any) => ({
+          title: item.name,
+          coverUrl: item.thumbnail_url || null, // Albums use thumbnail_url
+          type: "album",
+          externalId: item.id?.toString(),
+        }))
+      );
     }
     if (data.books) {
-      newSuggestions.push(...data.books.map((item: any) => ({
-        title: item.title || item.name,
-        coverUrl: item.thumbnail_url || null, // Books use thumbnail_url
-        type: 'book',
-        externalId: item.id?.toString()
-      })));
+      newSuggestions.push(
+        ...data.books.map((item: any) => ({
+          title: item.title || item.name,
+          coverUrl: item.thumbnail_url || null, // Books use thumbnail_url
+          type: "book",
+          externalId: item.id?.toString(),
+        }))
+      );
     }
     if (data.videogames) {
-      newSuggestions.push(...data.videogames.map((item: any) => ({
-        title: item.name, // Videogames usually use 'name'
-        coverUrl: item.cover_url || null, // Videogames use cover_url
-        type: 'videogame',
-        externalId: item.id?.toString()
-      })));
+      newSuggestions.push(
+        ...data.videogames.map((item: any) => ({
+          title: item.name, // Videogames usually use 'name'
+          coverUrl: item.cover_url || null, // Videogames use cover_url
+          type: "videogame",
+          externalId: item.id?.toString(),
+        }))
+      );
     }
     // --- Fin de la lógica adaptada ---
 
     // Filter out duplicates based on title and ensure selected tags are not suggested
     const uniqueSuggestions = new Map<string, SearchSuggestion>();
-    newSuggestions.forEach(s => {
-        if (!selectedTags.value.includes(s.title)) {
-            uniqueSuggestions.set(s.title, s);
-        }
+    newSuggestions.forEach((s) => {
+      if (!selectedTags.value.includes(s.title)) {
+        uniqueSuggestions.set(s.title, s);
+      }
     });
     suggestions.value = Array.from(uniqueSuggestions.values());
-
   } catch (error: any) {
-    if (error.name === 'AbortError') {
-      console.log('Suggestion fetch request was aborted.');
+    if (error.name === "AbortError") {
+      console.log("Suggestion fetch request was aborted.");
     } else {
       console.error("Error al obtener sugerencias:", error);
       suggestions.value = [];
@@ -354,8 +518,8 @@ watch(inputValue, (newValue) => {
   if (newValue.length < 2) {
     suggestions.value = [];
     if (abortController) {
-        abortController.abort();
-        abortController = null;
+      abortController.abort();
+      abortController = null;
     }
     return;
   }
@@ -384,7 +548,9 @@ const addTagFromInput = () => {
     (s) => s.title.toLowerCase() === inputValue.value.toLowerCase()
   );
 
-  const tagToAdd = exactSuggestionObject ? exactSuggestionObject.title : inputValue.value;
+  const tagToAdd = exactSuggestionObject
+    ? exactSuggestionObject.title
+    : inputValue.value;
 
   if (tagToAdd && !selectedTags.value.includes(tagToAdd)) {
     selectedTags.value.push(tagToAdd);
@@ -423,7 +589,8 @@ onUnmounted(() => {
 const sendData = async () => {
   if (selectedTags.value.length === 0) {
     console.warn("No hay tags seleccionados para enviar.");
-    recommendationsError.value = "Por favor, selecciona al menos un tag para generar recomendaciones.";
+    recommendationsError.value =
+      "Por favor, selecciona al menos un tag para generar recomendaciones.";
     recommendations.value = [];
     return;
   }
@@ -440,7 +607,7 @@ const sendData = async () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({
         itemName: tagsQueryParam,
@@ -449,7 +616,9 @@ const sendData = async () => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || `Error HTTP! Estado: ${response.status}`);
+      throw new Error(
+        errorData.message || `Error HTTP! Estado: ${response.status}`
+      );
     }
 
     const result = await response.json();
@@ -468,26 +637,93 @@ const sendData = async () => {
       if (result.movies) processedRecommendations.push(...result.movies);
       if (result.tvshows) processedRecommendations.push(...result.tvshows);
       if (result.books) processedRecommendations.push(...result.books);
-      if (result.videogames) processedRecommendations.push(...result.videogames);
+      if (result.videogames)
+        processedRecommendations.push(...result.videogames);
     }
 
     recommendations.value = processedRecommendations;
     if (processedRecommendations.length === 0) {
-      recommendationsError.value = "No se encontraron recomendaciones para tu búsqueda.";
+      recommendationsError.value =
+        "No se encontraron recomendaciones para tu búsqueda.";
     }
-
   } catch (error: any) {
     console.error("Error al enviar datos o recibir recomendaciones:", error);
-    recommendationsError.value = error.message || "Ocurrió un error inesperado al obtener recomendaciones.";
+    recommendationsError.value =
+      error.message ||
+      "Ocurrió un error inesperado al obtener recomendaciones.";
     recommendations.value = [];
   } finally {
     recommendationsLoading.value = false;
   }
 };
 
-const acceptRecommendations = () => {
-  console.log("Recomendaciones aceptadas:", recommendations.value);
-  router.push('/profile/');
+const createPlaylist = async () => {
+  if (recommendations.value.length === 0) {
+    console.warn("No hay recomendaciones para crear una playlist.");
+    Swal.fire({
+      title: "Error!",
+      text: "No hay recomendaciones disponibles para crear una playlist.",
+      icon: "error",
+    });
+    showPlaylistModal.value = false;
+    return;
+  }
+
+  if (!newPlaylist.value.name.trim()) {
+    Swal.fire({
+      title: "Error!",
+      text: "El nombre de la playlist es obligatorio.",
+      icon: "error",
+    });
+    return;
+  }
+
+  playlistSaving.value = true; // <--- Activa el spinner
+
+  try {
+    const response = await fetch(`${config.public.backend}/api/playlists`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        name: newPlaylist.value.name,
+        description: newPlaylist.value.description,
+        isCollaborative: newPlaylist.value.isCollaborative,
+        items: recommendations.value, // Todas las recomendaciones tal cual
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message ||
+          `Error al crear la playlist: ${response.statusText}`
+      );
+    }
+
+    const result = await response.json();
+    console.log("Playlist creada exitosamente:", result);
+    Swal.fire({
+      title: "Playlist Creada!",
+      text: "Tu playlist ha sido creada exitosamente.",
+      icon: "success",
+    });
+    showPlaylistModal.value = false; // Cierra el modal
+    router.push(
+      `/profile/${JSON.parse(localStorage.getItem("user") || "{}").username}`
+    ); // Redirige al perfil o a donde sea necesario
+  } catch (error: any) {
+    console.error("Error al aceptar recomendaciones y crear playlist:", error);
+    Swal.fire({
+      title: "Error!",
+      text: "Ocurrió un error al crear la playlist. Inténtalo de nuevo.",
+      icon: "error",
+    });
+  } finally {
+    playlistSaving.value = false; // <--- Desactiva el spinner
+  }
 };
 </script>
 
@@ -512,10 +748,12 @@ const acceptRecommendations = () => {
 }
 
 /* Transición para el datalist */
-.fade-slide-down-enter-active, .fade-slide-down-leave-active {
+.fade-slide-down-enter-active,
+.fade-slide-down-leave-active {
   transition: all 0.3s ease-out;
 }
-.fade-slide-down-enter-from, .fade-slide-down-leave-to {
+.fade-slide-down-enter-from,
+.fade-slide-down-leave-to {
   opacity: 0;
   transform: translateY(-10px);
 }
