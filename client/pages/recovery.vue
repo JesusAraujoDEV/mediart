@@ -107,6 +107,7 @@ const route = useRoute(); // Access route parameters
 const router = useRouter(); // For redirection
 
 // State variables
+const tokenWeb = localStorage.getItem('token');
 const token = ref<string | null>(null);
 const newPassword = ref('');
 const confirmPassword = ref('');
@@ -160,6 +161,7 @@ const resetPassword = async () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${tokenWeb}`, // Include token in the header
       },
       body: JSON.stringify({
         token: token.value,

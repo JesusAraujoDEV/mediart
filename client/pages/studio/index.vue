@@ -73,8 +73,8 @@
           v-model="selectedCategory"
           class="p-2 px-6 rounded-full bg-gray-700 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none"
         >
-          <option value="mix">Mezcla</option>
           <option value="songs">Canciones</option>
+          <option value="mix">Mezcla</option>
           <option value="artists">Artistas</option>
           <option value="albums">Álbumes</option>
           <option value="movies">Películas</option>
@@ -349,7 +349,7 @@ const showDatalist = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
 const config = useRuntimeConfig();
 
-const selectedCategory = ref<string>("mix");
+const selectedCategory = ref<string>("songs");
 
 const recommendations = ref<RecommendationItem[]>([]);
 const recommendationsLoading = ref(false);
