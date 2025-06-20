@@ -154,7 +154,7 @@ const resetPassword = async () => {
   }
 
   try {
-    const changePasswordUrl = `${config.public.backend}/api/v1/auth/change-password`;
+    const changePasswordUrl = `${config.public.backend}/api/auth/change-password`;
 
     const response = await fetch(changePasswordUrl, {
       method: 'POST',
