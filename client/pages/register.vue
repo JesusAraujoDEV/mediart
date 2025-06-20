@@ -4,7 +4,7 @@
     <NuxtPage />
     <main class="w-screen h-dvh flex justify-center items-center">
       <div
-        class="md:w-1/3 max-md:w-5/6 h-fit gap-6 flex flex-col relative items-center justify-center glassEffect p-8 py-16 rounded-lg"
+        class="md:w-1/3 max-md:w-full h-fit gap-6 flex flex-col relative items-center justify-center glassEffect p-8 py-16 rounded-lg"
       >
         <h2 class="text-3xl text-center">Registro de Nueva Cuenta</h2>
         <form
@@ -22,7 +22,7 @@
             <input
               type="email"
               placeholder="tu@email.com"
-              class="w-full p-4 rounded border border-gray-300"
+              class="w-full p-4 rounded border border-gray-300 max-md:text-sm"
               id="Email"
               v-model="email"
               :disabled="loading"
@@ -40,7 +40,7 @@
             <input
               type="text"
               placeholder="tu_usuario"
-              class="w-full p-4 rounded border border-gray-300"
+              class="w-full p-4 rounded border border-gray-300 max-md:text-sm"
               id="Username"
               v-model="username"
               :disabled="loading"
@@ -58,7 +58,7 @@
             <input
               type="password"
               placeholder="••••••••"
-              class="w-full p-4 rounded border border-gray-300"
+              class="w-full p-4 rounded border border-gray-300 max-md:text-sm"
               id="Password"
               v-model="password"
               :disabled="loading"

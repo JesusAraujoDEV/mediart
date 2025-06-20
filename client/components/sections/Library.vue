@@ -48,7 +48,7 @@
               ?
             </div>
             <div class="flex-grow">
-              <p class="font-bold text-sm text-white truncate">{{ item.title }}</p>
+              <p class="font-bold text-sm text-white">{{ item.title }}</p>
               <p class="text-xs text-gray-300 capitalize">{{ item.type }}</p>
             </div>
           </div>

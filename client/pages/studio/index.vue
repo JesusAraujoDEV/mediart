@@ -1,14 +1,14 @@
 <template>
   <title>MediartStudio - Inicio</title>
   <main
-    class="w-screen h-dvh flex flex-col items-center justify-between p-4 text-white"
+    class="w-screen md:h-dvh h-[130dvh] flex flex-col items-center justify-between p-4 text-white"
   >
     <NavigationStudio />
 
     <div
-      class="flex items-center justify-center w-full mb-4 px-4 max-w-4xl max-md:mt-20"
+      class="flex max-md:flex-col gap-4 items-center justify-center w-full mb-4 px-4 max-w-4xl max-md:mt-20"
     >
-      <div class="relative flex-grow mr-3">
+      <div class="relative flex-grow mr-3 max-md:mr-0 max-md:w-full">
         <div
           class="glassEffect shadow-xl rounded-full p-3 flex flex-wrap items-center gap-2 min-h-[48px] border border-gray-700"
           @click="focusInput"
@@ -68,34 +68,37 @@
           </ul>
         </Transition>
       </div>
-      <select
-        v-model="selectedCategory"
-        class="p-2 rounded-full bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none"
-      >
-        <option value="mix">Mezcla</option>
-        <option value="songs">Canciones</option>
-        <option value="artists">Artistas</option>
-        <option value="albums">Álbumes</option>
-        <option value="movies">Películas</option>
-        <option value="tvshows">Series TV</option>
-        <option value="books">Libros</option>
-        <option value="videogames">Videojuegos</option>
-      </select>
-      <button
-        @click="sendData"
-        class="ml-3 p-2 rounded-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg flex items-center justify-center text-white"
-        aria-label="Generar recomendaciones"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="24"
-          height="24"
-          fill="currentColor"
+      <div class="flex items-center justify-center max-md:w-full max-md:max-w-4xl">
+        <select
+          v-model="selectedCategory"
+          class="p-2 px-6 rounded-full bg-gray-700 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none"
         >
-          <path d="M3 20v-6l8-2l-8-2V4l19 8z" />
-        </svg>
-      </button>
+          <option value="mix">Mezcla</option>
+          <option value="songs">Canciones</option>
+          <option value="artists">Artistas</option>
+          <option value="albums">Álbumes</option>
+          <option value="movies">Películas</option>
+          <option value="tvshows">Series TV</option>
+          <option value="books">Libros</option>
+          <option value="videogames">Videojuegos</option>
+        </select>
+        <button
+          @click="sendData"
+          class="ml-3 p-2 rounded-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg flex items-center justify-center text-white"
+          aria-label="Generar recomendaciones"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            fill="currentColor"
+          >
+            <path d="M3 20v-6l8-2l-8-2V4l19 8z" />
+          </svg>
+        </button>
+      </div>
+
     </div>
 
     <div
@@ -194,7 +197,7 @@
               </div>
             </div>
           </div>
-          <div class="flex justify-center gap-6 mt-8 pb-4">
+          <div class="flex max-md:flex-col justify-center gap-6 mt-8 pb-4">
             <button
               @click="showPlaylistModal = true"
               class="bg-green-600 cursor-pointer hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg"

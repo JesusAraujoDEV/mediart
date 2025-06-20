@@ -2,7 +2,7 @@
   <NuxtLayout>
     <main class="w-screen h-dvh flex justify-center items-center">
       <div
-        class="md:w-1/3 max-md:w-5/6 h-fit gap-6 flex flex-col relative items-center justify-center glassEffect p-8 py-16 rounded-lg"
+        class="md:w-1/3 max-md:w-full h-fit gap-6 flex flex-col relative items-center justify-center glassEffect p-8 py-16 rounded-lg"
       >
         <h2 class="text-3xl">Restablecer Contraseña</h2>
 
@@ -34,7 +34,7 @@
             <input
               type="password"
               placeholder="••••••••"
-              class="w-full pl-2 pr-6 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full pl-2 pr-6 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 max-md:text-sm"
               id="newPassword"
               v-model="newPassword"
               :disabled="loading"
@@ -52,7 +52,7 @@
             <input
               type="password"
               placeholder="••••••••"
-              class="w-full pl-2 pr-6 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full pl-2 pr-6 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 max-md:text-sm"
               id="confirmPassword"
               v-model="confirmPassword"
               :disabled="loading"

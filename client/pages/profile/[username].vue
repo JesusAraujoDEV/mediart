@@ -3,7 +3,7 @@
   <NuxtLayout>
     <NuxtPage />
     <main
-      class="w-screen h-fit md:h-dvh flex gap-4 justify-center items-center p-10 max-md:flex-col"
+      class="w-screen h-fit md:h-dvh flex gap-4 justify-center items-center p-10 max-md:my-20 max-md:p-5 max-md:flex-col"
     >
       <NavigationStudio />
       <Profile />

@@ -2,9 +2,9 @@
   <NuxtLayout>
     <main class="w-screen h-dvh flex justify-center items-center">
       <div
-        class="md:w-1/3 max-md:w-5/6 h-fit gap-6 flex flex-col relative items-center justify-center glassEffect p-8 py-16 rounded-lg"
+        class="md:w-1/3 max-md:w-full h-fit gap-6 flex flex-col relative items-center justify-center glassEffect p-8 py-16 rounded-lg"
       >
-        <h2 class="text-3xl">Recuperar Contraseña</h2>
+        <h2 class="text-3xl text-center">Recuperar Contraseña</h2>
 
         <form
           class="flex flex-col w-2/3 h-3/4 max-md:w-5/6 justify-center items-center"
