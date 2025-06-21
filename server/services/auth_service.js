@@ -47,15 +47,15 @@ class AuthService{
         };
 
         const token = jwt.sign(payload, config.jwtSecret, {expiresIn: '15min'}); 
-        const link = `${config.clientUrl}recovey?token=${token}`;
+        const link = `${config.clientUrl}recovery?token=${token}`;
 
         await service.update(user.id, {recoveryToken: token});
 
         const mail = {
-                from: process.env.EMAIL_TESTING,        // Remitente: Tu correo de Gmail
+                from: config.noReplyEmail,        // Remitente: Tu correo de Gmail
                 to: `${user.email}`,  // Destinatario: El otro correo que tienes en .env
                 subject: "Email para recuperar la contraseña ! ✔",
-                html: `<b>Ingresa a este link... => ${link} jeje<b>`
+                html: `<b>Ingresa a este link... => ${link}<b>`
         }
 
         const rta = await this.sendMail(mail);
@@ -74,7 +74,7 @@ class AuthService{
                 recoveryToken: null,
                 password: hash
             });
-            return { message: 'password changed!' }
+            return { message: 'Password changed!' }
         }
         catch{
             throw boom.unauthorized();

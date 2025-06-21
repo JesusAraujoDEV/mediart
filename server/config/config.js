@@ -8,6 +8,8 @@ const config = {
   apiKey: process.env.API_KEY,
   jwtSecret: process.env.JWT_SECRET,
   clientUrl: process.env.CLIENT_URL,
+  noReplyEmail: process.env.NO_REPLY_EMAIL,
+  passwordApp: process.env.PASSWORD_APP,
 
   // PostgreSQL Configuration
   postgres: {

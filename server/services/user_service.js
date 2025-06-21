@@ -106,6 +106,11 @@ class UserService {
             model: models.UserFollow, // Acceso directo a las relaciones de seguimiento recibidas por este usuario
             as: 'receivedFollows',
             foreignKey: 'followed_user_id'
+          },
+          {
+            model: models.Playlist,
+            as: 'collaboratorPlaylists',
+            foreignKey: 'user_id'
           }
         ]
       }

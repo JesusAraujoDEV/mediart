@@ -33,6 +33,11 @@ const UserSchema = {
     allowNull: true,
     type: DataTypes.TEXT
   },
+  recoveryToken: {
+    field: 'recovery_token',
+    allowNull: true,
+    type: DataTypes.STRING
+  },
   createdAt: {
     allowNull: false,
     type: DataTypes.DATE,
@@ -95,6 +100,18 @@ class User extends Model {
     this.hasMany(models.UserFollow, {
         as: 'receivedFollows', // Las relaciones de seguimiento donde este usuario es el seguido
         foreignKey: 'followed_user_id'
+    });
+
+    this.belongsToMany(models.Playlist, { // <-- ¡Ahora es a models.Playlist!
+      as: 'collaboratorPlaylists', // Alias para las playlists en las que este usuario es colaborador
+      through: {
+          model: models.Library, // La tabla intermedia sigue siendo Library
+          scope: { // <-- ¡La magia del filtro!
+              isCollaborator: true
+          }
+      },
+      foreignKey: 'user_id', // Clave foránea en Library que apunta a este User
+      otherKey: 'playlist_id' // Clave foránea en Library que apunta a la Playlist
     });
   }
 

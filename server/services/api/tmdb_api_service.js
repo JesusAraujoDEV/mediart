@@ -18,7 +18,7 @@ class TmdbApiService {
         params: {
           api_key: this.apiKey,
           query: query,
-          language: 'es-ES'
+          language: 'es-MX'
         }
       });
 
