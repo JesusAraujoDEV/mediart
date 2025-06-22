@@ -1,23 +1,17 @@
-// server/db/config.js
 const { config } = require('./../config/config');
-const fs = require('fs'); // Importa el módulo 'fs'
-const path = require('path'); // Importa el módulo 'path'
 
 let sslConfigCli = {};
 if (config.isProd) {
-  const caCertPath = path.join(__dirname, '..', 'ca.crt'); // Ajusta la ruta si ca.crt está en otro lugar
-  // console.log('Path al certificado CA:', caCertPath); // Para depuración
-
-  if (!fs.existsSync(caCertPath)) {
-    console.error('ERROR: CA certificate file not found at:', caCertPath);
-    throw new Error('Database CA certificate file not found for migrations. Cannot connect to PostgreSQL.');
+  const caCertEnv = process.env.POSTGRES_CA_CERT;
+  if (!caCertEnv) {
+    console.error('ERROR: POSTGRES_CA_CERT environment variable is not set for sequelize-cli config!');
+    throw new Error('Database CA certificate not found for migrations. Cannot connect to PostgreSQL.');
   }
-  const caCert = fs.readFileSync(caCertPath, 'utf8');
-
   sslConfigCli = {
+    // Estas son las opciones SSL para el dialectOptions
     require: true,
-    rejectUnauthorized: true,
-    ca: caCert // Ahora lee del archivo
+    rejectUnauthorized: true, // ¡Tal como lo indica Aiven!
+    ca: caCertEnv // El certificado CA completo como string
   };
 }
 
@@ -29,8 +23,5 @@ module.exports = {
     production: {
         url: config.db_url,
         dialect: 'postgres',
-        dialectOptions: { // ¡Asegúrate de que esto esté presente!
-            ssl: sslConfigCli
-        },
     },
 }
