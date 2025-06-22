@@ -179,7 +179,7 @@ const viewPlaylistDetails = async (playlist: Playlist) => {
   loadingPlaylistDetails.value.add(playlist.id.toString());
   try {
     const username = await getUsername(playlist.ownerUserId);
-    router.push(`/profile/${username}/playlists/${playlist.id}`);
+    router.push(`/studio/playlists/${playlist.id}`);
   } catch (error) {
     console.error("Error al ver detalles de la playlist:", error);
     // Puedes añadir una notificación de error aquí si lo deseas
