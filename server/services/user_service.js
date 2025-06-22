@@ -71,9 +71,9 @@ class UserService {
     return { message: 'Playlist unsaved successfully' };
   }
 
-  async find() {
-    const users = await models.User.findAll();
-    return users; // Renombrado 'client' a 'users'
+  async find(options = {}) { // Ahora acepta un objeto de opciones
+    const users = await models.User.findAll(options); // Pasa las opciones a findAll
+    return users;
   }
 
   async findOneByEmail(email) {

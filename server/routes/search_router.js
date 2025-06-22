@@ -24,4 +24,19 @@ router.get(
   }
 );
 
+router.get(
+  '/users',
+  passport.authenticate('jwt', { session: false }),
+  validatorHandler(searchQuerySchema, 'query'),
+  async (req, res, next) => {
+    try {
+      const { q } = req.query;
+      const users = await searchService.searchUsersByUsername(q);
+      res.json(users);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 module.exports = router;

@@ -3,6 +3,8 @@ const TmdbApiService = require('./api/tmdb_api_service');
 const SpotifyApiService = require('./api/spotify_api_service');
 const GoogleBooksApiService = require('./api/googlebooks_api_service');
 const IgdbApiService = require('./api/igdb_api_service');
+const UserService = require('./user_service'); // <-- ¡NUEVA IMPORTACIÓN!
+const { Op } = require('sequelize'); // Para usar operadores como LIKE
 
 class SearchService {
   constructor() {
@@ -10,6 +12,7 @@ class SearchService {
     this.spotifyApiService = new SpotifyApiService();
     this.googleBooksApiService = new GoogleBooksApiService();
     this.igdbApiService = new IgdbApiService();
+    this.userService = new UserService(); 
   }
 
   /**
@@ -117,6 +120,26 @@ class SearchService {
       return [];
     }
   }
+
+  async searchUsersByUsername(query) {
+    try {
+      // Usamos el método find de UserService, pero le pasamos opciones de búsqueda
+      // para filtrar por username que contenga la query.
+      const users = await this.userService.find({
+        where: {
+          username: {
+            [Op.iLike]: `%${query}%` // iLike para búsqueda insensible a mayúsculas/minúsculas
+          }
+        },
+        attributes: { exclude: ['passwordHash', 'recoveryToken'] } // Excluir campos sensibles
+      });
+      return users;
+    } catch (error) {
+      console.error('Error in searchUsersByUsername:', error);
+      throw error; // O return []; si prefieres no propagar el error.
+    }
+  }
+
 }
 
 module.exports = SearchService;
