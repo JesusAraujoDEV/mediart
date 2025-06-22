@@ -130,7 +130,46 @@ class UserService {
   async findOneByUsername(username) {
     const user = await models.User.findOne(
       {
-        where: { username }
+        where: { username },
+        include: [
+          {
+            model: models.Playlist,
+            as: 'ownedPlaylists' // Incluye las playlists que este usuario posee
+          },
+          {
+            model: models.Playlist,
+            as: 'savedPlaylists', // Incluye las playlists que este usuario ha guardado
+            through: { attributes: ['savedAt'] } // Incluye el campo 'savedAt' de la tabla intermedia
+          },
+          {
+            model: models.User,
+            as: 'followersUsers' // Incluye los usuarios que siguen a este usuario
+          },
+          {
+            model: models.User,
+            as: 'followingUsers' // Incluye los usuarios a los que este usuario sigue
+          },
+          {
+            model: models.Library, // Acceso directo a las entradas de la tabla 'library'
+            as: 'libraryEntries',
+            foreignKey: 'user_id'
+          },
+          {
+            model: models.UserFollow, // Acceso directo a las relaciones de seguimiento iniciadas por este usuario
+            as: 'initiatedFollows',
+            foreignKey: 'follower_user_id'
+          },
+          {
+            model: models.UserFollow, // Acceso directo a las relaciones de seguimiento recibidas por este usuario
+            as: 'receivedFollows',
+            foreignKey: 'followed_user_id'
+          },
+          {
+            model: models.Playlist,
+            as: 'collaboratorPlaylists',
+            foreignKey: 'user_id'
+          }
+        ]
       }
     );
     return user;

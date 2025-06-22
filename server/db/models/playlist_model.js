@@ -34,6 +34,11 @@ const PlaylistSchema = {
     type: DataTypes.BOOLEAN,
     field: 'is_collaborative'
   },
+  thumbnailUrl: {
+    allowNull: true,
+    type: DataTypes.STRING,
+    field: 'thumbnail_url'
+  },
   createdAt: {
     allowNull: false,
     type: DataTypes.DATE,
