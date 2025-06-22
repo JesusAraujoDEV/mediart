@@ -4,7 +4,7 @@
   >
     <img
       v-if="isLoading"
-      class="size-36 animate-pulse"
+      class="size-36 animate-pulse rounded-full object-cover"
       :src="
         userProfile.profilePictureUrl ||
         '/resources/studio/previewProfile.webp'
@@ -22,51 +22,195 @@
     <p class="text-center w-2/3">{{ userProfile.bio }}</p>
     <p class="text-center text-sm text-gray-500">{{ userProfile.email }}</p>
 
-    <NuxtLink to="/profile/edit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+    <div v-if="!isOwner">
+      <button
+        v-if="!isFriend"
+        @click="addFriend"
+        :disabled="isFriendActionLoading"
+        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {{ isFriendActionLoading ? 'Agregando...' : 'Agregar amigo' }}
+      </button>
+      <button
+        v-else
+        @click="removeFriend"
+        :disabled="isFriendActionLoading"
+        class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {{ isFriendActionLoading ? 'Eliminando...' : 'Eliminar de amigos' }}
+      </button>
+    </div>
+
+    <NuxtLink v-else to="/profile/edit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
       >Editar Perfil</NuxtLink
     >
+
+    <p v-if="friendActionMessage" :class="{'text-green-400': !friendActionError, 'text-red-400': friendActionError}" class="mt-2 text-sm">
+      {{ friendActionMessage }}
+    </p>
   </section>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { useFetch } from '#app'; // Ensure useFetch is imported from '#app'
-import type { UserProfile } from "~/types/User";
+import { useFetch } from '#app';
+import type { UserProfile } from "~/types/User"; // Assuming you have this type defined
+
+// Interfaces for response from friend-related API calls
+interface FriendActionResponse {
+  message: string;
+  success: boolean;
+  isFriend?: boolean;
+}
 
 const userProfile = ref<UserProfile>({
   username: "Cargando...",
   email: "cargando@ejemplo.com",
   profilePictureUrl: "/resources/studio/previewProfile.webp",
   bio: "Cargando biografía del estudio...",
+  id: -1, // Initialize with a default ID
 });
 
 const isLoading = ref(true);
+const isOwner = ref(false);
+const isFriend = ref(false);
+const isFriendActionLoading = ref(false);
+const friendActionMessage = ref<string | null>(null);
+const friendActionError = ref(false);
 
 const config = useRuntimeConfig();
 const route = useRoute();
 
 const defaultProfile: UserProfile = {
+  id: -1, // Default ID for anonymous/not found
   username: "Usuario Anónimo",
   email: "anonimo@example.com",
   profilePictureUrl: "/resources/studio/previewProfile.webp",
-  bio: "Este es un perfil de estudio predeterminado. Crea o edita tu perfil para mostrar tu trabajo.",
+  bio: "Este es un perfil predeterminado o no encontrado. Crea o edita tu perfil para mostrar tu trabajo.",
 };
+
+// Get current user's ID from localStorage (assuming it's stored after login)
+const getCurrentUserId = (): number | null => {
+  if (typeof localStorage === 'undefined') return null;
+  const user = localStorage.getItem("user");
+  if (user) {
+    try {
+      const parsedUser = JSON.parse(user);
+      return parsedUser.id || null;
+    } catch (e) {
+      console.error("Error parsing user from localStorage:", e);
+      return null;
+    }
+  }
+  return null;
+};
+
+const currentUserId = ref<number | null>(getCurrentUserId());
+
+
+// --- Friend-related functions ---
+
+const checkFriendshipStatus = async () => {
+  if (!currentUserId.value || userProfile.value.id === -1 || userProfile.value.id === undefined) {
+    // Cannot check friendship if current user or target user ID is unknown
+    return;
+  }
+
+  try {
+    const { data, error } = await useFetch<boolean>(
+      `${config.public.backend}/api/users/${currentUserId.value}/friends/${userProfile.value.id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+        },
+      }
+    );
+
+    if (error.value) {
+      console.error("Error al verificar estado de amistad:", error.value);
+      isFriend.value = false; // Assume not friends on error
+      return;
+    }
+
+    // Backend should return true/false directly, or an object with a boolean. Adjust based on your actual backend response.
+    // Assuming backend returns a boolean directly
+    isFriend.value = data.value === true;
+
+  } catch (err) {
+    console.error("Excepción al verificar estado de amistad:", err);
+    isFriend.value = false;
+  }
+};
+
+const sendFriendAction = async (action: 'add' | 'remove') => {
+  if (!currentUserId.value || userProfile.value.id === -1 || userProfile.value.id === undefined) {
+    friendActionError.value = true;
+    friendActionMessage.value = "Error: IDs de usuario no disponibles.";
+    return;
+  }
+
+  isFriendActionLoading.value = true;
+  friendActionMessage.value = null;
+  friendActionError.value = false;
+
+  const endpoint = action === 'add'
+    ? `${config.public.backend}/api/users/${currentUserId.value}/add-friend/${userProfile.value.id}`
+    : `${config.public.backend}/api/users/${currentUserId.value}/remove-friend/${userProfile.value.id}`;
+
+  try {
+    const { data, error } = await useFetch<FriendActionResponse>(endpoint, {
+      method: "POST", // Or PUT/DELETE based on your API design
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    if (error.value) {
+      console.error(`Error al ${action === 'add' ? 'agregar' : 'eliminar'} amigo:`, error.value);
+      friendActionError.value = true;
+      friendActionMessage.value = error.value.data?.message || `Error al ${action === 'add' ? 'agregar' : 'eliminar'} amigo.`;
+      isFriend.value = action === 'remove'; // Revert state on error
+      return;
+    }
+
+    if (data.value && data.value.success) {
+      isFriend.value = action === 'add'; // Update friend status based on action
+      friendActionMessage.value = data.value.message || `Amigo ${action === 'add' ? 'agregado' : 'eliminado'} correctamente.`;
+    } else {
+      friendActionError.value = true;
+      friendActionMessage.value = data.value?.message || `Operación fallida al ${action === 'add' ? 'agregar' : 'eliminar'} amigo.`;
+    }
+
+  } catch (err) {
+    console.error(`Excepción al ${action === 'add' ? 'agregar' : 'eliminar'} amigo:`, err);
+    friendActionError.value = true;
+    friendActionMessage.value = `Error inesperado al ${action === 'add' ? 'agregar' : 'eliminar'} amigo.`;
+    isFriend.value = action === 'remove'; // Revert state on error
+  } finally {
+    isFriendActionLoading.value = false;
+  }
+};
+
+const addFriend = () => sendFriendAction('add');
+const removeFriend = () => sendFriendAction('remove');
+
+
+// --- Main Profile Load Logic ---
 
 onMounted(async () => {
   const usernameFromUrl = route.params.username as string;
 
-  const targetUsername =
-    usernameFromUrl ||
-    JSON.parse(localStorage.getItem("user") || "{}").username; // Removed || "anonymous" here, handle anonymous explicitly
+  const targetUsername = usernameFromUrl || JSON.parse(localStorage.getItem("user") || "{}").username;
 
-  if (!targetUsername) { // If no specific username is found, display the default profile immediately
+  if (!targetUsername) {
     userProfile.value = defaultProfile;
     isLoading.value = false;
-    console.warn(
-      "No se encontró un nombre de usuario en la URL o en el almacenamiento local. Mostrando perfil predeterminado."
-    );
-    return; // Exit the function if no targetUsername
+    console.warn("No se encontró un nombre de usuario en la URL o en el almacenamiento local. Mostrando perfil predeterminado.");
+    return;
   }
 
   try {
@@ -83,44 +227,46 @@ onMounted(async () => {
 
     if (error.value) {
       console.error("Error al cargar el perfil del usuario:", error.value);
-      // Fallback to default profile on *any* error (e.g., 404, network)
       userProfile.value = defaultProfile;
-      return; // Exit the function after handling error
-    }
-
-    if(data?.value?.bio === null) {
-      // If bio is null, set it to a default message
-      data.value.bio = "Este usuario no ha proporcionado una biografía.";
-    }
-
-    // Check if data.value is defined before accessing its properties
-    if (!data.value) {
-      console.warn("La respuesta del servidor no contiene datos de perfil. Mostrando perfil predeterminado.");
-      userProfile.value = defaultProfile;
-      return; // Exit the function if no data is returned
+      isLoading.value = false; // Ensure loading is false on error
+      return;
     }
 
     if (data.value) {
-      // Correctly assign the fetched data
       userProfile.value = {
         ...data.value,
         profilePictureUrl:
-          data.value.profilePictureUrl ||
-          "/resources/studio/previewProfile.webp", // Fallback for profile picture
+          data.value.profilePictureUrl || "/resources/studio/previewProfile.webp",
+        bio: data.value.bio || "Este usuario no ha proporcionado una biografía.",
       };
+
+      // Check if the current user is the owner of this profile
+      isOwner.value = currentUserId.value === userProfile.value.id;
+
+      // If not the owner, check friendship status
+      if (!isOwner.value) {
+        await checkFriendshipStatus();
+      }
+
     } else {
-      // If data.value is null/undefined but no direct error, still fallback
       console.warn("La respuesta del servidor no contiene datos de perfil. Mostrando perfil predeterminado.");
       userProfile.value = defaultProfile;
     }
 
   } catch (err) {
-    // This catch block will primarily handle errors from `useFetch` itself,
-    // though `error.value` typically catches most HTTP errors.
     console.error("Excepción inesperada al cargar el perfil:", err);
     userProfile.value = defaultProfile;
   } finally {
-    isLoading.value = false; // Always set loading to false after attempt
+    isLoading.value = false;
   }
 });
 </script>
+
+<style scoped>
+/* Estilos para el efecto glass, etc., si no están en un archivo global */
+.glassEffect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+</style>
