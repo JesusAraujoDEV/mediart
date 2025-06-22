@@ -61,10 +61,11 @@
       <div class="glassEffect bg-gray-800/50 rounded-lg p-6 shadow-xl flex-grow overflow-y-auto custom-scroll">
         <h2 class="text-2xl font-bold mb-5 text-gray-200">Contenido de la Playlist ({{ playlist.items?.length || 0 }})</h2>
         <div v-if="playlist.items && playlist.items.length > 0" class="grid grid-cols-1 gap-4">
-          <div
+          <NuxtLink
             v-for="item in playlist.items"
             :key="item.id"
-            class="bg-gray-700/60 rounded-lg p-3 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 cursor-pointer border border-gray-600"
+            :to="`/studio/item/${item.id}`"
+            class="block bg-gray-700/60 rounded-lg p-3 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white"
           >
             <img
               :src="item.coverUrl || '/resources/item-placeholder.webp'"
@@ -85,17 +86,14 @@
               <p v-if="item.avgRating !== null && item.avgRating !== undefined" class="text-xs text-gray-400 mb-2">
                 Valoración: {{ parseFloat(item.avgRating.toString()).toFixed(1) }} / 10
               </p>
-              <a
+              <span
                 v-if="item.externalUrl"
-                :href="item.externalUrl"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-blue-400 hover:underline text-sm font-semibold"
+                class="text-blue-400 text-sm font-semibold mt-1"
               >
                 Ver más en {{ item.externalSource }}
-              </a>
+              </span>
             </div>
-          </div>
+          </NuxtLink>
         </div>
         <div v-else class="text-center text-gray-400 text-lg py-10">
           <p>Esta playlist no tiene elementos aún.</p>
@@ -125,7 +123,7 @@ interface PlaylistItem {
   releaseDate?: string | null;
   externalId: string;
   externalSource: string;
-  avgRating?: number | string | null; // Changed to accept string as per your data
+  avgRating?: number | string | null;
   externalUrl?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -149,7 +147,7 @@ interface Playlist {
   items?: PlaylistItem[];
   savedByUsers?: PlaylistOwner[];
   collaborators?: PlaylistOwner[];
-  coverUrl?: string; // Add a coverUrl for the playlist itself if applicable, or handle it with a placeholder
+  coverUrl?: string;
 }
 
 const playlist = ref<Playlist>({
@@ -186,8 +184,7 @@ const fetchPlaylist = async () => {
   isLoading.value = true;
   errorMessage.value = null;
 
-  // *** THE FIX IS HERE ***
-  const playlistId = route.params.id; // Access 'id' from route.params
+  const playlistId = route.params.id;
 
   if (!playlistId) {
     errorMessage.value = "ID de playlist no proporcionado.";
@@ -209,7 +206,6 @@ const fetchPlaylist = async () => {
 
     if (error.value) {
       console.error("Error al obtener la playlist:", error.value);
-      // More specific error message if available from backend
       throw new Error(error.value.data?.message || error.value.message || "No se pudo cargar la playlist.");
     }
 
