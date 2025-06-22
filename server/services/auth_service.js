@@ -5,7 +5,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const { config } = require('../config/config');
-
+const fs = require('fs');
+const path = require('path');
 const service = new UserService();
 
 class AuthService{
@@ -38,28 +39,42 @@ class AuthService{
 
     async sendRecovery(email){
         const user = await service.findOneByEmail(email);
+
         if(!user){
-            throw boom.unauthorized();
+            console.warn(`Intento de recuperación de contraseña para correo no existente: ${email}`);
+            return { message: 'Si el correo electrónico está registrado, recibirás un enlace para restablecer tu contraseña.' };
         }
+
 
         const payload = {
             sub: user.id
         };
 
-        const token = jwt.sign(payload, config.jwtSecret, {expiresIn: '15min'}); 
+        const token = jwt.sign(payload, config.jwtSecret, {expiresIn: '15min'});
         const link = `${config.clientUrl}recovery?token=${token}`;
 
         await service.update(user.id, {recoveryToken: token});
 
+        const emailTemplatePath = path.join(__dirname, '..', 'templates', 'emails', 'recovery_email.html');
+        let emailHtml = fs.readFileSync(emailTemplatePath, 'utf8');
+
+        emailHtml = emailHtml.replace('{{recoveryLink}}', link);
+        emailHtml = emailHtml.replace('{{currentYear}}', new Date().getFullYear().toString());
+
         const mail = {
-                from: config.noReplyEmail,        // Remitente: Tu correo de Gmail
-                to: `${user.email}`,  // Destinatario: El otro correo que tienes en .env
-                subject: "Email para recuperar la contraseña ! ✔",
-                html: `<b>Ingresa a este link... => ${link}<b>`
+                from: config.noReplyEmail,
+                to: `${user.email}`,
+                subject: "Recupera tu contraseña de Mediart",
+                html: emailHtml
         }
 
-        const rta = await this.sendMail(mail);
-        return rta;
+        try {
+            await this.sendMail(mail);
+            return { message: 'Si el correo electrónico está registrado, recibirás un enlace para restablecer tu contraseña.' };
+        } catch (error) {
+            console.error('Error al enviar correo de recuperación:', error);
+            throw boom.internal('Ocurrió un error al intentar enviar el correo de recuperación. Inténtalo de nuevo más tarde.');
+        }
     }
 
     async changePassword(token, newPassword){
@@ -72,7 +87,7 @@ class AuthService{
             const hash = await bcrypt.hash(newPassword, 10);
             await service.update(user.id, {
                 recoveryToken: null,
-                password: hash
+                passwordHash: hash
             });
             return { message: 'Password changed!' }
         }
@@ -84,12 +99,12 @@ class AuthService{
     async sendMail(infoMail){
         const transporter = nodemailer.createTransport(
             {
-            host: "smtp.gmail.com", 
-            secure: true,           
-            port: 465,              
+            host: "smtp.gmail.com",
+            secure: true,
+            port: 465,
             auth: {
-                user: process.env.EMAIL_TESTING,
-                pass: process.env.PASSWORD_APP
+                user: config.noReplyEmail,      // <-- ¡Cambio aquí!
+                pass: config.emailAppPassword   // <-- ¡Cambio aquí!
             }
             }
         );

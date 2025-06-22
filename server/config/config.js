@@ -9,7 +9,7 @@ const config = {
   jwtSecret: process.env.JWT_SECRET,
   clientUrl: process.env.CLIENT_URL,
   noReplyEmail: process.env.NO_REPLY_EMAIL,
-  passwordApp: process.env.PASSWORD_APP,
+  emailAppPassword: process.env.EMAIL_APP_PASSWORD,
 
   // PostgreSQL Configuration
   postgres: {
