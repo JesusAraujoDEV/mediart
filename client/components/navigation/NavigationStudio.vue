@@ -23,12 +23,28 @@
     <NuxtLink class="flex items-center cursor-pointer" :to="`/studio/search`">
       <Icon name="material-symbols:search" size="2em" />
     </NuxtLink>
+    <div @click="logout" class="flex items-center cursor-pointer">
+      <Icon name="material-symbols:logout" size="2em" />
+    </div>
   </nav>
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
+
 const userString = localStorage.getItem("user");
 const actualUser = userString ? JSON.parse(userString).username : null;
+
+const router = useRouter();
+
+const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  console.log("Token and user removed from localStorage.");
+
+  router.push('/');
+  console.log("Redirecting to homepage.");
+};
 </script>
 
 <style scoped>

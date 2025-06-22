@@ -14,7 +14,7 @@
             v-model="searchQuery"
             @input="debouncedSearchUsers" type="text"
             placeholder="Buscar por nombre de usuario..."
-            class="flex-grow p-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            class="flex-grow p-3 w-full rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           />
           <button
             @click="searchUsers" :disabled="isSearching"
