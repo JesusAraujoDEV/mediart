@@ -1,6 +1,10 @@
 const boom = require('@hapi/boom');
 const { models } = require('../libs/sequelize');
 const ItemService = require('./item_service');
+const fs = require('fs');
+const path = require('path');
+const { PLAYLIST_PICTURES_DIR } = require('./../utils/multer_config');
+
 
 class PlaylistService {
 
@@ -178,15 +182,38 @@ class PlaylistService {
   }
 
   async update(id, changes) {
-    const playlist = await this.findOne(id);
+    const playlist = await this.findOne(id); // Obtener la playlist para tener la URL actual
+
+    // Si se está actualizando la imagen de portada (thumbnailUrl)
+    // y la playlist ya tenía una imagen de portada anterior, eliminarla.
+    // changes.thumbnailUrl !== undefined: Significa que el frontend envió el campo, ya sea con una nueva URL o null/vacío.
+    if (changes.thumbnailUrl !== undefined && playlist.thumbnailUrl) {
+      const oldPicturePath = path.join(PLAYLIST_PICTURES_DIR, path.basename(playlist.thumbnailUrl));
+      if (fs.existsSync(oldPicturePath)) {
+        fs.unlink(oldPicturePath, (err) => {
+          if (err) console.error('Error deleting old playlist cover image:', err);
+          else console.log(`Deleted old playlist cover image: ${oldPicturePath}`);
+        });
+      }
+    }
+
     const rta = await playlist.update(changes);
     return rta;
   }
 
   async delete(id) {
     const playlist = await this.findOne(id);
+    if (playlist.thumbnailUrl) {
+      const picturePath = path.join(PLAYLIST_PICTURES_DIR, path.basename(playlist.thumbnailUrl));
+      if (fs.existsSync(picturePath)) {
+        fs.unlink(picturePath, (err) => {
+          if (err) console.error('Error deleting playlist cover image on delete:', err);
+          else console.log(`Deleted playlist cover image: ${picturePath} on playlist delete.`);
+        });
+      }
+    }
     await playlist.destroy();
-    return { id };
+    return { id, message: 'Playlist deleted successfully' };
   }
 
   async addItemsToPlaylist(playlist, itemsData) {

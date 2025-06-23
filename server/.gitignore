@@ -220,4 +220,16 @@ mysql_data
 
 ca.crt
 
+# Ignorar todos los archivos dentro de la carpeta profile_pictures
+uploads/profile_pictures/*
+
+# Pero no ignores la carpeta misma (permite que se añada al repositorio)
+!uploads/profile_pictures/.gitkeep
+
+# Ignorar todos los archivos dentro de la carpeta playlist_pictures
+uploads/playlist_pictures/*
+
+# Pero no ignores la carpeta misma
+!uploads/playlist_pictures/.gitkeep
+
 # End of https://www.toptal.com/developers/gitignore/api/node,windows,linux,macos

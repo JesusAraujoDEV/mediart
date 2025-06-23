@@ -12,36 +12,24 @@ class SearchService {
     this.spotifyApiService = new SpotifyApiService();
     this.googleBooksApiService = new GoogleBooksApiService();
     this.igdbApiService = new IgdbApiService();
-    this.userService = new UserService(); 
+    this.userService = new UserService();
   }
 
-  /**
-   * Realiza una búsqueda en todas las APIs configuradas para diferentes tipos de contenido.
-   * Utilizado principalmente para la búsqueda inicial del "item base".
-   * @param {string} query La cadena de búsqueda.
-   * @returns {Promise<Object>} Un objeto con arrays de movies, tvshows, songs, books, videogames, artists, albums.
-   */
-  async searchAll(query, type = '') {
+  async searchAll(query) {
     const [tmdbResult, spotifyResult, googleBooksResult, igdbResult] = await Promise.allSettled([
-      this.tmdbApiService.search(query), // Debería devolver { movies: [], tvshows: [], genres: [] } si los obtuviste
-      this.spotifyApiService.search(query), // Debería devolver { songs: [], artists: [], albums: [] }
+      this.tmdbApiService.search(query),
+      this.spotifyApiService.search(query),
       this.googleBooksApiService.search(query),
       this.igdbApiService.search(query)
     ]);
 
-    // Procesar los resultados de Promise.allSettled
     const movies = tmdbResult.status === 'fulfilled' ? tmdbResult.value.movies : [];
     const tvshows = tmdbResult.status === 'fulfilled' ? tmdbResult.value.tvshows : [];
-    // Nota: Si TmdbApiService.search() también devuelve géneros, deberías manejarlos aquí
-    // const tmdbGenres = tmdbResult.status === 'fulfilled' ? tmdbResult.value.genres : [];
-
-
     const songs = spotifyResult.status === 'fulfilled' ? spotifyResult.value.songs : [];
     const artists = spotifyResult.status === 'fulfilled' ? spotifyResult.value.artists : [];
     const albums = spotifyResult.status === 'fulfilled' ? spotifyResult.value.albums : [];
-
-    const books = googleBooksResult.status === 'fulfilled' ? googleBooksResult.value : []; // Google Books api puede devolver directamente un array
-    const videogames = igdbResult.status === 'fulfilled' ? igdbResult.value : []; // IGDB api puede devolver directamente un array
+    const books = googleBooksResult.status === 'fulfilled' ? googleBooksResult.value : [];
+    const videogames = igdbResult.status === 'fulfilled' ? igdbResult.value : [];
 
     return {
       movies,

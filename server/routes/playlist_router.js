@@ -12,6 +12,7 @@ const {
 const passport = require('passport');
 const boom = require('@hapi/boom');
 const { addCollaboratorSchema, addCollaboratorsSchema } = require('../schemas/collaborator_schema');
+const { uploadPlaylistPicture } = require('./../utils/multer_config');
 
 const router = express.Router();
 const service = new PlaylistService();
@@ -41,6 +42,7 @@ router.get('/:id',
 
 router.post('/',
   passport.authenticate('jwt', { session: false }),
+  uploadPlaylistPicture.single('thumbnail'),
   validatorHandler(createPlaylistSchema, 'body'),
   async (req, res, next) => {
     try {
@@ -49,7 +51,13 @@ router.post('/',
         ...body,
         ownerUserId: req.user.sub
       };
-      console.log(bodyWithUserId);
+
+      if (req.file) {
+        bodyWithUserId.thumbnailUrl = `/uploads/playlist_pictures/${req.file.filename}`;
+      } else {
+        delete bodyWithUserId.thumbnailUrl;
+      }
+      
       const newPlaylist = await service.create(bodyWithUserId);
       res.status(201).json(newPlaylist);
     } catch (error) {
@@ -61,17 +69,29 @@ router.post('/',
 router.patch('/:id',
   passport.authenticate('jwt', { session: false }),
   validatorHandler(getPlaylistSchema, 'params'),
+  uploadPlaylistPicture.single('thumbnail'),
   validatorHandler(updatePlaylistSchema, 'body'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
       const body = req.body;
-      const userId = req.user.sub; // Obtener el ID del usuario autenticado
+      const userId = req.user.sub;
 
       const playlist = await service.findOne(id);
       // Verificar si el usuario autenticado es el dueño de la playlist
       if (playlist.ownerUserId !== userId) {
         throw boom.forbidden('You are not the owner of this playlist.');
+      }
+
+      // Lógica para manejar la imagen de portada
+      if (req.file) {
+        // Si se subió un nuevo archivo, usar su ruta
+        body.thumbnailUrl = `/uploads/playlist_pictures/${req.file.filename}`;
+      } else if (body.thumbnailUrl === '') {
+        // Si el frontend envía thumbnailUrl como cadena vacía, significa que se quiere eliminar la imagen
+        body.thumbnailUrl = null;
+      } else {
+        delete body.thumbnailUrl;
       }
 
       const updatedPlaylist = await service.update(id, body);

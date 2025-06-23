@@ -125,7 +125,6 @@ class UserService {
           {
             model: models.Playlist,
             as: 'collaboratorPlaylists',
-            foreignKey: 'user_id'
           }
         ]
       }
@@ -161,38 +160,14 @@ class UserService {
   async findOne(id) {
     const user = await models.User.findByPk(id, {
       include: [
-        {
-          model: models.Playlist,
-          as: 'ownedPlaylists' // Incluye las playlists que este usuario posee
-        },
-        {
-          model: models.Playlist,
-          as: 'savedPlaylists', // Incluye las playlists que este usuario ha guardado
-          through: { attributes: ['savedAt'] }
-        },
-        {
-          model: models.User,
-          as: 'followersUsers' // Incluye los usuarios que siguen a este usuario
-        },
-        {
-          model: models.User,
-          as: 'followingUsers' // Incluye los usuarios a los que este usuario sigue
-        },
-        {
-          model: models.Library, // Acceso directo a las entradas de la tabla 'library'
-          as: 'libraryEntries',
-          foreignKey: 'user_id'
-        },
-        {
-          model: models.UserFollow, // Acceso directo a las relaciones de seguimiento iniciadas por este usuario
-          as: 'initiatedFollows',
-          foreignKey: 'follower_user_id'
-        },
-        {
-          model: models.UserFollow, // Acceso directo a las relaciones de seguimiento recibidas por este usuario
-          as: 'receivedFollows',
-          foreignKey: 'followed_user_id'
-        }
+        { model: models.Playlist, as: 'ownedPlaylists' },
+        { model: models.Playlist, as: 'savedPlaylists', through: { attributes: ['savedAt'] } },
+        { model: models.User, as: 'followersUsers' },
+        { model: models.User, as: 'followingUsers' },
+        { model: models.Library, as: 'libraryEntries' },
+        { model: models.UserFollow, as: 'initiatedFollows' },
+        { model: models.UserFollow, as: 'receivedFollows' },
+        { model: models.Playlist, as: 'collaboratorPlaylists' }
       ]
     });
     if (!user) {
@@ -297,12 +272,30 @@ class UserService {
 
   async update(id, changes) {
     const user = await this.findOne(id);
+
+    if (changes.profilePictureUrl !== undefined && user.profilePictureUrl) {
+      const oldPicturePath = path.join(PROFILE_PICTURES_DIR, path.basename(user.profilePictureUrl));
+      if (fs.existsSync(oldPicturePath)) {
+        fs.unlink(oldPicturePath, (err) => {
+          if (err) console.error('Error deleting old profile picture:', err);
+        });
+      }
+    }
+
     const rta = await user.update(changes);
     return rta;
   }
 
   async delete(id) {
     const user = await this.findOne(id);
+    if (user.profilePictureUrl) {
+      const picturePath = path.join(PROFILE_PICTURES_DIR, path.basename(user.profilePictureUrl));
+      if (fs.existsSync(picturePath)) {
+        fs.unlink(picturePath, (err) => {
+          if (err) console.error('Error deleting profile picture on user delete:', err);
+        });
+      }
+    }
     await user.destroy();
     return { id };
   }

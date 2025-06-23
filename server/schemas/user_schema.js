@@ -4,7 +4,7 @@ const id = Joi.number().integer();
 const username = Joi.string().min(3).max(20);
 const email = Joi.string().email();
 const passwordHash = Joi.string().min(8);
-const profilePictureUrl = Joi.string().max(255);
+const profilePictureUrl = Joi.string().allow(null, '').max(255);
 const bio = Joi.string().max(600);
 
 

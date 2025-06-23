@@ -4,12 +4,13 @@ const routerApi = require('./routes');
 const {config} = require('./config/config');
 
 const { logErrors, errorHandler, ormErrorHandler, boomErrorHandler} = require('./middlewares/error_handler');
+const path = require('path');
 const app = express();
 const cors = require('cors');
 const port = config.port || 3000;
 
 // Sirve los archivos estáticos desde la carpeta 'uploads'
-app.use('/uploads', express.static('uploads')); // Ahora tus fuentes serán accesibles en /uploads/fonts/nombre_del_archivo.ttf
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 const whitelist = ['http://localhost:3000', config.clientUrl];
