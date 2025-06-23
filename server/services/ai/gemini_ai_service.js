@@ -21,21 +21,28 @@ class GeminiAiService {
    * @returns {Promise<string[]>} Un array de strings con los nombres/títulos recomendados.
    */
   async generateRecommendations(itemType, itemName, itemContext = '') {
-    try {
-      let promptText = `Dame 10 nombres de ${itemType} que sean similares o tengan las "vibras" de "${itemName}"`;
+    if (!this.apiKey) {
+      console.error('Gemini API Key not configured. Gemini AI service will be unavailable.');
+      return [];
+    }
 
-      promptText += `. Por favor, responde únicamente con los nombres de los ${itemType} separados por comas y sin números ni introducciones, solo la lista y sin formato markdown.`; // <-- Añadido "sin formato markdown"
+    try {
+      // *** MODIFICACIÓN DEL PROMPT AQUÍ ***
+      let promptText = `Dame 10 nombres de ${itemType} que sean similares o tengan las "vibras" de "${itemName}"`;
+      if (itemContext) {
+        promptText += ` ${itemContext}`;
+      }
+      promptText += `. Responde ÚNICAMENTE con los nombres de los ${itemType}, separados por comas, sin números, sin introducciones y sin formato markdown. Es CRÍTICO que todos los elementos listados sean estrictamente ${itemType}.`; // <-- Reforzado aquí
 
       const requestBody = {
         contents: [{
           parts: [{
-            text: promptText // El prompt directo aquí
+            text: promptText
           }]
         }],
-        // Opcional: configurar generación para asegurar mejor formato
         generationConfig: {
-            temperature: 0.7, // Ajusta la creatividad
-            maxOutputTokens: 200, // Limita la longitud para solo la lista
+            temperature: 0.7,
+            maxOutputTokens: 200,
             topP: 1,
             topK: 1,
         }
@@ -53,7 +60,7 @@ class GeminiAiService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Gemini API Error Response:', errorData); // Log de la respuesta de error completa
+        console.error('Gemini API Error Response:', errorData);
         throw new Error(errorData.error?.message || `Error en la API de Gemini: ${response.status} ${response.statusText}`);
       }
 
@@ -67,21 +74,19 @@ class GeminiAiService {
       const rawResponseText = data.candidates[0].content.parts[0].text;
       console.log('Gemini raw response:', rawResponseText);
 
-      // Limpia y parsea la respuesta. El LLM debería devolver solo texto, pero lo hacemos robusto.
       const recommendedTitles = rawResponseText
         .split(',')
-        .map(title => title.replace(/(\d+\.\s*|["'*`\-_])/g, '').trim()) // Elimina números, comillas, asteriscos, guiones bajos, etc.
-        .filter(title => title.length > 0 && !title.includes('No puedo')); // Filtra vacíos y respuestas negativas
+        .map(title => title.replace(/(\d+\.\s*|["'*`\-_])/g, '').trim())
+        .filter(title => title.length > 0 && !title.includes('No puedo'));
 
       return recommendedTitles;
 
     } catch (error) {
       console.error('Error generating recommendations with Gemini AI:', error.message);
-      // Para errores de cuota, puedes añadir una lógica específica aquí si quieres
       if (error.message.includes('429 Too Many Requests')) {
         console.warn('Gemini API quota exceeded. Please wait or check your plan.');
       }
-      return [];
+      throw error; // Es importante relanzar el error para que el fallback funcione
     }
   }
 }

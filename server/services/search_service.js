@@ -21,7 +21,7 @@ class SearchService {
    * @param {string} query La cadena de búsqueda.
    * @returns {Promise<Object>} Un objeto con arrays de movies, tvshows, songs, books, videogames, artists, albums.
    */
-  async searchAll(query) {
+  async searchAll(query, type = '') {
     const [tmdbResult, spotifyResult, googleBooksResult, igdbResult] = await Promise.allSettled([
       this.tmdbApiService.search(query), // Debería devolver { movies: [], tvshows: [], genres: [] } si los obtuviste
       this.spotifyApiService.search(query), // Debería devolver { songs: [], artists: [], albums: [] }

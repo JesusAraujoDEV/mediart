@@ -37,6 +37,7 @@ class TmdbApiService {
             poster_url: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
             backdrop_url: item.backdrop_path ? `https://image.tmdb.org/t/p/w1280${item.backdrop_path}` : null,
             vote_average: item.vote_average,
+            popularity: item.popularity, // <-- Añadir popularidad aquí
             external_url: `https://www.themoviedb.org/movie/${item.id}`
           });
         } else if (item.media_type === 'tv') {
@@ -48,10 +49,17 @@ class TmdbApiService {
             poster_url: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
             backdrop_url: item.backdrop_path ? `https://image.tmdb.org/t/p/w1280${item.backdrop_path}` : null,
             vote_average: item.vote_average,
+            popularity: item.popularity, // <-- Añadir popularidad aquí
             external_url: `https://www.themoviedb.org/tv/${item.id}`
           });
         }
       });
+
+      // ¡AQUÍ ESTÁ LA LÓGICA DE ORDENAMIENTO!
+      // Ordenar películas por popularidad de mayor a menor
+      movies.sort((a, b) => b.popularity - a.popularity);
+      // Ordenar series de TV por popularidad de mayor a menor
+      tvshows.sort((a, b) => b.popularity - a.popularity);
 
       return { movies, tvshows };
 

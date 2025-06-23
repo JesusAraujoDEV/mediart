@@ -1,15 +1,18 @@
 // services/recommendation_service.js
 const SearchService = require('./../search_service');
 const GeminiAiService = require('./gemini_ai_service');
+const DeepSeekAiService = require('./deepseek_ai_service'); // <-- ¡NUEVA IMPORTACIÓN!
 
 class RecommendationService {
   constructor() {
     this.searchService = new SearchService();
     this.geminiAiService = new GeminiAiService();
+    this.deepSeekAiService = new DeepSeekAiService(); // <-- ¡NUEVA INSTANCIA!
   }
 
   // Helper function to map item data to the desired schem
   _mapToItemSchema(itemData, itemType, externalSource) {
+    // ... (tu código _mapToItemSchema existente) ...
     let mappedItem = {
       type: itemType,
       externalSource: externalSource,
@@ -76,7 +79,7 @@ class RecommendationService {
           mappedItem.avgRating = itemData.avg_rating || null;
           mappedItem.externalUrl = itemData.external_url || null;
           break;
-  
+
         default:
           console.warn(`Tipo de ítem desconocido para mapeo: ${itemType}`);
           break;
@@ -85,6 +88,28 @@ class RecommendationService {
     Object.keys(mappedItem).forEach(key => mappedItem[key] === undefined && delete mappedItem[key]);
 
     return mappedItem;
+  }
+
+  // --- Función auxiliar para manejar la lógica de fallback ---
+  async _getRecommendedQueries(itemCategory, itemName, itemContext) {
+    let recommendedQueries = [];
+    let usedApi = 'Gemini';
+
+    try {
+      recommendedQueries = await this.geminiAiService.generateRecommendations(itemCategory, itemName, itemContext);
+      console.log('Gemini LLM recommended queries:', recommendedQueries);
+    } catch (geminiError) {
+      console.warn(`Gemini LLM failed for ${itemCategory} recommendation, attempting with DeepSeek. Error:`, geminiError.message);
+      usedApi = 'DeepSeek';
+      try {
+        recommendedQueries = await this.deepSeekAiService.generateRecommendations(itemCategory, itemName, itemContext);
+        console.log('DeepSeek LLM recommended queries:', recommendedQueries);
+      } catch (deepSeekError) {
+        console.error(`DeepSeek LLM also failed for ${itemCategory} recommendation. Error:`, deepSeekError.message);
+        throw deepSeekError; // Lanzar el error si ambos fallan
+      }
+    }
+    return recommendedQueries;
   }
 
 
@@ -100,8 +125,9 @@ class RecommendationService {
         }
       }
 
-      const recommendedQueries = await this.geminiAiService.generateRecommendations('peliculas', itemName, itemContext);
-      console.log('Gemini LLM recommended queries for movies:', recommendedQueries);
+      // Usar la nueva función auxiliar para obtener queries
+      const recommendedQueries = await this._getRecommendedQueries('peliculas', itemName, itemContext);
+      // console.log se mueve dentro de _getRecommendedQueries
 
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
@@ -122,7 +148,7 @@ class RecommendationService {
       }
       return allRecommendedItems;
     } catch (error) {
-      console.error('Error in recommendMovies service using Gemini LLM:', error);
+      console.error('Error in recommendMovies service:', error); // Mensaje más genérico
       return [];
     }
   }
@@ -141,8 +167,8 @@ class RecommendationService {
             }
         }
 
-        const recommendedQueries = await this.geminiAiService.generateRecommendations('canciones', itemName, itemContext);
-        console.log('Gemini LLM recommended queries for songs:', recommendedQueries);
+        const recommendedQueries = await this._getRecommendedQueries('canciones', itemName, itemContext);
+        // console.log se mueve dentro de _getRecommendedQueries
 
         const allRecommendedItems = [];
         const addedExternalIds = new Set();
@@ -163,7 +189,7 @@ class RecommendationService {
         }
         return allRecommendedItems;
     } catch (error) {
-        console.error('Error in recommendSongs service using Gemini LLM:', error);
+        console.error('Error in recommendSongs service:', error); // Mensaje más genérico
         return [];
     }
   }
@@ -180,8 +206,8 @@ class RecommendationService {
         }
       }
 
-      const recommendedQueries = await this.geminiAiService.generateRecommendations('series de televisión', itemName, itemContext);
-      console.log('Gemini LLM recommended queries for TV Shows:', recommendedQueries);
+      const recommendedQueries = await this._getRecommendedQueries('series de televisión', itemName, itemContext);
+      // console.log se mueve dentro de _getRecommendedQueries
 
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
@@ -202,7 +228,7 @@ class RecommendationService {
       }
       return allRecommendedItems;
     } catch (error) {
-      console.error('Error in recommendTvShows service using Gemini LLM:', error);
+      console.error('Error in recommendTvShows service:', error); // Mensaje más genérico
       return [];
     }
   }
@@ -219,8 +245,8 @@ class RecommendationService {
         itemContext = `del género ${baseBook.genres[0]}`;
       }
 
-      const recommendedQueries = await this.geminiAiService.generateRecommendations('libros', itemName, itemContext);
-      console.log('Gemini LLM recommended queries for Books:', recommendedQueries);
+      const recommendedQueries = await this._getRecommendedQueries('libros', itemName, itemContext);
+      // console.log se mueve dentro de _getRecommendedQueries
 
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
@@ -241,7 +267,7 @@ class RecommendationService {
       }
       return allRecommendedItems;
     } catch (error) {
-      console.error('Error in recommendBooks service using Gemini LLM:', error);
+      console.error('Error in recommendBooks service:', error); // Mensaje más genérico
       return [];
     }
   }
@@ -264,8 +290,8 @@ class RecommendationService {
         }
       }
 
-      const recommendedQueries = await this.geminiAiService.generateRecommendations('videojuegos', itemName, itemContext);
-      console.log('Gemini LLM recommended queries for Videogames:', recommendedQueries);
+      const recommendedQueries = await this._getRecommendedQueries('videojuegos', itemName, itemContext);
+      // console.log se mueve dentro de _getRecommendedQueries
 
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
@@ -275,7 +301,7 @@ class RecommendationService {
 
       for (const result of searchResults) {
         if (result.status === 'fulfilled' && result.value.length > 0) {
-          const videogame = result.value[0]; // Tomar el primer resultado de cada query recomendada
+          const videogame = result.value[0];
           if (videogame.id && !addedExternalIds.has(`videogame-${videogame.id}`)) {
             const mappedVideogame = this._mapToItemSchema(videogame, 'videogame', 'IGDB');
             allRecommendedItems.push(mappedVideogame);
@@ -286,7 +312,7 @@ class RecommendationService {
       }
       return allRecommendedItems;
     } catch (error) {
-      console.error('Error in recommendVideogames service using Gemini LLM:', error);
+      console.error('Error in recommendVideogames service:', error); // Mensaje más genérico
       return [];
     }
   }
@@ -298,11 +324,11 @@ class RecommendationService {
 
       let itemContext = '';
       if (baseArtist && baseArtist.genres && baseArtist.genres.length > 0) {
-        itemContext = `del género ${baseArtist.genres[0]}`; // Spotify genres son strings directos
+        itemContext = `del género ${baseArtist.genres[0]}`;
       }
 
-      const recommendedQueries = await this.geminiAiService.generateRecommendations('artistas', itemName, itemContext);
-      console.log('Gemini LLM recommended queries for Artists:', recommendedQueries);
+      const recommendedQueries = await this._getRecommendedQueries('artistas', itemName, itemContext);
+      // console.log se mueve dentro de _getRecommendedQueries
 
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
@@ -323,7 +349,7 @@ class RecommendationService {
       }
       return allRecommendedItems;
     } catch (error) {
-      console.error('Error in recommendArtists service using Gemini LLM:', error);
+      console.error('Error in recommendArtists service:', error); // Mensaje más genérico
       return [];
     }
   }
@@ -340,8 +366,8 @@ class RecommendationService {
           itemContext = `del artista ${baseAlbum.artists[0].name}`;
       }
 
-      const recommendedQueries = await this.geminiAiService.generateRecommendations('álbumes', itemName, itemContext);
-      console.log('Gemini LLM recommended queries for Albums:', recommendedQueries);
+      const recommendedQueries = await this._getRecommendedQueries('álbumes', itemName, itemContext);
+      // console.log se mueve dentro de _getRecommendedQueries
 
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
@@ -362,7 +388,7 @@ class RecommendationService {
       }
       return allRecommendedItems;
     } catch (error) {
-      console.error('Error in recommendAlbums service using Gemini LLM:', error);
+      console.error('Error in recommendAlbums service:', error); // Mensaje más genérico
       return [];
     }
   }
