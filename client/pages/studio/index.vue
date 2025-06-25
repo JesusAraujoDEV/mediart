@@ -8,6 +8,23 @@
     <div
       class="flex max-md:flex-col gap-4 items-center justify-center w-full mb-4 px-4 max-w-4xl max-md:mt-20"
     >
+      <!-- Select de tipo de búsqueda -->
+      <div class="flex items-center justify-center max-md:w-full">
+        <select
+          v-model="searchType"
+          class="p-2 px-6 rounded-full bg-gray-700 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none"
+        >
+          <option value="general">Buscar en todo</option>
+          <option value="song">Buscar canciones</option>
+          <option value="artist">Buscar artistas</option>
+          <option value="album">Buscar álbumes</option>
+          <option value="movie">Buscar películas</option>
+          <option value="tvshow">Buscar series</option>
+          <option value="book">Buscar libros</option>
+          <option value="videogame">Buscar videojuegos</option>
+        </select>
+      </div>
+
       <div class="relative flex-grow mr-3 max-md:mr-0 max-md:w-full">
         <div
           class="glassEffect shadow-xl rounded-full p-3 flex flex-wrap items-center gap-2 min-h-[48px] border border-gray-700"
@@ -73,14 +90,14 @@
           v-model="selectedCategory"
           class="p-2 px-6 rounded-full bg-gray-700 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none"
         >
-          <option value="songs">Canciones</option>
-          <option value="mix">Mezcla</option>
-          <option value="artists">Artistas</option>
-          <option value="albums">Álbumes</option>
-          <option value="movies">Películas</option>
-          <option value="tvshows">Series TV</option>
-          <option value="books">Libros</option>
-          <option value="videogames">Videojuegos</option>
+          <option value="mix">Tipo de lista: Mezcla</option>
+          <option value="songs">Tipo de lista: Canciones</option>
+          <option value="artists">Tipo de lista: Artistas</option>
+          <option value="albums">Tipo de lista: Álbumes</option>
+          <option value="movies">Tipo de lista: Películas</option>
+          <option value="tvshows">Tipo de lista: Series TV</option>
+          <option value="books">Tipo de lista: Libros</option>
+          <option value="videogames">Tipo de lista: Videojuegos</option>
         </select>
         <button
           @click="sendData"
@@ -349,7 +366,7 @@ const showDatalist = ref(false);
 const searchInput = ref<HTMLInputElement | null>(null);
 const config = useRuntimeConfig();
 
-const selectedCategory = ref<string>("songs");
+const selectedCategory = ref<string>("mix");
 
 const recommendations = ref<RecommendationItem[]>([]);
 const recommendationsLoading = ref(false);
@@ -368,7 +385,11 @@ const newPlaylist = ref({
 const playlistSaving = ref(false); // <--- Nueva variable de estado para el spinner
 // ----------------------------------------------------
 
+const searchType = ref<string>("general");
+
 const fetchSuggestions = async (query: string) => {
+  console.log('Fetching suggestions for:', { query, searchType: searchType.value });
+  
   if (abortController) {
     abortController.abort();
     console.log("Previous suggestion request aborted.");
@@ -381,18 +402,18 @@ const fetchSuggestions = async (query: string) => {
     return;
   }
 
+  const url = `${config.public.backend}/api/search?q=${query}&type=${searchType.value}`;
+  console.log('URL de búsqueda:', url);
+
   try {
-    const response = await fetch(
-      `${config.public.backend}/api/search?q=${query}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        signal: signal,
-      }
-    );
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      signal: signal,
+    });
 
     if (signal.aborted) {
       console.log("Suggestion fetch was aborted, not processing response.");
@@ -403,81 +424,211 @@ const fetchSuggestions = async (query: string) => {
       throw new Error(`Error de red: ${response.statusText}`);
     }
     const data = await response.json();
+    console.log('Respuesta completa del backend:', data);
 
     const newSuggestions: SearchSuggestion[] = [];
 
-    // --- Lógica adaptada para obtener la portada según el tipo de contenido ---
-    if (data.movies) {
-      newSuggestions.push(
-        ...data.movies.map((item: any) => ({
-          title: item.title,
-          coverUrl: item.poster_url || null, // Movies use poster_url
-          type: "movie",
-          externalId: item.id?.toString(),
-        }))
-      );
+    // Procesar según el tipo de búsqueda seleccionado
+    switch (searchType.value) {
+      case 'song':
+        console.log('Procesando songs:', data);
+        if (data.songs && Array.isArray(data.songs)) {
+          console.log('Songs encontradas:', data.songs.length);
+          newSuggestions.push(
+            ...data.songs.map((item: any) => ({
+              title: item.title,
+              coverUrl: item.thumbnail_url || null,
+              type: "song",
+              externalId: item.id?.toString(),
+              description: `${item.artist_name} - ${item.album_name}`,
+              externalUrl: item.external_url || null,
+            }))
+          );
+          console.log('Sugerencias procesadas para songs:', newSuggestions.length);
+        } else {
+          console.log('No se encontraron songs en la respuesta o no es un array');
+        }
+        break;
+
+      case 'movie':
+        if (data.movies && Array.isArray(data.movies)) {
+          newSuggestions.push(
+            ...data.movies.map((item: any) => ({
+              title: item.title,
+              coverUrl: item.poster_url || null,
+              type: "movie",
+              externalId: item.id?.toString(),
+              description: item.overview || null,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        break;
+
+      case 'tvshow':
+        if (data.tvshows && Array.isArray(data.tvshows)) {
+          newSuggestions.push(
+            ...data.tvshows.map((item: any) => ({
+              title: item.title || item.name,
+              coverUrl: item.poster_url || null,
+              type: "tvshow",
+              externalId: item.id?.toString(),
+              description: item.overview || null,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        break;
+
+      case 'artist':
+        if (data.artists && Array.isArray(data.artists)) {
+          newSuggestions.push(
+            ...data.artists.map((item: any) => ({
+              title: item.name,
+              coverUrl: item.image_url || null,
+              type: "artist",
+              externalId: item.id?.toString(),
+              description: null,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        break;
+
+      case 'album':
+        if (data.albums && Array.isArray(data.albums)) {
+          newSuggestions.push(
+            ...data.albums.map((item: any) => ({
+              title: item.name,
+              coverUrl: item.thumbnail_url || null,
+              type: "album",
+              externalId: item.id?.toString(),
+              description: item.artist_name || null,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        break;
+
+      case 'book':
+        if (data.books && Array.isArray(data.books)) {
+          newSuggestions.push(
+            ...data.books.map((item: any) => ({
+              title: item.title || item.name,
+              coverUrl: item.thumbnail_url || null,
+              type: "book",
+              externalId: item.id?.toString(),
+              description: item.description || null,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        break;
+
+      case 'videogame':
+        if (data.videogames && Array.isArray(data.videogames)) {
+          newSuggestions.push(
+            ...data.videogames.map((item: any) => ({
+              title: item.name,
+              coverUrl: item.cover_url || null,
+              type: "videogame",
+              externalId: item.id?.toString(),
+              description: item.description || null,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        break;
+
+      case 'general':
+      default:
+        // Para búsqueda general, procesar todos los tipos disponibles
+        if (data.movies) {
+          newSuggestions.push(
+            ...data.movies.map((item: any) => ({
+              title: item.title,
+              coverUrl: item.poster_url || null,
+              type: "movie",
+              externalId: item.id?.toString(),
+              description: item.overview || null,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        if (data.tvshows) {
+          newSuggestions.push(
+            ...data.tvshows.map((item: any) => ({
+              title: item.title || item.name,
+              coverUrl: item.poster_url || null,
+              type: "tvshow",
+              externalId: item.id?.toString(),
+              description: item.overview || null,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        if (data.songs) {
+          newSuggestions.push(
+            ...data.songs.map((item: any) => ({
+              title: item.title,
+              coverUrl: item.thumbnail_url || null,
+              type: "song",
+              externalId: item.id?.toString(),
+              description: `${item.artist_name} - ${item.album_name}`,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        if (data.artists) {
+          newSuggestions.push(
+            ...data.artists.map((item: any) => ({
+              title: item.name,
+              coverUrl: item.image_url || null,
+              type: "artist",
+              externalId: item.id?.toString(),
+              description: null,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        if (data.albums) {
+          newSuggestions.push(
+            ...data.albums.map((item: any) => ({
+              title: item.name,
+              coverUrl: item.thumbnail_url || null,
+              type: "album",
+              externalId: item.id?.toString(),
+              description: item.artist_name || null,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        if (data.books) {
+          newSuggestions.push(
+            ...data.books.map((item: any) => ({
+              title: item.title || item.name,
+              coverUrl: item.thumbnail_url || null,
+              type: "book",
+              externalId: item.id?.toString(),
+              description: item.description || null,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        if (data.videogames) {
+          newSuggestions.push(
+            ...data.videogames.map((item: any) => ({
+              title: item.name,
+              coverUrl: item.cover_url || null,
+              type: "videogame",
+              externalId: item.id?.toString(),
+              description: item.description || null,
+              externalUrl: item.external_url || null,
+            }))
+          );
+        }
+        break;
     }
-    if (data.tvshows) {
-      newSuggestions.push(
-        ...data.tvshows.map((item: any) => ({
-          title: item.title || item.name, // TV shows might use title or name
-          coverUrl: item.poster_url || null, // TV shows use poster_url
-          type: "tvshow",
-          externalId: item.id?.toString(),
-        }))
-      );
-    }
-    if (data.songs) {
-      newSuggestions.push(
-        ...data.songs.map((item: any) => ({
-          title: item.title,
-          coverUrl: item.thumbnail_url || null, // Songs use thumbnail_url
-          type: "song",
-          externalId: item.id?.toString(),
-        }))
-      );
-    }
-    if (data.artists) {
-      newSuggestions.push(
-        ...data.artists.map((item: any) => ({
-          title: item.name,
-          coverUrl: item.image_url || null, // Artists use image_url
-          type: "artist",
-          externalId: item.id?.toString(),
-        }))
-      );
-    }
-    if (data.albums) {
-      newSuggestions.push(
-        ...data.albums.map((item: any) => ({
-          title: item.name,
-          coverUrl: item.thumbnail_url || null, // Albums use thumbnail_url
-          type: "album",
-          externalId: item.id?.toString(),
-        }))
-      );
-    }
-    if (data.books) {
-      newSuggestions.push(
-        ...data.books.map((item: any) => ({
-          title: item.title || item.name,
-          coverUrl: item.thumbnail_url || null, // Books use thumbnail_url
-          type: "book",
-          externalId: item.id?.toString(),
-        }))
-      );
-    }
-    if (data.videogames) {
-      newSuggestions.push(
-        ...data.videogames.map((item: any) => ({
-          title: item.name, // Videogames usually use 'name'
-          coverUrl: item.cover_url || null, // Videogames use cover_url
-          type: "videogame",
-          externalId: item.id?.toString(),
-        }))
-      );
-    }
-    // --- Fin de la lógica adaptada ---
 
     // Filter out duplicates based on title and ensure selected tags are not suggested
     const uniqueSuggestions = new Map<string, SearchSuggestion>();
@@ -487,6 +638,8 @@ const fetchSuggestions = async (query: string) => {
       }
     });
     suggestions.value = Array.from(uniqueSuggestions.values());
+    console.log('Sugerencias finales asignadas:', suggestions.value);
+    console.log('Cantidad de sugerencias:', suggestions.value.length);
   } catch (error: any) {
     if (error.name === "AbortError") {
       console.log("Suggestion fetch request was aborted.");
@@ -500,17 +653,39 @@ const fetchSuggestions = async (query: string) => {
 };
 
 const filteredSuggestions = computed(() => {
+  console.log('filteredSuggestions computed - inputValue:', inputValue.value);
+  console.log('filteredSuggestions computed - suggestions:', suggestions.value);
+  console.log('filteredSuggestions computed - selectedTags:', selectedTags.value);
+  
   if (!inputValue.value && suggestions.value.length === 0) {
+    console.log('filteredSuggestions: No input value and no suggestions');
     return [];
   }
-  const lowerCaseInput = inputValue.value.toLowerCase();
-  return suggestions.value
+  
+  // Si no hay inputValue, mostrar todas las sugerencias
+  if (!inputValue.value.trim()) {
+    const filtered = suggestions.value
+      .filter(s => !selectedTags.value.some(tag => tag.title === s.title))
+      .slice(0, 10);
+    console.log('filteredSuggestions result (no input):', filtered);
+    return filtered;
+  }
+  
+  const lowerCaseInput = inputValue.value.toLowerCase().trim();
+  const filtered = suggestions.value
     .filter(
-      (s) =>
-        s.title.toLowerCase().includes(lowerCaseInput) &&
-        !selectedTags.value.some(tag => tag.title === s.title)
+      (s) => {
+        const titleMatches = s.title.toLowerCase().includes(lowerCaseInput);
+        const descriptionMatches = s.description && s.description.toLowerCase().includes(lowerCaseInput);
+        const notSelected = !selectedTags.value.some(tag => tag.title === s.title);
+        console.log(`Suggestion "${s.title}": titleMatches=${titleMatches}, descriptionMatches=${descriptionMatches}, notSelected=${notSelected}`);
+        return (titleMatches || descriptionMatches) && notSelected;
+      }
     )
     .slice(0, 10);
+  
+  console.log('filteredSuggestions result:', filtered);
+  return filtered;
 });
 
 watch(inputValue, (newValue) => {
@@ -644,12 +819,12 @@ const sendData = async () => {
     const result = await response.json();
     console.log("Recomendaciones recibidas:", result);
 
-    const processedRecommendations: RecommendationItem[] = [];
+    let processedRecommendations: RecommendationItem[] = [];
 
-    // This part should already handle different cover URLs correctly since `item.coverUrl` is the standard name
-    // from your backend's recommendation endpoint.
-    if (Array.isArray(result)) {
-      processedRecommendations.push(...result);
+    if (selectedCategory.value === 'mix' && Array.isArray(result.mix)) {
+      processedRecommendations = result.mix;
+    } else if (Array.isArray(result)) {
+      processedRecommendations = result;
     } else {
       if (result.songs) processedRecommendations.push(...result.songs);
       if (result.artists) processedRecommendations.push(...result.artists);
@@ -700,6 +875,16 @@ const createPlaylist = async () => {
 
   playlistSaving.value = true; // <--- Activa el spinner
 
+  // Obtener la imagen del primer item si existe
+  let thumbnailUrl = null;
+  if (recommendations.value.length > 0) {
+    const first = recommendations.value[0] as any;
+    thumbnailUrl = first.coverUrl || first.thumbnailUrl || first.imageUrl || null;
+  }
+
+  console.log('thumbnailUrl:', thumbnailUrl); 
+  console.log('recommendations.value:', recommendations.value);
+
   try {
     const response = await fetch(`${config.public.backend}/api/playlists`, {
       method: "POST",
@@ -711,7 +896,8 @@ const createPlaylist = async () => {
         name: newPlaylist.value.name,
         description: newPlaylist.value.description,
         isCollaborative: newPlaylist.value.isCollaborative,
-        items: recommendations.value, // Todas las recomendaciones tal cual
+        items: recommendations.value,
+        thumbnailUrl,
       }),
     });
 
@@ -745,6 +931,23 @@ const createPlaylist = async () => {
     playlistSaving.value = false; // <--- Desactiva el spinner
   }
 };
+
+// Agregar watcher para searchType para que se actualice en tiempo real
+watch(searchType, () => {
+  // Limpiar sugerencias actuales
+  suggestions.value = [];
+  showDatalist.value = false;
+  
+  // Si hay texto en el input, hacer nueva búsqueda
+  if (inputValue.value.length >= 2) {
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+    debounceTimeout = setTimeout(() => {
+      fetchSuggestions(inputValue.value);
+    }, 300); // Tiempo más corto para cambio de tipo
+  }
+});
 </script>
 
 <style scoped>

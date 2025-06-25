@@ -22,6 +22,28 @@
     <p class="text-center w-2/3">{{ userProfile.bio }}</p>
     <p class="text-center text-sm text-gray-500">{{ userProfile.email }}</p>
 
+    <!-- Contadores de amigos y seguidores clickeables -->
+    <div class="flex gap-6 my-2">
+      <button
+        class="flex flex-col items-center focus:outline-none hover:text-purple-500 transition-colors"
+        @click="goToFollowing"
+        :disabled="isLoading"
+        style="background: none; border: none; cursor: pointer;"
+      >
+        <span class="text-lg font-bold">{{ userProfile.followingUsers?.length || 0 }}</span>
+        <span class="text-xs text-gray-400">Amigos</span>
+      </button>
+      <button
+        class="flex flex-col items-center focus:outline-none hover:text-purple-500 transition-colors"
+        @click="goToFollowers"
+        :disabled="isLoading"
+        style="background: none; border: none; cursor: pointer;"
+      >
+        <span class="text-lg font-bold">{{ userProfile.followersUsers?.length || 0 }}</span>
+        <span class="text-xs text-gray-400">Seguidores</span>
+      </button>
+    </div>
+
     <div v-if="!isOwner">
       <button
         v-if="!isFriend"
@@ -53,9 +75,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useFetch } from '#app';
-import type { UserProfile } from "~/types/User"; // Assuming you have this type defined
+import type { UserProfile as UserProfileType } from "~/types/User";
+
+interface UserProfile extends UserProfileType {
+  followersUsers?: any[];
+  followingUsers?: any[];
+}
 
 // Interfaces for response from friend-related API calls
 interface FriendActionResponse {
@@ -70,6 +97,8 @@ const userProfile = ref<UserProfile>({
   profilePictureUrl: "/resources/studio/previewProfile.webp",
   bio: "Cargando biografía del estudio...",
   id: -1, // Initialize with a default ID
+  followersUsers: [],
+  followingUsers: [],
 });
 
 const isLoading = ref(true);
@@ -81,6 +110,7 @@ const friendActionError = ref(false);
 
 const config = useRuntimeConfig();
 const route = useRoute();
+const router = useRouter();
 
 const defaultProfile: UserProfile = {
   id: -1, // Default ID for anonymous/not found
@@ -88,6 +118,8 @@ const defaultProfile: UserProfile = {
   email: "anonimo@example.com",
   profilePictureUrl: "/resources/studio/previewProfile.webp",
   bio: "Este es un perfil predeterminado o no encontrado. Crea o edita tu perfil para mostrar tu trabajo.",
+  followersUsers: [],
+  followingUsers: [],
 };
 
 // Get current user's ID from localStorage (assuming it's stored after login)
@@ -146,9 +178,9 @@ const checkFriendshipStatus = async () => {
 };
 
 const sendFriendAction = async (action: 'add' | 'remove') => {
-  if (!currentUserId.value || userProfile.value.id === -1 || userProfile.value.id === undefined) {
+  if (!userProfile.value.id || userProfile.value.id === -1 || userProfile.value.id === undefined) {
     friendActionError.value = true;
-    friendActionMessage.value = "Error: IDs de usuario no disponibles.";
+    friendActionMessage.value = "Error: ID de usuario no disponible.";
     return;
   }
 
@@ -156,13 +188,12 @@ const sendFriendAction = async (action: 'add' | 'remove') => {
   friendActionMessage.value = null;
   friendActionError.value = false;
 
-  const endpoint = action === 'add'
-    ? `${config.public.backend}/api/users/${currentUserId.value}/add-friend/${userProfile.value.id}`
-    : `${config.public.backend}/api/users/${currentUserId.value}/remove-friend/${userProfile.value.id}`;
+  const endpoint = `${config.public.backend}/api/profile/follow/${userProfile.value.id}`;
+  const method = action === 'add' ? 'POST' : 'DELETE';
 
   try {
     const { data, error } = await useFetch<FriendActionResponse>(endpoint, {
-      method: "POST", // Or PUT/DELETE based on your API design
+      method,
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${localStorage.getItem('token')}`,
@@ -215,7 +246,7 @@ onMounted(async () => {
 
   try {
     const { data, error } = await useFetch<UserProfile>(
-      `${config.public.backend}/api/users/by-username/${targetUsername}`,
+      `${config.public.backend}/api/profile`,
       {
         method: "GET",
         headers: {
@@ -238,6 +269,8 @@ onMounted(async () => {
         profilePictureUrl:
           data.value.profilePictureUrl || "/resources/studio/previewProfile.webp",
         bio: data.value.bio || "Este usuario no ha proporcionado una biografía.",
+        followersUsers: data.value.followersUsers || [],
+        followingUsers: data.value.followingUsers || [],
       };
 
       // Check if the current user is the owner of this profile
@@ -260,6 +293,17 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
+
+function goToFollowing() {
+  if (!userProfile.value.username) return;
+  router.push(`/profile/${userProfile.value.username}/following`);
+}
+function goToFollowers() {
+  if (!userProfile.value.username) return;
+  router.push(`/profile/${userProfile.value.username}/followers`);
+}
+
+defineExpose({ goToFollowing, goToFollowers });
 </script>
 
 <style scoped>

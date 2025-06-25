@@ -47,58 +47,51 @@
       <div
         v-for="playlist in filteredPlaylists"
         :key="playlist.id"
-        class="bg-gray-800/70 rounded-xl p-6 shadow-lg transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-700/80 border border-gray-600 flex flex-col"
+        class="bg-gray-800/70 rounded-xl p-0 shadow-lg transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-700/80 border border-gray-600 flex flex-col md:flex-row items-stretch overflow-hidden"
       >
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-2xl font-bold text-white">{{ playlist.name }}</h3>
-          <span class="text-sm text-gray-400 max-md:hidden">Guardado: {{ formatDate(playlist.Library.savedAt) }}</span>
-        </div>
-        <p v-if="playlist.description" class="text-gray-300 text-md mb-3 flex-grow">{{ playlist.description }}</p>
-        <p class="text-sm text-gray-400 mb-4">
-          <span class="font-semibold">Colaborativa:</span> {{ playlist.isCollaborative ? 'Sí' : 'No' }}
-        </p>
-
-        <h4 class="text-xl font-semibold text-purple-300 mb-4">Elementos Destacados:</h4>
-        <div v-if="playlist.items && playlist.items.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div
-            v-for="item in playlist.items.slice(0, 4)" :key="item.id"
-            class="bg-gray-700/70 rounded-lg p-3 flex items-center shadow-md border border-gray-600"
-          >
-            <img
-              v-if="item.coverUrl"
-              :src="item.coverUrl"
-              :alt="item.title || 'Cover'"
-              class="w-12 h-12 object-cover rounded-md mr-3 flex-shrink-0 shadow-sm border border-gray-500"
-            />
-            <div v-else class="w-12 h-12 bg-gray-600 rounded-md mr-3 flex-shrink-0 flex items-center justify-center text-gray-400 text-xs border border-gray-500">
-              ?
-            </div>
-            <div class="flex-grow">
-              <p class="font-bold text-sm text-white">{{ item.title }}</p>
-              <p class="text-xs text-gray-300 capitalize">{{ item.type }}</p>
-            </div>
+        <!-- Imagen a la izquierda -->
+        <div class="flex items-center justify-center bg-gray-900/60 md:w-48 w-full md:h-auto h-40 flex-shrink-0">
+          <img
+            v-if="(playlist as any).thumbnailUrl || (playlist as any).coverUrl || (playlist as any).imageUrl"
+            :src="(playlist as any).thumbnailUrl || (playlist as any).coverUrl || (playlist as any).imageUrl"
+            :alt="playlist.name"
+            class="object-cover w-full h-full md:w-48 md:h-48 rounded-l-xl md:rounded-none md:rounded-l-xl border border-gray-700 shadow-md"
+          />
+          <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-4xl bg-gray-700 rounded-l-xl md:rounded-none md:rounded-l-xl border border-gray-700">
+            <span>🎵</span>
           </div>
         </div>
-        <p v-else class="text-gray-400 text-sm mb-4">Esta playlist no tiene elementos.</p>
-
-        <div class="mt-auto flex justify-end">
-          <button
-            @click="viewPlaylistDetails(playlist)"
-            :disabled="loadingPlaylistDetails.has(playlist.id.toString())"
-            class="bg-purple-600 cursor-pointer hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-colors text-lg flex items-center justify-center"
-            :class="{ 'opacity-75 cursor-not-allowed': loadingPlaylistDetails.has(playlist.id.toString()) }"
-          >
-            <template v-if="loadingPlaylistDetails.has(playlist.id.toString())">
-              <svg class="animate-spin h-5 w-5 text-white mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Cargando...
-            </template>
-            <template v-else>
-              Ver más
-            </template>
-          </button>
+        <!-- Datos a la derecha -->
+        <div class="flex flex-col flex-grow p-6 justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-2xl font-bold text-white">{{ playlist.name }}</h3>
+              <span class="text-sm text-gray-400 max-md:hidden">ID: {{ playlist.id }}</span>
+            </div>
+            <p v-if="playlist.description" class="text-gray-300 text-md mb-2 flex-grow">{{ playlist.description }}</p>
+            <p class="text-sm text-gray-400 mb-2">
+              <span class="font-semibold">Colaborativa:</span> {{ playlist.isCollaborative ? 'Sí' : 'No' }}
+            </p>
+          </div>
+          <div class="mt-4 flex justify-end">
+            <button
+              @click="viewPlaylistDetails(playlist)"
+              :disabled="loadingPlaylistDetails.has(playlist.id.toString())"
+              class="bg-purple-600 cursor-pointer hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-colors text-lg flex items-center justify-center"
+              :class="{ 'opacity-75 cursor-not-allowed': loadingPlaylistDetails.has(playlist.id.toString()) }"
+            >
+              <template v-if="loadingPlaylistDetails.has(playlist.id.toString())">
+                <svg class="animate-spin h-5 w-5 text-white mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Cargando...
+              </template>
+              <template v-else>
+                Ver más
+              </template>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -119,7 +112,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import type { Playlist } from "~/types/Playlist"; // Asegúrate de que la ruta sea correcta
 import type { User } from "~/types/User"; // Necesitarás definir este tipo
 
@@ -131,6 +124,7 @@ const loadingPlaylists = ref(false);
 const errorPlaylists = ref<string | null>(null);
 const loadingPlaylistDetails = ref<Set<string>>(new Set()); // Set para IDs de playlists en carga, ahora espera strings
 const searchQuery = ref('');
+const username = ref(useRoute().params.username as string);
 
 // Computed property para filtrar las playlists basado en la búsqueda
 const filteredPlaylists = computed(() => {
@@ -172,7 +166,7 @@ const fetchSavedPlaylists = async () => {
       throw new Error("No hay token de autenticación disponible. Por favor, inicia sesión.");
     }
 
-    const response = await fetch(`${config.public.backend}/api/profile/saved-playlists`, {
+    const response = await fetch(`${config.public.backend}/api/users/by-username/${username.value || ''}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -186,7 +180,7 @@ const fetchSavedPlaylists = async () => {
     }
 
     const data = await response.json();
-    savedPlaylists.value = data;
+    savedPlaylists.value = data.savedPlaylists;
     console.log("Playlists guardadas:", data);
 
     if (savedPlaylists.value.length === 0) {
