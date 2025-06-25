@@ -122,6 +122,8 @@ const defaultProfile: UserProfile = {
   followingUsers: [],
 };
 
+
+
 // Get current user's ID from localStorage (assuming it's stored after login)
 const getCurrentUserId = (): number | null => {
   if (typeof localStorage === 'undefined') return null;
@@ -246,7 +248,7 @@ onMounted(async () => {
 
   try {
     const { data, error } = await useFetch<UserProfile>(
-      `${config.public.backend}/api/profile`,
+      `${config.public.backend}/api/users/by-username/${usernameFromUrl}`,
       {
         method: "GET",
         headers: {

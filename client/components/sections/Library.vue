@@ -235,7 +235,7 @@ const fetchSavedPlaylists = async () => {
       throw new Error("No hay token de autenticación disponible. Por favor, inicia sesión.");
     }
 
-    const response = await fetch(`${config.public.backend}/api/users/by-username/${username.value || ''}`, {
+    const response = await fetch(`${config.public.backend}/api/users/by-username/${username.value || ''}/saved-playlists`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

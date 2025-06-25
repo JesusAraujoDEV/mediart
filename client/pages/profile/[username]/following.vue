@@ -13,20 +13,21 @@
           <h2 class="text-4xl font-extrabold text-center">Amigos</h2>
           <NuxtLink 
             :to="`/profile/${username}`" 
-            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full shadow-md transition-colors text-sm"
+            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full shadow-md transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
             ← Volver al perfil
           </NuxtLink>
         </div>
 
-        <!-- Buscador -->
+        <!-- Buscador optimizado -->
         <div class="mb-6">
           <div class="relative">
             <input
-              v-model="searchQuery"
+              v-model.trim="searchQuery"
               type="text"
               placeholder="Buscar amigo..."
               class="w-full bg-gray-800/70 border border-gray-600 rounded-lg px-4 py-3 pl-12 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+              @input="handleSearchInput"
             />
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,6 +38,7 @@
               v-if="searchQuery"
               @click="clearSearch"
               class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors"
+              aria-label="Limpiar búsqueda"
             >
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -45,49 +47,79 @@
           </div>
         </div>
 
+        <!-- Loading state optimizado -->
         <div v-if="loading" class="flex flex-col items-center text-center">
           <p class="text-xl mb-4 text-gray-300">Cargando amigos...</p>
-          <svg class="animate-spin h-10 w-10 text-blue-400 mt-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
+          <div class="relative">
+            <svg class="animate-spin h-10 w-10 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
         </div>
 
+        <!-- Error state optimizado -->
         <div v-else-if="error" class="text-red-400 text-center flex flex-col items-center">
           <p class="text-xl mb-4">{{ error }}</p>
-          <button @click="fetchFollowing" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg">
+          <button 
+            @click="fetchFollowing" 
+            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
             Reintentar
           </button>
         </div>
 
+        <!-- Lista de amigos optimizada -->
         <div v-else-if="filteredFollowing.length > 0" class="w-full flex flex-col gap-4 pb-4 px-2">
-          <div
-            v-for="friend in filteredFollowing"
-            :key="friend.id"
-            class="bg-gray-800/70 rounded-xl p-4 shadow-lg transform transition-transform duration-300 hover:scale-[1.02] hover:bg-gray-700/80 border border-gray-600 flex items-center"
+          <TransitionGroup 
+            name="friend-list" 
+            tag="div" 
+            class="flex flex-col gap-4"
           >
-            <img
-              :src="friend.profilePictureUrl || '/resources/studio/previewProfile.webp'"
-              :alt="friend.username"
-              class="w-16 h-16 object-cover rounded-full mr-4 flex-shrink-0 shadow-md border border-gray-500"
-            />
-            <div class="flex-grow">
-              <h3 class="text-xl font-bold text-white mb-1">{{ friend.username }}</h3>
-              <p v-if="friend.bio" class="text-gray-300 text-sm mb-2">{{ friend.bio }}</p>
-              <p class="text-xs text-gray-400">{{ friend.email }}</p>
-            </div>
-            <NuxtLink
-              :to="`/profile/${friend.username}`"
-              class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full shadow-md transition-colors text-sm"
+            <div
+              v-for="friend in visibleFriends"
+              :key="friend.id"
+              class="bg-gray-800/70 rounded-xl p-4 shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:bg-gray-700/80 border border-gray-600 flex items-center"
             >
-              Ver perfil
-            </NuxtLink>
+              <img
+                :src="friend.profilePictureUrl || '/resources/studio/previewProfile.webp'"
+                :alt="friend.username"
+                class="w-16 h-16 object-cover rounded-full mr-4 flex-shrink-0 shadow-md border border-gray-500"
+                loading="lazy"
+                @error="handleImageError"
+              />
+              <div class="flex-grow min-w-0">
+                <h3 class="text-xl font-bold text-white mb-1 truncate">{{ friend.username }}</h3>
+                <p v-if="friend.bio" class="text-gray-300 text-sm mb-2 line-clamp-2">{{ friend.bio }}</p>
+                <p class="text-xs text-gray-400 truncate">{{ friend.email }}</p>
+              </div>
+              <NuxtLink
+                :to="`/profile/${friend.username}`"
+                class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full shadow-md transition-colors text-sm flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                Ver perfil
+              </NuxtLink>
+            </div>
+          </TransitionGroup>
+          
+          <!-- Load more button -->
+          <div v-if="hasMoreFriends" class="flex justify-center mt-6">
+            <button
+              @click="loadMoreFriends"
+              class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              Cargar más
+            </button>
           </div>
         </div>
 
+        <!-- Empty states optimizados -->
         <div v-else-if="searchQuery && following.length > 0" class="text-center text-gray-400 text-2xl flex flex-col items-center">
           <p class="mb-4">No se encontraron amigos que coincidan con "{{ searchQuery }}"</p>
-          <button @click="clearSearch" class="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-colors text-lg">
+          <button 
+            @click="clearSearch" 
+            class="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
             Limpiar búsqueda
           </button>
         </div>
@@ -107,7 +139,7 @@ definePageMeta({
   middleware: ["auth-middleware"],
 });
 
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 
@@ -120,7 +152,12 @@ const loading = ref(false);
 const error = ref<string | null>(null);
 const searchQuery = ref('');
 
-// Computed property para filtrar los amigos basado en la búsqueda
+// Virtualización y paginación
+const itemsPerPage = 10;
+const currentPage = ref(1);
+const searchDebounceTimeout = ref<NodeJS.Timeout | null>(null);
+
+// Computed properties optimizadas
 const filteredFollowing = computed(() => {
   if (!searchQuery.value.trim()) {
     return following.value;
@@ -134,12 +171,44 @@ const filteredFollowing = computed(() => {
   );
 });
 
-// Función para limpiar la búsqueda
+const visibleFriends = computed(() => {
+  const startIndex = 0;
+  const endIndex = currentPage.value * itemsPerPage;
+  return filteredFollowing.value.slice(startIndex, endIndex);
+});
+
+const hasMoreFriends = computed(() => {
+  return visibleFriends.value.length < filteredFollowing.value.length;
+});
+
+// Event handlers optimizados
+const handleSearchInput = () => {
+  if (searchDebounceTimeout.value) {
+    clearTimeout(searchDebounceTimeout.value);
+  }
+  
+  searchDebounceTimeout.value = setTimeout(() => {
+    currentPage.value = 1; // Reset pagination on search
+  }, 300);
+};
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement;
+  img.src = '/resources/studio/previewProfile.webp';
+};
+
 const clearSearch = () => {
   searchQuery.value = '';
+  currentPage.value = 1;
+};
+
+const loadMoreFriends = () => {
+  currentPage.value++;
 };
 
 const fetchFollowing = async () => {
+  if (loading.value) return; // Prevent multiple requests
+  
   loading.value = true;
   error.value = null;
   following.value = [];
@@ -150,7 +219,8 @@ const fetchFollowing = async () => {
       throw new Error("No hay token de autenticación disponible.");
     }
 
-    const response = await fetch(`${config.public.backend}/api/profile`, {
+    // Obtener el perfil del usuario específico
+    const response = await fetch(`${config.public.backend}/api/users/by-username/${username}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -175,13 +245,27 @@ const fetchFollowing = async () => {
   }
 };
 
-onMounted(() => {
-  fetchFollowing();
+// Watchers optimizados
+watch(searchQuery, () => {
+  currentPage.value = 1; // Reset pagination when search changes
+});
+
+// Lifecycle hooks
+onMounted(async () => {
+  await nextTick();
+  await fetchFollowing();
+});
+
+// Cleanup
+onUnmounted(() => {
+  if (searchDebounceTimeout.value) {
+    clearTimeout(searchDebounceTimeout.value);
+  }
 });
 </script>
 
 <style scoped>
-/* Estilos para la barra de desplazamiento */
+/* Estilos optimizados para la barra de desplazamiento */
 .custom-main-scroll::-webkit-scrollbar {
   width: 8px;
 }
@@ -198,5 +282,57 @@ onMounted(() => {
 
 .custom-main-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(150, 150, 150, 0.7);
+}
+
+/* Transiciones optimizadas */
+.friend-list-enter-active,
+.friend-list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.friend-list-enter-from {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.friend-list-leave-to {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+.friend-list-move {
+  transition: transform 0.3s ease;
+}
+
+/* Utilidades CSS optimizadas */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Optimizaciones de rendimiento */
+* {
+  will-change: transform;
+}
+
+img {
+  will-change: auto;
+}
+
+/* Focus states mejorados */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+/* Optimizaciones para dispositivos móviles */
+@media (max-width: 768px) {
+  .glassEffect {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
 }
 </style>
