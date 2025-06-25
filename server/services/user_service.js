@@ -157,9 +157,11 @@ class UserService {
     return user.savedPlaylists; // Devuelve el array de playlists guardadas
   }
 
-  async findOne(id) {
-    const user = await models.User.findByPk(id, {
-      include: [
+  async findOne(id, includeAssociations = true) {
+    let findOptions = {};
+
+    if (includeAssociations) {
+      findOptions.include = [
         { model: models.Playlist, as: 'ownedPlaylists' },
         { model: models.Playlist, as: 'savedPlaylists', through: { attributes: ['savedAt'] } },
         { model: models.User, as: 'followersUsers' },
@@ -168,8 +170,17 @@ class UserService {
         { model: models.UserFollow, as: 'initiatedFollows' },
         { model: models.UserFollow, as: 'receivedFollows' },
         { model: models.Playlist, as: 'collaboratorPlaylists' }
-      ]
-    });
+      ];
+    }
+    else {
+      findOptions.include = [
+        { model: models.User, as: 'followersUsers' },
+        { model: models.User, as: 'followingUsers' },
+      ];
+    }
+
+    const user = await models.User.findByPk(id, findOptions);
+    
     if (!user) {
       throw boom.notFound('User not found');
     }

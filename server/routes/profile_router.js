@@ -13,6 +13,22 @@ const playlistService = new PlaylistService();
 const userService = new UserService();
 
 router.get(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    try {
+      const userId = req.user.sub;
+
+      const user = await userService.findOne(userId, false);
+
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get(
     '/owned-playlists',
     passport.authenticate('jwt', { session: false }),
     async (req, res, next) => {
