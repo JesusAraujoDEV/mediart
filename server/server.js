@@ -1,17 +1,18 @@
-require('dotenv').config(); // Importar dotenv al inicio
+require('dotenv').config();
 const express = require('express');
 const routerApi = require('./routes');
-const {config} = require('./config/config');
+const { config } = require('./config/config');
 
-const { logErrors, errorHandler, ormErrorHandler, boomErrorHandler} = require('./middlewares/error_handler');
+const { logErrors, errorHandler, ormErrorHandler, boomErrorHandler } = require('./middlewares/error_handler');
 const path = require('path');
 const app = express();
 const cors = require('cors');
 const port = config.port || 3000;
 
+const setupSwagger = require('./swagger');
+
 // Sirve los archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 
 const whitelist = ['http://localhost:3000', config.clientUrl];
 const options = {
@@ -38,14 +39,13 @@ app.get('/', (req, res) => {
 
 routerApi(app);
 
+setupSwagger(app);
+
 app.use(logErrors);
 app.use(ormErrorHandler);
 app.use(boomErrorHandler);
 app.use(errorHandler);
 
-//swaggerDocs(app, port);
-
 app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`);
 })
-
