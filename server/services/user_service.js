@@ -85,27 +85,72 @@ class UserService {
     return user;
   }
 
-  async findOneByUsername(username) {
-    const user = await models.User.findOne(
-      {
+  async findOneByUsername(username, associationsToInclude = []) {
+    const allowedAssociations = {
+      'ownedPlaylists': { model: models.Playlist, as: 'ownedPlaylists' },
+      'savedPlaylists': { model: models.Playlist, as: 'savedPlaylists', through: { attributes: ['savedAt'] } },
+      'followersUsers': {
+        model: models.User,
+        as: 'followersUsers',
+        attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+        through: { attributes: [] }
+      },
+      'followingUsers': {
+        model: models.User,
+        as: 'followingUsers',
+        attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+        through: { attributes: [] }
+      },
+      'libraryEntries': { model: models.Library, as: 'libraryEntries' },
+      'initiatedFollows': { model: models.UserFollow, as: 'initiatedFollows' },
+      'receivedFollows': { model: models.UserFollow, as: 'receivedFollows' },
+      'collaboratorPlaylists': {
+        model: models.Playlist,
+        as: 'collaboratorPlaylists',
+        through: { attributes: [] },
+      }
+    };
+
+    let findOptions = {
         where: { username },
         attributes: { exclude: ['passwordHash', 'recoveryToken'] },
-        include: [
-          {
-            model: models.User,
-            as: 'followersUsers',
-            attributes: ['id', 'username', 'email', 'profilePictureUrl'],
-            through: { attributes: [] }
-          },
-          {
-            model: models.User,
-            as: 'followingUsers',
-            attributes: ['id', 'username', 'email', 'profilePictureUrl'],
-            through: { attributes: [] }
-          },
-        ]
+        include: []
+    };
+
+    // Si se especifican asociaciones, las añadimos si están en la lista de permitidas
+    if (Array.isArray(associationsToInclude) && associationsToInclude.length > 0) {
+      for (const associationName of associationsToInclude) {
+        if (allowedAssociations[associationName]) {
+          findOptions.include.push(allowedAssociations[associationName]);
+        } else {
+          // Opcional: Podrías lanzar un boom.badRequest aquí si quieres que la API falle si se pide una asociación inválida
+          console.warn(`Attempted to include unknown or disallowed association: ${associationName} for username.`);
+        }
       }
-    );
+    }
+
+    if (findOptions.include.length === 0) {
+        findOptions.include.push(
+            {
+                model: models.User,
+                as: 'followersUsers',
+                attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+                through: { attributes: [] }
+            },
+            {
+                model: models.User,
+                as: 'followingUsers',
+                attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+                through: { attributes: [] }
+            }
+        );
+    }
+
+    const user = await models.User.findOne(findOptions);
+
+    if (!user) {
+      throw boom.notFound('User not found');
+    }
     return user;
   }
 

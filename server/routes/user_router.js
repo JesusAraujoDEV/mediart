@@ -1,7 +1,7 @@
 const express = require('express');
 const UserService = require('./../services/user_service');
 const validatorHandler = require('./../middlewares/validator_handler');
-const { updateUserSchema, createUserSchema, getUserSchema, getUserByUsernameSchema } = require('./../schemas/user_schema');
+const { updateUserSchema, createUserSchema, getUserSchema, getUserByUsernameSchema, getUserQuerySchema } = require('./../schemas/user_schema');
 const { uploadProfilePicture } = require('./../utils/multer_config');
 const passport = require('passport');
 
@@ -19,10 +19,18 @@ router.get('/', async (req, res, next) => {
 
 router.get('/by-username/:username',
   validatorHandler(getUserByUsernameSchema, 'params'),
+  validatorHandler(getUserQuerySchema, 'query'),
   async (req, res, next) => {
     try {
       const { username } = req.params;
-      const user = await service.findOneByUsername(username);
+      const includeAssociationsParam = req.query.include;
+
+      let associationsToInclude = [];
+      if (includeAssociationsParam) {
+        associationsToInclude = includeAssociationsParam.split(',').map(assoc => assoc.trim());
+      }
+
+      const user = await service.findOneByUsername(username, associationsToInclude);
       res.json(user);
     } catch (error) {
       next(error);
