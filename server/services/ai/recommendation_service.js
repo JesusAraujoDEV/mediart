@@ -1,18 +1,15 @@
-// services/recommendation_service.js
 const SearchService = require('./../search_service');
 const GeminiAiService = require('./gemini_ai_service');
-const DeepSeekAiService = require('./deepseek_ai_service'); // <-- ¡NUEVA IMPORTACIÓN!
+const DeepSeekAiService = require('./deepseek_ai_service');
 
 class RecommendationService {
   constructor() {
     this.searchService = new SearchService();
     this.geminiAiService = new GeminiAiService();
-    this.deepSeekAiService = new DeepSeekAiService(); // <-- ¡NUEVA INSTANCIA!
+    this.deepSeekAiService = new DeepSeekAiService();
   }
 
-  // Helper function to map item data to the desired schem
   _mapToItemSchema(itemData, itemType, externalSource) {
-    // ... (tu código _mapToItemSchema existente) ...
     let mappedItem = {
       type: itemType,
       externalSource: externalSource,
@@ -70,19 +67,19 @@ class RecommendationService {
         mappedItem.externalUrl = itemData.external_url || null;
         break;
 
-        case 'videogame':
-          mappedItem.title = itemData.name;
-          mappedItem.description = itemData.summary;
-          mappedItem.coverUrl = itemData.cover_url || null;
-          mappedItem.releaseDate = itemData.release_date === 'N/A' ? null : itemData.release_date;
-          mappedItem.externalId = itemData.id ? String(itemData.id) : null;
-          mappedItem.avgRating = itemData.avg_rating || null;
-          mappedItem.externalUrl = itemData.external_url || null;
-          break;
+      case 'videogame':
+        mappedItem.title = itemData.name;
+        mappedItem.description = itemData.summary;
+        mappedItem.coverUrl = itemData.cover_url || null;
+        mappedItem.releaseDate = itemData.release_date === 'N/A' ? null : itemData.release_date;
+        mappedItem.externalId = itemData.id ? String(itemData.id) : null;
+        mappedItem.avgRating = itemData.avg_rating || null;
+        mappedItem.externalUrl = itemData.external_url || null;
+        break;
 
-        default:
-          console.warn(`Tipo de ítem desconocido para mapeo: ${itemType}`);
-          break;
+      default:
+        console.warn(`Tipo de ítem desconocido para mapeo: ${itemType}`);
+        break;
     }
 
     Object.keys(mappedItem).forEach(key => mappedItem[key] === undefined && delete mappedItem[key]);
@@ -90,7 +87,6 @@ class RecommendationService {
     return mappedItem;
   }
 
-  // --- Función auxiliar para manejar la lógica de fallback ---
   async _getRecommendedQueries(itemCategory, itemName, itemContext) {
     let recommendedQueries = [];
     let usedApi = 'Gemini';
@@ -125,9 +121,7 @@ class RecommendationService {
         }
       }
 
-      // Usar la nueva función auxiliar para obtener queries
       const recommendedQueries = await this._getRecommendedQueries('peliculas', itemName, itemContext);
-      // console.log se mueve dentro de _getRecommendedQueries
 
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
@@ -144,11 +138,11 @@ class RecommendationService {
             addedExternalIds.add(`movie-${movie.id}`);
           }
         }
-        if (allRecommendedItems.length >= 10) break;
+        // ELIMINADO: if (allRecommendedItems.length >= 10) break;
       }
       return allRecommendedItems;
     } catch (error) {
-      console.error('Error in recommendMovies service:', error); // Mensaje más genérico
+      console.error('Error in recommendMovies service:', error);
       return [];
     }
   }
@@ -168,7 +162,6 @@ class RecommendationService {
         }
 
         const recommendedQueries = await this._getRecommendedQueries('canciones', itemName, itemContext);
-        // console.log se mueve dentro de _getRecommendedQueries
 
         const allRecommendedItems = [];
         const addedExternalIds = new Set();
@@ -185,11 +178,11 @@ class RecommendationService {
                     addedExternalIds.add(`song-${song.id}`);
                 }
             }
-            if (allRecommendedItems.length >= 10) break;
+            // ELIMINADO: if (allRecommendedItems.length >= 10) break;
         }
         return allRecommendedItems;
     } catch (error) {
-        console.error('Error in recommendSongs service:', error); // Mensaje más genérico
+        console.error('Error in recommendSongs service:', error);
         return [];
     }
   }
@@ -207,7 +200,6 @@ class RecommendationService {
       }
 
       const recommendedQueries = await this._getRecommendedQueries('series de televisión', itemName, itemContext);
-      // console.log se mueve dentro de _getRecommendedQueries
 
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
@@ -224,11 +216,11 @@ class RecommendationService {
             addedExternalIds.add(`tvshow-${tvShow.id}`);
           }
         }
-        if (allRecommendedItems.length >= 10) break;
+        // ELIMINADO: if (allRecommendedItems.length >= 10) break;
       }
       return allRecommendedItems;
     } catch (error) {
-      console.error('Error in recommendTvShows service:', error); // Mensaje más genérico
+      console.error('Error in recommendTvShows service:', error);
       return [];
     }
   }
@@ -246,7 +238,6 @@ class RecommendationService {
       }
 
       const recommendedQueries = await this._getRecommendedQueries('libros', itemName, itemContext);
-      // console.log se mueve dentro de _getRecommendedQueries
 
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
@@ -263,11 +254,11 @@ class RecommendationService {
             addedExternalIds.add(`book-${book.id}`);
           }
         }
-        if (allRecommendedItems.length >= 10) break;
+        // ELIMINADO: if (allRecommendedItems.length >= 10) break;
       }
       return allRecommendedItems;
     } catch (error) {
-      console.error('Error in recommendBooks service:', error); // Mensaje más genérico
+      console.error('Error in recommendBooks service:', error);
       return [];
     }
   }
@@ -291,7 +282,6 @@ class RecommendationService {
       }
 
       const recommendedQueries = await this._getRecommendedQueries('videojuegos', itemName, itemContext);
-      // console.log se mueve dentro de _getRecommendedQueries
 
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
@@ -308,11 +298,11 @@ class RecommendationService {
             addedExternalIds.add(`videogame-${videogame.id}`);
           }
         }
-        if (allRecommendedItems.length >= 10) break;
+        // ELIMINADO: if (allRecommendedItems.length >= 10) break;
       }
       return allRecommendedItems;
     } catch (error) {
-      console.error('Error in recommendVideogames service:', error); // Mensaje más genérico
+      console.error('Error in recommendVideogames service:', error);
       return [];
     }
   }
@@ -328,7 +318,6 @@ class RecommendationService {
       }
 
       const recommendedQueries = await this._getRecommendedQueries('artistas', itemName, itemContext);
-      // console.log se mueve dentro de _getRecommendedQueries
 
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
@@ -345,11 +334,11 @@ class RecommendationService {
             addedExternalIds.add(`artist-${artist.id}`);
           }
         }
-        if (allRecommendedItems.length >= 10) break;
+        // ELIMINADO: if (allRecommendedItems.length >= 10) break;
       }
       return allRecommendedItems;
     } catch (error) {
-      console.error('Error in recommendArtists service:', error); // Mensaje más genérico
+      console.error('Error in recommendArtists service:', error);
       return [];
     }
   }
@@ -367,7 +356,6 @@ class RecommendationService {
       }
 
       const recommendedQueries = await this._getRecommendedQueries('álbumes', itemName, itemContext);
-      // console.log se mueve dentro de _getRecommendedQueries
 
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
@@ -384,11 +372,59 @@ class RecommendationService {
             addedExternalIds.add(`album-${album.id}`);
           }
         }
-        if (allRecommendedItems.length >= 10) break;
+        // ELIMINADO: if (allRecommendedItems.length >= 10) break;
       }
       return allRecommendedItems;
     } catch (error) {
-      console.error('Error in recommendAlbums service:', error); // Mensaje más genérico
+      console.error('Error in recommendAlbums service:', error);
+      return [];
+    }
+  }
+
+  // --- FUNCIÓN recommendMix con la corrección del límite ---
+  async recommendMix(itemName, limit = 10) {
+    try {
+      const recommendationPromises = [];
+      const addedExternalIds = new Set();
+      let allMixedItems = []; // Cambiado a let para permitir reasignación si se desea, aunque push es suficiente
+
+      // Al no tener los 'break' internos en las funciones recommendX,
+      // estas devolverán más ítems, lo que aumenta la probabilidad de variedad.
+      recommendationPromises.push(this.recommendMovies(itemName));
+      recommendationPromises.push(this.recommendTvShows(itemName));
+      recommendationPromises.push(this.recommendSongs(itemName));
+      recommendationPromises.push(this.recommendArtists(itemName));
+      recommendationPromises.push(this.recommendAlbums(itemName));
+      recommendationPromises.push(this.recommendBooks(itemName));
+      recommendationPromises.push(this.recommendVideogames(itemName));
+
+      const results = await Promise.allSettled(recommendationPromises);
+
+      for (const result of results) {
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+          for (const item of result.value) {
+            const uniqueKey = `${item.type}-${item.externalSource}-${item.externalId}`;
+            if (item.externalId && !addedExternalIds.has(uniqueKey)) {
+              allMixedItems.push(item);
+              addedExternalIds.add(uniqueKey);
+              // NOTA: No hacemos break aquí para que todas las categorías contribuyan,
+              // el límite final se aplica después del shuffle.
+            }
+          }
+        }
+      }
+
+      // Mezclar los ítems de forma aleatoria para que no salgan siempre en el mismo orden de categoría
+      for (let i = allMixedItems.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allMixedItems[i], allMixedItems[j]] = [allMixedItems[j], allMixedItems[i]];
+      }
+
+      // Devolver solo el número solicitado de ítems
+      return allMixedItems.slice(0, limit);
+
+    } catch (error) {
+      console.error('Error in recommendMix service:', error);
       return [];
     }
   }

@@ -25,7 +25,6 @@ const createRecommendationRoute = (type, serviceMethod) => {
   );
 };
 
-// Crea las rutas para cada tipo de contenido
 createRecommendationRoute('movies', 'recommendMovies');
 createRecommendationRoute('tvshows', 'recommendTvShows');
 createRecommendationRoute('books', 'recommendBooks');
@@ -33,6 +32,6 @@ createRecommendationRoute('songs', 'recommendSongs');
 createRecommendationRoute('artists', 'recommendArtists');
 createRecommendationRoute('albums', 'recommendAlbums');
 createRecommendationRoute('videogames', 'recommendVideogames');
-
+createRecommendationRoute('mix', 'recommendMix');
 
 module.exports = router;
