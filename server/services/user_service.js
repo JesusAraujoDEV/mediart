@@ -89,43 +89,20 @@ class UserService {
     const user = await models.User.findOne(
       {
         where: { username },
+        attributes: { exclude: ['passwordHash', 'recoveryToken'] },
         include: [
           {
-            model: models.Playlist,
-            as: 'ownedPlaylists' // Incluye las playlists que este usuario posee
-          },
-          {
-            model: models.Playlist,
-            as: 'savedPlaylists', // Incluye las playlists que este usuario ha guardado
-            through: { attributes: ['savedAt'] } // Incluye el campo 'savedAt' de la tabla intermedia
+            model: models.User,
+            as: 'followersUsers',
+            attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+            through: { attributes: [] }
           },
           {
             model: models.User,
-            as: 'followersUsers' // Incluye los usuarios que siguen a este usuario
+            as: 'followingUsers',
+            attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+            through: { attributes: [] }
           },
-          {
-            model: models.User,
-            as: 'followingUsers' // Incluye los usuarios a los que este usuario sigue
-          },
-          {
-            model: models.Library, // Acceso directo a las entradas de la tabla 'library'
-            as: 'libraryEntries',
-            foreignKey: 'user_id'
-          },
-          {
-            model: models.UserFollow, // Acceso directo a las relaciones de seguimiento iniciadas por este usuario
-            as: 'initiatedFollows',
-            foreignKey: 'follower_user_id'
-          },
-          {
-            model: models.UserFollow, // Acceso directo a las relaciones de seguimiento recibidas por este usuario
-            as: 'receivedFollows',
-            foreignKey: 'followed_user_id'
-          },
-          {
-            model: models.Playlist,
-            as: 'collaboratorPlaylists',
-          }
         ]
       }
     );
@@ -157,30 +134,69 @@ class UserService {
     return user.savedPlaylists; // Devuelve el array de playlists guardadas
   }
 
-  async findOne(id, includeAssociations = true) {
-    let findOptions = {};
+  async findOne(id, associationsToInclude = []) {
+    const allowedAssociations = {
+      'ownedPlaylists': {
+        model: models.Playlist,
+        as: 'ownedPlaylists',
+        through: { attributes: [] }
+      },
+      'savedPlaylists': {
+        model: models.Playlist,
+        as: 'savedPlaylists',
+        through: { attributes: ['savedAt'] }
+      },
+      'followersUsers': {
+        model: models.User,
+        as: 'followersUsers',
+        attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+        through: { attributes: [] }
+      },
+      'followingUsers': {
+        model: models.User,
+        as: 'followingUsers',
+        attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+        through: { attributes: [] }
+      },
+      'libraryEntries': {
+        model: models.Library,
+        as: 'libraryEntries',
+        attributes: { exclude: ['createdAt', 'updatedAt'] }
+      },
+      'initiatedFollows': {
+        model: models.UserFollow,
+        as: 'initiatedFollows',
+        attributes: { exclude: ['createdAt', 'updatedAt'] }
+      },
+      'receivedFollows': {
+        model: models.UserFollow,
+        as: 'receivedFollows',
+        attributes: { exclude: ['createdAt', 'updatedAt'] }
+      },
+      'collaboratorPlaylists': {
+        model: models.Playlist,
+        as: 'collaboratorPlaylists',
+        through: { attributes: [] },
+      }
+    };
 
-    if (includeAssociations) {
-      findOptions.include = [
-        { model: models.Playlist, as: 'ownedPlaylists' },
-        { model: models.Playlist, as: 'savedPlaylists', through: { attributes: ['savedAt'] } },
-        { model: models.User, as: 'followersUsers' },
-        { model: models.User, as: 'followingUsers' },
-        { model: models.Library, as: 'libraryEntries' },
-        { model: models.UserFollow, as: 'initiatedFollows' },
-        { model: models.UserFollow, as: 'receivedFollows' },
-        { model: models.Playlist, as: 'collaboratorPlaylists' }
-      ];
-    }
-    else {
-      findOptions.include = [
-        { model: models.User, as: 'followersUsers' },
-        { model: models.User, as: 'followingUsers' },
-      ];
+    let findOptions = {
+        attributes: { exclude: ['passwordHash', 'recoveryToken'] }
+    };
+    findOptions.include = [];
+
+    if (Array.isArray(associationsToInclude) && associationsToInclude.length > 0) {
+      for (const associationName of associationsToInclude) {
+        if (allowedAssociations[associationName]) {
+          findOptions.include.push(allowedAssociations[associationName]);
+        } else {
+          console.warn(`Attempted to include unknown or disallowed association: ${associationName}`);
+        }
+      }
     }
 
     const user = await models.User.findByPk(id, findOptions);
-    
+
     if (!user) {
       throw boom.notFound('User not found');
     }
@@ -189,12 +205,13 @@ class UserService {
 
   async findMyFollowers(userId) {
     const userWithFollowers = await models.User.findByPk(userId, {
-      attributes: ['id'],
+      attributes: [],
       include: [
         {
           model: models.User,
           as: 'followersUsers',
-          attributes: ['id', 'username', 'email', 'profilePictureUrl']
+          attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+          through: { attributes: [] }
         }
       ]
     });
@@ -208,12 +225,13 @@ class UserService {
 
   async findMyFollowings(userId) {
     const userWithFollowings = await models.User.findByPk(userId, {
-      attributes: ['id'],
+      attributes: [],
       include: [
         {
           model: models.User,
           as: 'followingUsers',
-          attributes: ['id', 'username', 'email', 'profilePictureUrl']
+          attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+          through: { attributes: [] }
         }
       ]
     });
