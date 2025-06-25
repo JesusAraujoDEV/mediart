@@ -43,8 +43,8 @@
           <NuxtLink
             v-for="user in users"
             :key="user.id"
-            :to="`/studio/profile/${user.username}`"
-            class="block bg-gray-700/60 rounded-lg p-3 flex items-center shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white"
+            :to="`/profile/${user.username}`"
+            class="bg-gray-700/60 rounded-lg p-3 flex items-center shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white"
           >
             <img
               :src="user.profilePictureUrl || '/resources/studio/previewProfile.webp'"

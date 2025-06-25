@@ -15,10 +15,10 @@
         >
           <span
             v-for="tag in selectedTags"
-            :key="tag"
+            :key="tag.title"
             class="bg-white/20 rounded-full px-3 py-1 text-sm flex items-center gap-1 backdrop-blur-sm"
           >
-            {{ tag }}
+            {{ tag.title }}
             <button
               @click.stop="removeTag(tag)"
               class="text-xs cursor-pointer text-white/80 hover:text-white ml-1"
@@ -48,7 +48,7 @@
             <li
               v-for="suggestion in filteredSuggestions"
               :key="suggestion.title"
-              @mousedown.prevent="selectSuggestion(suggestion.title)"
+              @mousedown.prevent="selectSuggestion(suggestion)"
               class="p-2 cursor-pointer hover:bg-gray-700/70 text-white text-sm flex items-center"
             >
               <img
@@ -342,7 +342,7 @@ import Swal from "sweetalert2";
 const router = useRouter();
 
 const inputValue = ref("");
-const selectedTags = ref<string[]>([]);
+const selectedTags = ref<SearchSuggestion[]>([]);
 
 const suggestions = ref<SearchSuggestion[]>([]);
 const showDatalist = ref(false);
@@ -482,7 +482,7 @@ const fetchSuggestions = async (query: string) => {
     // Filter out duplicates based on title and ensure selected tags are not suggested
     const uniqueSuggestions = new Map<string, SearchSuggestion>();
     newSuggestions.forEach((s) => {
-      if (!selectedTags.value.includes(s.title)) {
+      if (!selectedTags.value.some(tag => tag.title === s.title)) {
         uniqueSuggestions.set(s.title, s);
       }
     });
@@ -508,7 +508,7 @@ const filteredSuggestions = computed(() => {
     .filter(
       (s) =>
         s.title.toLowerCase().includes(lowerCaseInput) &&
-        !selectedTags.value.includes(s.title)
+        !selectedTags.value.some(tag => tag.title === s.title)
     )
     .slice(0, 10);
 });
@@ -536,9 +536,9 @@ const onInput = () => {
   showDatalist.value = true;
 };
 
-const selectSuggestion = (title: string) => {
-  if (!selectedTags.value.includes(title)) {
-    selectedTags.value.push(title);
+const selectSuggestion = (suggestion: SearchSuggestion) => {
+  if (!selectedTags.value.some(tag => tag.title === suggestion.title)) {
+    selectedTags.value.push(suggestion);
   }
   inputValue.value = "";
   showDatalist.value = false;
@@ -551,20 +551,28 @@ const addTagFromInput = () => {
     (s) => s.title.toLowerCase() === inputValue.value.toLowerCase()
   );
 
-  const tagToAdd = exactSuggestionObject
-    ? exactSuggestionObject.title
-    : inputValue.value;
-
-  if (tagToAdd && !selectedTags.value.includes(tagToAdd)) {
-    selectedTags.value.push(tagToAdd);
+  if (exactSuggestionObject && !selectedTags.value.some(tag => tag.title === exactSuggestionObject.title)) {
+    selectedTags.value.push(exactSuggestionObject);
+    inputValue.value = "";
+    showDatalist.value = false;
+    suggestions.value = [];
+  } else if (inputValue.value.trim() && !selectedTags.value.some(tag => tag.title === inputValue.value.trim())) {
+    // Si no hay sugerencia exacta, crear un objeto básico con el texto ingresado
+    const customTag: SearchSuggestion = {
+      title: inputValue.value.trim(),
+      coverUrl: null,
+      type: "custom",
+      externalId: undefined,
+    };
+    selectedTags.value.push(customTag);
     inputValue.value = "";
     showDatalist.value = false;
     suggestions.value = [];
   }
 };
 
-const removeTag = (tag: string) => {
-  selectedTags.value = selectedTags.value.filter((t) => t !== tag);
+const removeTag = (tag: SearchSuggestion) => {
+  selectedTags.value = selectedTags.value.filter((t) => t.title !== tag.title);
 };
 
 const focusInput = () => {
@@ -602,7 +610,16 @@ const sendData = async () => {
   recommendationsError.value = null;
   recommendations.value = [];
 
-  const tagsQueryParam = selectedTags.value.join(", ");
+  // Crear un string que contenga toda la información de los objetos
+  const itemName = selectedTags.value.map(tag => {
+    return `${tag.title} (${tag.type})${tag.externalId ? ` - ID: ${tag.externalId}` : ''}${tag.coverUrl ? ` - Cover: ${tag.coverUrl}` : ''}${tag.description ? ` - Descripcion: ${tag.description}` : ''}`;
+  }).join(' | ');
+
+  console.log('Enviando datos al backend:');
+  console.log('itemName:', itemName);
+  console.log('Objetos completos:', selectedTags.value);
+  console.log('Categoría seleccionada:', selectedCategory.value);
+
   const url = `${config.public.backend}/api/recommendation/${selectedCategory.value}`;
 
   try {
@@ -613,7 +630,7 @@ const sendData = async () => {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({
-        itemName: tagsQueryParam,
+        itemName: itemName, // Enviar el string con toda la información
       }),
     });
 

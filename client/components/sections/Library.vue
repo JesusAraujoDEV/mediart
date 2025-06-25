@@ -2,6 +2,32 @@
   <section class="w-2/3 glassEffect overflow-y-scroll h-full rounded-lg max-md:min-h-screen max-md:w-full p-6 custom-main-scroll">
     <h2 class="text-4xl font-extrabold mb-8 text-center">Mis Playlists Guardadas</h2>
 
+    <!-- Buscador -->
+    <div class="mb-6">
+      <div class="relative">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Buscar playlist por nombre..."
+          class="w-full bg-gray-800/70 border border-gray-600 rounded-lg px-4 py-3 pl-12 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+        />
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <button
+          v-if="searchQuery"
+          @click="clearSearch"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <div v-if="loadingPlaylists" class="flex flex-col items-center text-center">
       <p class="text-xl mb-4 text-gray-300">Cargando tus playlists guardadas...</p>
       <svg class="animate-spin h-10 w-10 text-blue-400 mt-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -17,9 +43,9 @@
       </button>
     </div>
 
-    <div v-else-if="savedPlaylists.length > 0" class="w-full flex flex-col gap-8 pb-4 px-2">
+    <div v-else-if="filteredPlaylists.length > 0" class="w-full flex flex-col gap-8 pb-4 px-2">
       <div
-        v-for="playlist in savedPlaylists"
+        v-for="playlist in filteredPlaylists"
         :key="playlist.id"
         class="bg-gray-800/70 rounded-xl p-6 shadow-lg transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-700/80 border border-gray-600 flex flex-col"
       >
@@ -77,6 +103,13 @@
       </div>
     </div>
 
+    <div v-else-if="searchQuery && savedPlaylists.length > 0" class="text-center text-gray-400 text-2xl flex flex-col items-center">
+      <p class="mb-4">No se encontraron playlists que coincidan con "{{ searchQuery }}"</p>
+      <button @click="clearSearch" class="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-colors text-lg">
+        Limpiar búsqueda
+      </button>
+    </div>
+
     <div v-else class="text-center text-gray-400 text-2xl flex flex-col items-center">
       <p class="mb-4">¡Tu biblioteca está vacía!</p>
       <p class="text-lg">Guarda algunas playlists desde las recomendaciones para verlas aquí.</p>
@@ -85,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import type { Playlist } from "~/types/Playlist"; // Asegúrate de que la ruta sea correcta
 import type { User } from "~/types/User"; // Necesitarás definir este tipo
@@ -97,7 +130,24 @@ const savedPlaylists = ref<Playlist[]>([]);
 const loadingPlaylists = ref(false);
 const errorPlaylists = ref<string | null>(null);
 const loadingPlaylistDetails = ref<Set<string>>(new Set()); // Set para IDs de playlists en carga, ahora espera strings
+const searchQuery = ref('');
 
+// Computed property para filtrar las playlists basado en la búsqueda
+const filteredPlaylists = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return savedPlaylists.value;
+  }
+  
+  const query = searchQuery.value.toLowerCase().trim();
+  return savedPlaylists.value.filter(playlist => 
+    playlist.name.toLowerCase().includes(query)
+  );
+});
+
+// Función para limpiar la búsqueda
+const clearSearch = () => {
+  searchQuery.value = '';
+};
 
 // Función para formatear la fecha de guardado
 const formatDate = (dateString: string) => {

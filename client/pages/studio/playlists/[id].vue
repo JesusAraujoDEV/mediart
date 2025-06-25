@@ -39,7 +39,7 @@
         </div>
 
         <div class="flex-grow">
-          <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 mb-2">
+          <h1 class="text-4xl font-extrabold mb-2">
             {{ playlist.name }}
           </h1>
           <p class="text-lg text-gray-300 mb-2">{{ playlist.description }}</p>
@@ -65,7 +65,7 @@
             v-for="item in playlist.items"
             :key="item.id"
             :to="`/studio/item/${item.id}`"
-            class="block bg-gray-700/60 rounded-lg p-3 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white"
+            class="bg-gray-700/60 rounded-lg p-3 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white"
           >
             <img
               :src="item.coverUrl || '/resources/item-placeholder.webp'"

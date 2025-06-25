@@ -1,5 +1,6 @@
 interface SearchSuggestion {
   title: string;
+  description?: string | null; 
   coverUrl?: string | null;
   type?: string;
   externalId?: string;
