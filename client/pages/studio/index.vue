@@ -633,8 +633,10 @@ const fetchSuggestions = async (query: string) => {
     // Filter out duplicates based on title and ensure selected tags are not suggested
     const uniqueSuggestions = new Map<string, SearchSuggestion>();
     newSuggestions.forEach((s) => {
+      // Crear una clave única que combine título y artista/descripción
+      const uniqueKey = s.description ? `${s.title} - ${s.description}` : s.title;
       if (!selectedTags.value.some(tag => tag.title === s.title)) {
-        uniqueSuggestions.set(s.title, s);
+        uniqueSuggestions.set(uniqueKey, s);
       }
     });
     suggestions.value = Array.from(uniqueSuggestions.values());
