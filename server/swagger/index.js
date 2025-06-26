@@ -3,6 +3,7 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 const path = require('path');
 const swaggerUi = require('swagger-ui-express');
+const {config} = require('./../config/config');
 
 // Importa las definiciones de tags
 const tags = require('./tags');
@@ -10,7 +11,6 @@ const tags = require('./tags');
 const allSchemas = require('./components/schemas');
 // Importa las respuestas comunes
 const commonResponses = require('./components/responses');
-// NO IMPORTAMOS allPaths aquí, porque swagger-jsdoc los escaneará con 'apis'
 
 const swaggerOptions = {
   swaggerDefinition: {
@@ -21,14 +21,14 @@ const swaggerOptions = {
       description: 'Documentación de la API de MediArt, una plataforma para gestionar y compartir contenido multimedia (playlists de películas, series, libros, etc.).',
       contact: {
         name: 'Tu Nombre/Equipo',
-        url: 'https://github.com/tu_usuario',
-        email: 'tu_email@example.com',
+        url: config.clientUrl, // Puedes dejar esta URL del cliente si no es la del backend de Swagger
+        email: 'chamitolol777@gmail.com',
       },
     },
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Servidor de Desarrollo Local',
+        url: config.backendUrl || 'http://localhost:3000', // Fallback a localhost si no está definida
+        description: 'Servidor API Principal',
       },
     ],
     tags: tags,
@@ -47,18 +47,15 @@ const swaggerOptions = {
         ...commonResponses,
       },
     },
-    // No definimos 'paths' aquí directamente, ya que swagger-jsdoc los buscará en 'apis'
-    // paths: {
-    //   ...allPaths, // <--- ESTO SE ELIMINA O COMENTA
-    // },
     security: [
       {
         bearerAuth: [],
       },
     ],
   },
-  // ¡CAMBIO CRUCIAL AQUÍ! Le decimos a swagger-jsdoc dónde buscar los JSDoc de las rutas
-  apis: [path.join(__dirname, './paths/**/*.js')],
+  apis: [
+    path.join(__dirname, './paths/**/*.js'),
+  ],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);

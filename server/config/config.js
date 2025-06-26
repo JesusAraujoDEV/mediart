@@ -8,6 +8,7 @@ const config = {
   apiKey: process.env.API_KEY,
   jwtSecret: process.env.JWT_SECRET,
   clientUrl: process.env.CLIENT_URL,
+  backendUrl: process.env.BACKEND_URL,
   noReplyEmail: process.env.NO_REPLY_EMAIL,
   emailAppPassword: process.env.EMAIL_APP_PASSWORD,
 
