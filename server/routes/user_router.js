@@ -77,7 +77,7 @@ router.patch(
   '/:id',
   passport.authenticate('jwt', { session: false }), // Asegúrate de que el usuario esté autenticado para actualizar su perfil
   validatorHandler(getUserSchema, 'params'),
-  uploadProfilePicture.single('profilePicture'), // <-- Middleware de Multer para una sola imagen
+  uploadProfilePicture.single('profilePictureUrl'), // <-- Middleware de Multer para una sola imagen
   validatorHandler(updateUserSchema, 'body'), // <-- El validador se ejecuta DESPUÉS de Multer
   async (req, res, next) => {
     try {
