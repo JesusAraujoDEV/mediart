@@ -5,8 +5,7 @@ const authSchemas = require('./auth_swagger_schema');
 const searchSchemas = require('./search_swagger_schema');
 const recommendationSchemas = require('./recommendation_swagger_schema');
 const playlistSchemas = require('./playlist_swagger_schema');
-
-
+const itemSchemas = require('./item_swagger_schema');
 
 // const playlistSchemas = require('./playlist_swagger_schema'); // Cuando lo crees
 
@@ -15,7 +14,8 @@ module.exports = {
   ...authSchemas,
   ...searchSchemas,
   ...recommendationSchemas,
-  ...playlistSchemas
+  ...playlistSchemas,
+  ...itemSchemas
   // ...playlistSchemas, // Descomenta cuando lo crees
   // ... (otros schemas)
 };

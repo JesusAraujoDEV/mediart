@@ -20,10 +20,10 @@ class ItemService {
             as: 'playlists',
             through: { attributes: [] }
           },
-          { // Nueva inclusión para acceder a los registros de la tabla intermedia
-            model: models.PlaylistItem,
-            as: 'playlistEntries' // Usamos el alias definido en item_model.js
-          }
+          // { // Nueva inclusión para acceder a los registros de la tabla intermedia
+          //   model: models.PlaylistItem,
+          //   as: 'playlistEntries' // Usamos el alias definido en item_model.js
+          // }
         ]
       }
     );
@@ -38,10 +38,10 @@ class ItemService {
           as: 'playlists',
           through: { attributes: [] }
         },
-        { // Nueva inclusión para acceder a los registros de la tabla intermedia
-          model: models.PlaylistItem,
-          as: 'playlistEntries' // Usamos el alias definido en item_model.js
-        }
+        // { // Nueva inclusión para acceder a los registros de la tabla intermedia
+        //   model: models.PlaylistItem,
+        //   as: 'playlistEntries' // Usamos el alias definido en item_model.js
+        // }
       ]
     });
     if (!item) {
