@@ -12,8 +12,15 @@
     </NuxtLink>
     <NuxtLink class="flex items-center justify-center" :to="`/profile/${actualUser ? actualUser : 'anonymous'}`">
       <img
-        class="icon rounded-full"
+        v-if="isLoading"
+        class="icon rounded-full animate-pulse"
         src="/resources/studio/previewProfile.webp"
+        alt="Cargando perfil..."
+      />
+      <img
+        v-else
+        class="icon rounded-full object-cover"
+        :src="(userProfile.profilePictureUrl ? config.public.backend + userProfile.profilePictureUrl : '/resources/studio/previewProfile.webp')"
         alt="Profile Preview"
       />
     </NuxtLink>
@@ -30,12 +37,62 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useFetch } from '#app';
+import type { UserProfile } from '~/types/User';
 
 const userString = localStorage.getItem("user");
 const actualUser = userString ? JSON.parse(userString).username : null;
 
 const router = useRouter();
+const config = useRuntimeConfig();
+
+const userProfile = ref<UserProfile>({
+  username: "",
+  email: "",
+  profilePictureUrl: "/resources/studio/previewProfile.webp",
+  bio: "",
+  id: -1,
+});
+
+const isLoading = ref(true);
+
+const loadUserProfile = async () => {
+  if (!actualUser) {
+    isLoading.value = false;
+    return;
+  }
+
+  try {
+    const { data, error } = await useFetch<UserProfile>(
+      `${config.public.backend}/api/users/by-username/${actualUser}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+      }
+    );
+
+    if (error.value) {
+      console.error("Error al cargar el perfil del usuario:", error.value);
+      return;
+    }
+
+    if (data.value) {
+      userProfile.value = {
+        ...data.value,
+        profilePictureUrl: data.value.profilePictureUrl || "/resources/studio/previewProfile.webp",
+      };
+    }
+  } catch (err) {
+    console.error("Excepción inesperada al cargar el perfil:", err);
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 const logout = () => {
   localStorage.removeItem("token");
@@ -45,6 +102,10 @@ const logout = () => {
   router.push('/');
   console.log("Redirecting to homepage.");
 };
+
+onMounted(() => {
+  loadUserProfile();
+});
 </script>
 
 <style scoped>

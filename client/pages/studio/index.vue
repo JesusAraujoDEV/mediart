@@ -12,33 +12,38 @@
       <div class="flex items-center justify-center max-md:w-full">
         <select
           v-model="searchType"
-          class="p-2 px-6 rounded-full bg-gray-700 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none"
+          class="p-2 px-6 rounded-full bg-gray-700 w-fit text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none"
         >
-          <option value="general">Buscar en todo</option>
-          <option value="song">Buscar canciones</option>
-          <option value="artist">Buscar artistas</option>
-          <option value="album">Buscar álbumes</option>
-          <option value="movie">Buscar películas</option>
-          <option value="tvshow">Buscar series</option>
-          <option value="book">Buscar libros</option>
-          <option value="videogame">Buscar videojuegos</option>
+          <option value="general">Todo</option>
+          <option value="song">Canciones</option>
+          <option value="artist">Artistas</option>
+          <option value="album">Álbumes</option>
+          <option value="movie">Películas</option>
+          <option value="tvshow">Series</option>
+          <option value="book">Libros</option>
+          <option value="videogame">Videojuegos</option>
         </select>
       </div>
 
       <div class="relative flex-grow mr-3 max-md:mr-0 max-md:w-full">
         <div
-          class="glassEffect shadow-xl rounded-full p-3 flex flex-wrap items-center gap-2 min-h-[48px] border border-gray-700"
+          class="glassEffect shadow-xl rounded-full p-3 flex flex-wrap items-center gap-2 min-h-[48px] border border-gray-700 transition-all duration-300"
+          :class="{
+            'rounded-2xl': selectedTags.length > 2,
+            'rounded-xl': selectedTags.length > 1 && selectedTags.length <= 2,
+            'rounded-full': selectedTags.length <= 1
+          }"
           @click="focusInput"
         >
           <span
             v-for="tag in selectedTags"
             :key="tag.title"
-            class="bg-white/20 rounded-full px-3 py-1 text-sm flex items-center gap-1 backdrop-blur-sm"
+            class="bg-white/20 rounded-full px-3 py-1 text-sm flex items-center gap-1 backdrop-blur-sm flex-shrink-0 max-w-[200px]"
           >
-            {{ tag.title }}
+            <span class="truncate">{{ tag.title }}</span>
             <button
               @click.stop="removeTag(tag)"
-              class="text-xs cursor-pointer text-white/80 hover:text-white ml-1"
+              class="text-xs cursor-pointer text-white/80 hover:text-white ml-1 flex-shrink-0"
             >
               ✕
             </button>
@@ -46,8 +51,8 @@
           <input
             ref="searchInput"
             type="text"
-            class="bg-transparent flex-grow outline-none text-white placeholder-white/60 min-w-[50px] max-md:h-5"
-            placeholder="Escribe tu consulta aquí..."
+            class="bg-transparent flex-grow outline-none text-white placeholder-white/60 min-w-[120px] max-md:min-w-[80px]"
+            :placeholder="getSearchPlaceholder()"
             v-model="inputValue"
             @input="onInput"
             @focus="showDatalist = true"
@@ -80,7 +85,10 @@
               >
                 ?
               </div>
-              <span>{{ suggestion.title }}</span>
+              <div class="flex-grow min-w-0">
+                <span class="font-medium truncate block">{{ suggestion.title }}</span>
+                <p v-if="suggestion.description" class="text-xs text-gray-400 truncate">{{ suggestion.description }}</p>
+              </div>
             </li>
           </ul>
         </Transition>
@@ -387,6 +395,29 @@ const playlistSaving = ref(false); // <--- Nueva variable de estado para el spin
 
 const searchType = ref<string>("general");
 
+// Función para obtener el placeholder según el tipo de búsqueda
+const getSearchPlaceholder = () => {
+  switch (searchType.value) {
+    case 'song':
+      return 'Escribe el nombre de una canción...';
+    case 'artist':
+      return 'Escribe el nombre de un artista...';
+    case 'album':
+      return 'Escribe el nombre de un álbum...';
+    case 'movie':
+      return 'Escribe el nombre de una película...';
+    case 'tvshow':
+      return 'Escribe el nombre de una serie...';
+    case 'book':
+      return 'Escribe el nombre de un libro...';
+    case 'videogame':
+      return 'Escribe el nombre de un videojuego...';
+    case 'general':
+    default:
+      return 'Escribe tu consulta aquí...';
+  }
+};
+
 const fetchSuggestions = async (query: string) => {
   console.log('Fetching suggestions for:', { query, searchType: searchType.value });
   
@@ -431,9 +462,7 @@ const fetchSuggestions = async (query: string) => {
     // Procesar según el tipo de búsqueda seleccionado
     switch (searchType.value) {
       case 'song':
-        console.log('Procesando songs:', data);
         if (data.songs && Array.isArray(data.songs)) {
-          console.log('Songs encontradas:', data.songs.length);
           newSuggestions.push(
             ...data.songs.map((item: any) => ({
               title: item.title,
@@ -444,9 +473,6 @@ const fetchSuggestions = async (query: string) => {
               externalUrl: item.external_url || null,
             }))
           );
-          console.log('Sugerencias procesadas para songs:', newSuggestions.length);
-        } else {
-          console.log('No se encontraron songs en la respuesta o no es un array');
         }
         break;
 
