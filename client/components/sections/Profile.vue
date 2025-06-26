@@ -5,15 +5,12 @@
     <img
       v-if="isLoading"
       class="size-36 animate-pulse rounded-full object-cover"
-      :src="
-        userProfile.profilePictureUrl ||
-        '/resources/studio/previewProfile.webp'
-      "
+      :src="(userProfile.profilePictureUrl ? config.public.backend + userProfile.profilePictureUrl : '/resources/studio/previewProfile.webp')"
       alt="Cargando perfil..."
     />
     <img
       v-else
-      :src="userProfile.profilePictureUrl"
+      :src="(userProfile.profilePictureUrl ? config.public.backend + userProfile.profilePictureUrl : '/resources/studio/previewProfile.webp')"
       alt="Profile"
       class="size-36 rounded-full object-cover"
     />

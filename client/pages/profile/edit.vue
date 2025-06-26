@@ -10,7 +10,7 @@
       <div class="flex flex-col items-center mb-6">
         <div class="relative mb-4">
           <img
-            :src="editableUserProfile.profilePictureUrl"
+            :src="(editableUserProfile.profilePictureUrl ? config.public.backend + editableUserProfile.profilePictureUrl : '/resources/studio/previewProfile.webp')"
             alt="Profile"
             class="size-36 rounded-full object-cover border-2 border-white/50 shadow-md"
           />
