@@ -8,9 +8,9 @@
       <h2 class="text-3xl font-bold mb-4">Editar Perfil</h2>
 
       <div class="flex flex-col items-center mb-6">
-        <div class="relative mb-4">
+        <div class="relative mb-4 group">
           <img
-            :src="(editableUserProfile.profilePictureUrl ? config.public.backend + editableUserProfile.profilePictureUrl : '/resources/studio/previewProfile.webp')"
+            :src="getProfilePictureUrl()"
             alt="Profile"
             class="size-36 rounded-full object-cover border-2 border-white/50 shadow-md"
           />
@@ -40,6 +40,17 @@
                 d="M1.5 6a3 3 0 0 1 3-3h15a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H4.5a3 3 0 0 1-3-3V6Zm12.912 1.613a4.5 4.5 0 0 0-8.736 0L4.5 18h15l-1.588-10.387ZM12 10.5a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3"
                 clip-rule="evenodd"
               />
+            </svg>
+          </button>
+          <button
+            v-if="editableUserProfile.profilePictureUrl && editableUserProfile.profilePictureUrl !== '' && getProfilePictureUrl() !== '/resources/studio/previewProfile.webp'"
+            @click="removeProfilePicture"
+            class="absolute top-0 right-0 bg-red-600 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+            title="Eliminar foto de perfil"
+            type="button"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
@@ -161,6 +172,7 @@ const isUpdating = ref(false);
 const successMessage = ref("");
 const errorMessage = ref("");
 const fileInput = ref<HTMLInputElement | null>(null);
+const previewProfilePicture = ref<string | null>(null);
 
 const config = useRuntimeConfig();
 const route = useRoute();
@@ -177,10 +189,23 @@ const handleImageUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
   if (file) {
-    editableUserProfile.value.profilePictureUrl = URL.createObjectURL(file);
+    previewProfilePicture.value = URL.createObjectURL(file);
     console.log("Archivo seleccionado para subir:", file);
   }
 };
+
+function getProfilePictureUrl() {
+  if (previewProfilePicture.value) {
+    return previewProfilePicture.value;
+  }
+  if (!editableUserProfile.value.profilePictureUrl || editableUserProfile.value.profilePictureUrl === '/resources/studio/previewProfile.webp') {
+    return '/resources/studio/previewProfile.webp';
+  }
+  if (editableUserProfile.value.profilePictureUrl.startsWith('http')) {
+    return editableUserProfile.value.profilePictureUrl;
+  }
+  return config.public.backend + editableUserProfile.value.profilePictureUrl;
+}
 
 const fetchUserProfile = async () => {
   isLoading.value = true;
@@ -286,7 +311,8 @@ const updateProfile = async () => {
       formData = new FormData();
       formData.append("username", editableUserProfile.value.username);
       formData.append("bio", editableUserProfile.value.bio);
-      formData.append("profilePicture", fileToUpload!);
+      formData.append("profilePictureUrl", fileToUpload!);
+      console.log(formData);  
       requestOptions = {
         method: "PATCH",
         headers: {
@@ -362,6 +388,11 @@ const updateProfile = async () => {
     isUpdating.value = false;
   }
 };
+
+function removeProfilePicture() {
+  editableUserProfile.value.profilePictureUrl = '';
+  previewProfilePicture.value = null;
+}
 
 onMounted(() => {
   fetchUserProfile();

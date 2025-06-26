@@ -47,7 +47,7 @@
             class="bg-gray-700/60 rounded-lg p-3 flex items-center shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white"
           >
             <img
-              :src="user.profilePictureUrl || '/resources/studio/previewProfile.webp'"
+              :src="getProfilePictureUrl(user)"
               alt="Profile Picture"
               class="w-16 h-16 object-cover rounded-full flex-shrink-0 mr-4 shadow-sm border border-gray-500"
             />
@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { useFetch } from '#app';
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 import type { UserProfile } from "~/types/User";
@@ -93,6 +93,18 @@ const searchPerformed = ref(false);
 let abortController: AbortController | null = null;
 
 const config = useRuntimeConfig();
+
+// Función para obtener la URL de la foto de perfil correctamente
+function getProfilePictureUrl(user: any) {
+  if (!user.profilePictureUrl || user.profilePictureUrl === '/resources/studio/previewProfile.webp') {
+    return '/resources/studio/previewProfile.webp';
+  }
+  // Si ya es una URL absoluta (por ejemplo, empieza con http), no concatenar
+  if (user.profilePictureUrl.startsWith('http')) {
+    return user.profilePictureUrl;
+  }
+  return config.public.backend + user.profilePictureUrl;
+}
 
 // Simple debounce function
 const debounce = (func: Function, delay: number) => {
