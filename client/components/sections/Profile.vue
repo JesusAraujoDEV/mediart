@@ -194,7 +194,7 @@ const reloadProfile = async () => {
       userProfile.value = {
         ...data.value,
         profilePictureUrl:
-          data.value.profilePictureUrl || "/resources/studio/previewProfile.webp",
+        config.public.backend+data.value.profilePictureUrl || "/resources/studio/previewProfile.webp",
         bio: data.value.bio || "Este usuario no ha proporcionado una biografía.",
         followersUsers: data.value.followersUsers || [],
         followingUsers: data.value.followingUsers || [],
@@ -325,7 +325,7 @@ onMounted(async () => {
       userProfile.value = {
         ...data.value,
         profilePictureUrl:
-          data.value.profilePictureUrl || "/resources/studio/previewProfile.webp",
+          config.public.backend+data.value.profilePictureUrl || "/resources/studio/previewProfile.webp",
         bio: data.value.bio || "Este usuario no ha proporcionado una biografía.",
         followersUsers: data.value.followersUsers || [],
         followingUsers: data.value.followingUsers || [],

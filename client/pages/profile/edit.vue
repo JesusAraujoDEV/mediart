@@ -245,20 +245,87 @@ const updateProfile = async () => {
   errorMessage.value = "";
 
   try {
-    const { data, error } = await useFetch<UserProfile>(
-      `${config.public.backend}/api/users/${JSON.parse(localStorage.getItem("user")).id}`, // Asumiendo actualización por el nombre de usuario original o ID
-      {
-        method: "PATCH", // O PATCH, según tu API
+    // Obtener el usuario del localStorage de forma segura
+    const storedUserRaw = localStorage.getItem("user");
+    if (!storedUserRaw) {
+      errorMessage.value = "No se encontró información de usuario en el almacenamiento local.";
+      isUpdating.value = false;
+      return;
+    }
+    const storedUser = JSON.parse(storedUserRaw);
+    const userId = storedUser.id;
+    if (!userId) {
+      errorMessage.value = "No se encontró el ID del usuario.";
+      isUpdating.value = false;
+      return;
+    }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      errorMessage.value = "No se encontró el token de autenticación. Por favor, inicia sesión de nuevo.";
+      isUpdating.value = false;
+      return;
+    }
+
+    const backendUrl = config.public.backend || '';
+    const userIdStr = String(userId || '');
+
+    // --- Lógica para la imagen de perfil ---
+    let formData: FormData | null = null;
+    let useFormData = false;
+    let fileToUpload: File | null = null;
+    // Detectar si el usuario subió una nueva imagen
+    if (fileInput.value && fileInput.value.files && fileInput.value.files[0]) {
+      fileToUpload = fileInput.value.files[0];
+      useFormData = true;
+    }
+    // Detectar si el usuario quiere eliminar la foto (profilePictureUrl === "")
+    const removePhoto = editableUserProfile.value.profilePictureUrl === "";
+
+    let requestOptions: any;
+    if (useFormData) {
+      formData = new FormData();
+      formData.append("username", editableUserProfile.value.username);
+      formData.append("bio", editableUserProfile.value.bio);
+      formData.append("profilePicture", fileToUpload!);
+      requestOptions = {
+        method: "PATCH",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      };
+    } else if (removePhoto) {
+      // Si se elimina la foto, enviar profilePictureUrl como string vacío
+      requestOptions = {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          // 'Authorization': `Bearer ${localStorage.getItem('token')}` // Importante: Incluir token de autenticación
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           username: editableUserProfile.value.username,
           bio: editableUserProfile.value.bio,
-          // profilePictureUrl: // Solo incluir si se cambió y se subió exitosamente
+          profilePictureUrl: "",
         }),
-      }
+      };
+    } else {
+      // Si no se cambia la foto, solo username y bio
+      requestOptions = {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          username: editableUserProfile.value.username,
+          bio: editableUserProfile.value.bio,
+        }),
+      };
+    }
+
+    const { data, error } = await useFetch<UserProfile>(
+      `${backendUrl}/api/users/${userIdStr}`,
+      requestOptions
     );
 
     if (error.value) {
@@ -271,9 +338,7 @@ const updateProfile = async () => {
       userProfile.value = { ...data.value, email: userProfile.value.email };
 
       // Actualizar el almacenamiento local si los datos del usuario se guardan allí
-      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
       if (storedUser.username === userProfile.value.username) {
-        // Verificar si es el usuario actualmente logueado
         localStorage.setItem(
           "user",
           JSON.stringify({
@@ -285,10 +350,8 @@ const updateProfile = async () => {
         );
       }
 
-      // Si el nombre de usuario cambió, redirigir
-      if (userProfile.value.username !== editableUserProfile.value.username) {
-        router.push(`/studio/profile/${editableUserProfile.value.username}`);
-      }
+      // Redirigir siempre al perfil actualizado
+      router.push(`/profile/${userProfile.value.username}`);
     } else {
       throw new Error("No se recibieron datos después de la actualización del perfil.");
     }
