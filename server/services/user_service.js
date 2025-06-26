@@ -179,7 +179,7 @@ class UserService {
     return user.savedPlaylists; // Devuelve el array de playlists guardadas
   }
 
-  async findOne(id, associationsToInclude = []) {
+  async findOne(id, associationsToInclude = [], includeRecoveryToken = false) {
     const allowedAssociations = {
       'ownedPlaylists': {
         model: models.Playlist,
@@ -226,8 +226,11 @@ class UserService {
     };
 
     let findOptions = {
-        attributes: { exclude: ['passwordHash', 'recoveryToken'] }
+      attributes: { exclude: ['passwordHash'] }
     };
+    if (!includeRecoveryToken) {
+      findOptions.attributes.exclude.push('recoveryToken');
+    }
     findOptions.include = [];
 
     if (Array.isArray(associationsToInclude) && associationsToInclude.length > 0) {

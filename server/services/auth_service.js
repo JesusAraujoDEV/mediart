@@ -77,13 +77,22 @@ class AuthService{
         }
     }
 
-    async changePassword(token, newPassword){
-        try{
+    async changePassword(token, newPassword) {
+        try {
             const payload = jwt.verify(token, config.jwtSecret);
-            const user = await service.findOne(payload.sub);
-            if(user.recoveryToken !== token){
-                throw boom.unauthorized();
+
+            const user = await service.findOne(payload.sub, [], true);
+
+            if (!user || !user.recoveryToken) {
+                console.warn(`Intento de cambio de contraseña con token inválido o usado para userId: ${payload.sub}`);
+                throw boom.unauthorized('Invalid or already used recovery token. Please request a new one.');
             }
+
+            if (user.recoveryToken !== token) {
+                console.warn(`Discrepancia de recoveryToken para userId: ${payload.sub}. Token DB: ${user.recoveryToken}, Token Request: ${token}`);
+                throw boom.unauthorized('Invalid recovery token. Please request a new one.');
+            }
+
             const hash = await bcrypt.hash(newPassword, 10);
             await service.update(user.id, {
                 recoveryToken: null,
