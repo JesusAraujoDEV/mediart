@@ -6,7 +6,7 @@ const swaggerUi = require('swagger-ui-express');
 const {config} = require('./../config/config');
 
 // Importa las definiciones de tags
-const tags = require('./tags');
+
 // Importa el index de schemas
 const allSchemas = require('./components/schemas');
 // Importa las respuestas comunes
@@ -31,7 +31,6 @@ const swaggerOptions = {
         description: 'Servidor API Principal',
       },
     ],
-    tags: tags,
     components: {
       securitySchemes: {
         bearerAuth: {
