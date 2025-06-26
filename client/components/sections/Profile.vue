@@ -49,7 +49,7 @@
         v-if="!isFriend"
         @click="addFriend"
         :disabled="isFriendActionLoading"
-        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        class="bg-blue-500 text-white px-4 cursor-pointer py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {{ isFriendActionLoading ? 'Agregando...' : 'Agregar amigo' }}
       </button>
@@ -57,7 +57,7 @@
         v-else
         @click="removeFriend"
         :disabled="isFriendActionLoading"
-        class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        class="bg-red-500 text-white px-4 cursor-pointer py-2 rounded hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {{ isFriendActionLoading ? 'Eliminando...' : 'Eliminar de amigos' }}
       </button>
@@ -66,10 +66,6 @@
     <NuxtLink v-else to="/profile/edit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
       >Editar Perfil</NuxtLink
     >
-
-    <p v-if="friendActionMessage" :class="{'text-green-400': !friendActionError, 'text-red-400': friendActionError}" class="mt-2 text-sm">
-      {{ friendActionMessage }}
-    </p>
   </section>
 </template>
 
@@ -78,17 +74,25 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useFetch } from '#app';
 import type { UserProfile as UserProfileType } from "~/types/User";
+import Swal from 'sweetalert2';
 
 interface UserProfile extends UserProfileType {
   followersUsers?: any[];
   followingUsers?: any[];
 }
 
+interface FollowEntry {
+  createdAt: string,
+  updatedAt: string,
+  id: number,
+  followerUserId: number,
+  followedUserId: number
+}
+
 // Interfaces for response from friend-related API calls
 interface FriendActionResponse {
   message: string;
-  success: boolean;
-  isFriend?: boolean;
+  followEntry?: FollowEntry
 }
 
 const userProfile = ref<UserProfile>({
@@ -152,30 +156,52 @@ const checkFriendshipStatus = async () => {
   }
 
   try {
-    const { data, error } = await useFetch<boolean>(
-      `${config.public.backend}/api/users/${currentUserId.value}/friends/${userProfile.value.id}`,
+    // Usar el endpoint correcto para saber si ya lo sigo
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${config.public.backend}/api/profile/my-followings`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error('No se pudo obtener la lista de seguidos');
+    }
+    const data = await response.json();
+    // data debe ser un array de usuarios que sigo
+    isFriend.value = Array.isArray(data) && data.some((u: any) => u.id === userProfile.value.id);
+  } catch (err) {
+    console.error('Error al verificar si ya sigues a este usuario:', err);
+    isFriend.value = false;
+  }
+};
+
+const reloadProfile = async () => {
+  const usernameFromUrl = route.params.username as string;
+  try {
+    const { data, error } = await useFetch<UserProfile>(
+      `${config.public.backend}/api/users/by-username/${usernameFromUrl}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
       }
     );
-
-    if (error.value) {
-      console.error("Error al verificar estado de amistad:", error.value);
-      isFriend.value = false; // Assume not friends on error
-      return;
+    if (data.value) {
+      userProfile.value = {
+        ...data.value,
+        profilePictureUrl:
+          data.value.profilePictureUrl || "/resources/studio/previewProfile.webp",
+        bio: data.value.bio || "Este usuario no ha proporcionado una biografía.",
+        followersUsers: data.value.followersUsers || [],
+        followingUsers: data.value.followingUsers || [],
+      };
     }
-
-    // Backend should return true/false directly, or an object with a boolean. Adjust based on your actual backend response.
-    // Assuming backend returns a boolean directly
-    isFriend.value = data.value === true;
-
   } catch (err) {
-    console.error("Excepción al verificar estado de amistad:", err);
-    isFriend.value = false;
+    // No hacer nada especial aquí
   }
 };
 
@@ -210,14 +236,44 @@ const sendFriendAction = async (action: 'add' | 'remove') => {
       return;
     }
 
-    if (data.value && data.value.success) {
-      isFriend.value = action === 'add'; // Update friend status based on action
-      friendActionMessage.value = data.value.message || `Amigo ${action === 'add' ? 'agregado' : 'eliminado'} correctamente.`;
-    } else {
-      friendActionError.value = true;
-      friendActionMessage.value = data.value?.message || `Operación fallida al ${action === 'add' ? 'agregar' : 'eliminar'} amigo.`;
+    await reloadProfile();
+    await checkFriendshipStatus();
+    // Nueva lógica: si data.value?.followEntry existe, se siguió; si no, se dejó de seguir
+    if (data.value && data.value.followEntry) {
+      isFriend.value = true;
+      friendActionMessage.value = data.value.message || 'Amigo agregado correctamente.';
+      try {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          heightAuto: false,
+          icon: 'success',
+          title: friendActionMessage.value,
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } catch (e) {
+        window.alert(friendActionMessage.value);
+      }
+    } else if (data.value && !data.value.followEntry) {
+      isFriend.value = false;
+      friendActionMessage.value = data.value.message || 'Amigo eliminado correctamente.';
+      try {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          heightAuto: false,
+          icon: 'success',
+          title: friendActionMessage.value,
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } catch (e) {
+        window.alert(friendActionMessage.value);
+      }
     }
-
   } catch (err) {
     console.error(`Excepción al ${action === 'add' ? 'agregar' : 'eliminar'} amigo:`, err);
     friendActionError.value = true;
@@ -307,12 +363,3 @@ function goToFollowers() {
 
 defineExpose({ goToFollowing, goToFollowers });
 </script>
-
-<style scoped>
-/* Estilos para el efecto glass, etc., si no están en un archivo global */
-.glassEffect {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-</style>
