@@ -14,6 +14,7 @@ const passport = require('passport');
 const boom = require('@hapi/boom');
 const { addCollaboratorSchema, addCollaboratorsSchema } = require('../schemas/collaborator_schema');
 const { uploadPlaylistPicture } = require('./../utils/multer_config');
+const { checkPlaylistOwnershipOrCollaboration } = require('../middlewares/auth_handler');
 
 const router = express.Router();
 const service = new PlaylistService();
@@ -128,18 +129,17 @@ router.post(
   '/:playlistId/items',
   passport.authenticate('jwt', { session: false }),
   validatorHandler(getPlaylistSchema, 'params'),
+  checkPlaylistOwnershipOrCollaboration,
   validatorHandler(addItemsToPlaylistUnifiedSchema, 'body'),
   async (req, res, next) => {
     try {
-      const { playlistId: playlistId } = req.params;
+      const { playlistId } = req.params;
       const body = req.body;
-      const userId = req.user.sub;
+      // Ya no necesitas obtener la playlist aquí, está en req.playlist
+      const playlist = req.playlist; // <--- ¡La playlist ya está disponible!
 
-      const playlist = await service.findOne(playlistId);
-
-      if (playlist.ownerUserId !== userId) {
-        throw boom.forbidden('You are not the owner of this playlist.');
-      }
+      // La lógica de permisos ya fue manejada por checkPlaylistOwnershipOrCollaboration
+      // if (playlist.ownerUserId !== userId && !isCollaborator) { ... } ya no es necesario aquí
 
       let rta;
       if (body.itemIds) {
@@ -161,16 +161,14 @@ router.delete(
   '/:playlistId/items/:itemId',
   passport.authenticate('jwt', { session: false }),
   validatorHandler(removeItemFromPlaylistSchema, 'params'),
+  checkPlaylistOwnershipOrCollaboration, // ¡NUEVO MIDDLEWARE AQUÍ!
   async (req, res, next) => {
     try {
       const { playlistId, itemId } = req.params;
-      const userId = req.user.sub;
+      const playlist = req.playlist;
 
-      const playlist = await service.findOne(playlistId);
-
-      if (playlist.ownerUserId !== userId) {
-        throw boom.forbidden('You are not the owner of this playlist.');
-      }
+      // La lógica de permisos ya fue manejada por checkPlaylistOwnershipOrCollaboration
+      // if (playlist.ownerUserId !== userId && !isCollaborator) { ... } ya no es necesario aquí
 
       const rta = await service.removeItemFromPlaylist(playlist, itemId);
 
