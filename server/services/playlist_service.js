@@ -105,6 +105,59 @@ class PlaylistService {
     };
   }
 
+  async removeCollaborator(playlistId, userIdToRemove) {
+    const playlist = await models.Playlist.findByPk(playlistId);
+    if (!playlist) {
+      throw boom.notFound('Playlist not found.');
+    }
+    if (!playlist.isCollaborative) {
+      throw boom.badRequest('This playlist is not configured as collaborative.');
+    }
+
+    // El dueño no puede ser "removido" como colaborador
+    if (playlist.ownerUserId === userIdToRemove) {
+      throw boom.badRequest('The playlist owner cannot be removed as a collaborator.');
+    }
+
+    const libraryEntry = await models.Library.findOne({
+      where: {
+        userId: userIdToRemove,
+        playlistId: playlistId,
+        isCollaborator: true // Nos aseguramos de que realmente era un colaborador
+      }
+    });
+
+    if (!libraryEntry) {
+      throw boom.notFound(`User ${userIdToRemove} is not a collaborator of playlist ${playlistId}.`);
+    }
+
+    // Establecer isCollaborator a false
+    await libraryEntry.update({ isCollaborator: false });
+
+    return { status: 'success', message: `User ${userIdToRemove} is no longer a collaborator of playlist ${playlistId}.` };
+  }
+
+  async removeMultipleCollaborators(playlistId, userIdsToRemove) {
+    const playlist = await this.findOne(playlistId);
+    if (!playlist.isCollaborative) {
+      throw boom.badRequest('This playlist is not configured as collaborative.');
+    }
+
+    const results = [];
+    for (const userId of userIdsToRemove) {
+      try {
+        const result = await this.removeCollaborator(playlistId, userId);
+        results.push({ userId, status: 'success', message: result.message });
+      } catch (error) {
+        results.push({ userId, status: 'error', message: error.output?.payload?.message || error.message || 'Failed to remove as collaborator' });
+      }
+    }
+    return {
+      message: `Attempted to remove ${userIdsToRemove.length} collaborators.`,
+      details: results
+    };
+  }
+
   async find() {
     const playlists = await models.Playlist.findAll(
       {

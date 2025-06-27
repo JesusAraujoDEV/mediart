@@ -216,4 +216,43 @@ router.post(
   }
 );
 
+router.patch(
+  '/:playlistId/collaborators/remove',
+  passport.authenticate('jwt', { session: false }),
+  validatorHandler(getPlaylistSchema, 'params'),
+  validatorHandler(addCollaboratorsSchema, 'body'),
+  async (req, res, next) => {
+    try {
+      const { playlistId } = req.params;
+      const { userId, userIds } = req.body;
+      const currentUserId = req.user.sub;
+
+      const playlist = await service.findOne(playlistId);
+
+      // Solo el dueño puede añadir/eliminar colaboradores
+      if (playlist.ownerUserId !== currentUserId) {
+        throw boom.forbidden('You do not have permission to manage collaborators for this playlist. Only the owner can perform this action.');
+      }
+
+      // La playlist debe ser colaborativa para gestionar colaboradores
+      if (!playlist.isCollaborative) {
+        throw boom.badRequest('This playlist is not configured as collaborative.');
+      }
+
+      let result;
+      if (userId) {
+        result = await service.removeCollaborator(playlistId, userId);
+      } else if (userIds && userIds.length > 0) {
+        result = await service.removeMultipleCollaborators(playlistId, userIds);
+      } else {
+        throw boom.badRequest('Must provide either "userId" (single user ID) or "userIds" (array of user IDs) to remove collaborators.');
+      }
+
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 module.exports = router;
