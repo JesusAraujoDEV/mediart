@@ -14,7 +14,7 @@ const setupSwagger = require('./swagger');
 // Sirve los archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-const whitelist = ['http://localhost:3000', config.clientUrl];
+const whitelist = ['http://localhost:3000', config.clientUrl, config.backendUrl];
 const options = {
   origin: (origin, callback) => {
     if (whitelist.includes(origin) || !origin){

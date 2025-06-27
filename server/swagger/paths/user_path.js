@@ -52,6 +52,11 @@
  *                 type: string
  *                 format: binary
  *                 description: Imagen JPEG, PNG, GIF o WEBP (máx 2MB)
+ *               profilePictureUrl:
+ *                 type: string
+ *                 format: uri
+ *                 example: https://cdn.ejemplo.com/avatar.png
+ *                 description: URL externa de la foto de perfil (opcional)
  *     responses:
  *       201:
  *         description: Usuario creado exitosamente
@@ -166,11 +171,11 @@
  *               profilePicture:
  *                 type: string
  *                 format: binary
- *                 description: Nueva foto de perfil
+ *                 description: Nueva imagen de perfil a subir
  *               profilePictureUrl:
  *                 type: string
- *                 enum: [ "" ]
- *                 description: Enviar cadena vacía para eliminar la foto actual
+ *                 example: ""
+ *                 description: URL externa de la nueva imagen o cadena vacía ("") para eliminarla
  *     responses:
  *       200:
  *         description: Usuario actualizado exitosamente

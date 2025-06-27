@@ -4,7 +4,7 @@ const validatorHandler = require('./../middlewares/validator_handler');
 const { updateUserSchema, createUserSchema, getUserSchema, getUserByUsernameSchema, getUserQuerySchema } = require('./../schemas/user_schema');
 const { uploadProfilePicture } = require('./../utils/multer_config');
 const passport = require('passport');
-const { Boom } = require('@hapi/boom');
+const boom = require('@hapi/boom');
 
 const router = express.Router();
 const service = new UserService();
@@ -88,7 +88,7 @@ router.patch(
 
       // Asegurarse de que el usuario solo pueda actualizar su propio perfil
       if (parseInt(id, 10) !== parseInt(userIdFromToken, 10)) {
-        throw Boom.forbidden('You can only update your own profile.');
+        throw boom.forbidden('You can only update your own profile.');
       }
 
       // Si se subió un archivo, Multer lo guarda en req.file
@@ -111,6 +111,7 @@ router.patch(
     }
   }
 );
+
 router.delete('/:id',
   validatorHandler(getUserSchema, 'params'),
   async (req, res, next) => {
