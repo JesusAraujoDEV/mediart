@@ -20,7 +20,7 @@
       <img
         v-else
         class="icon rounded-full object-cover"
-        :src="(userProfile.profilePictureUrl ? config.public.backend + userProfile.profilePictureUrl : '/resources/studio/previewProfile.webp')"
+        :src="(userProfile.profilePictureUrl ? (userProfile.profilePictureUrl.startsWith('http') ? userProfile.profilePictureUrl : config.public.backend + userProfile.profilePictureUrl) : '/resources/studio/previewProfile.webp')"
         alt="Profile Preview"
       />
     </NuxtLink>

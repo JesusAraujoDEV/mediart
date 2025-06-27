@@ -82,11 +82,9 @@
               class="bg-gray-800/70 rounded-xl p-4 shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:bg-gray-700/80 border border-gray-600 flex items-center"
             >
               <img
-                :src="(follower.profilePictureUrl ? config.public.backend + follower.profilePictureUrl : '/resources/studio/previewProfile.webp')"
+                :src="(follower.profilePictureUrl ? (follower.profilePictureUrl.startsWith('http') ? follower.profilePictureUrl : config.public.backend + follower.profilePictureUrl) : '/resources/studio/previewProfile.webp')"
                 :alt="follower.username"
-                class="w-16 h-16 object-cover rounded-full mr-4 flex-shrink-0 shadow-md border border-gray-500"
-                loading="lazy"
-                @error="handleImageError"
+                class="w-12 h-12 rounded-full object-cover"
               />
               <div class="flex-grow min-w-0">
                 <h3 class="text-xl font-bold text-white mb-1 truncate">{{ follower.username }}</h3>

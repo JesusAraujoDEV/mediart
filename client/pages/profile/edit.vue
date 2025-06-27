@@ -146,7 +146,15 @@ definePageMeta({
   ],
 });
 
+interface EditableUserProfile {
+  username: string;
+  email: string;
+  profilePictureUrl?: string;
+  bio: string;
+}
+
 interface UserProfile {
+  id: number;
   username: string;
   email: string;
   profilePictureUrl?: string;
@@ -154,13 +162,14 @@ interface UserProfile {
 }
 
 const userProfile = ref<UserProfile>({
+  id: -1,
   username: "",
   email: "",
   profilePictureUrl: "/resources/studio/previewProfile.webp",
   bio: "",
 });
 
-const editableUserProfile = ref<UserProfile>({
+const editableUserProfile = ref<EditableUserProfile>({
   username: "",
   email: "",
   profilePictureUrl: "/resources/studio/previewProfile.webp",
@@ -179,6 +188,7 @@ const route = useRoute();
 const router = useRouter();
 
 const defaultProfile: UserProfile = {
+  id: -1,
   username: "Usuario Anónimo",
   email: "anonimo@example.com",
   profilePictureUrl: "/resources/studio/previewProfile.webp",
@@ -245,12 +255,20 @@ const fetchUserProfile = async () => {
 
     if (data.value) {
       userProfile.value = {
-        ...data.value,
+        id: data.value.id || -1,
+        username: data.value.username,
+        email: data.value.email,
         profilePictureUrl:
           data.value.profilePictureUrl ||
           "/resources/studio/previewProfile.webp",
+        bio: data.value.bio || "",
       };
-      editableUserProfile.value = { ...userProfile.value };
+      editableUserProfile.value = {
+        username: userProfile.value.username,
+        email: userProfile.value.email,
+        bio: userProfile.value.bio,
+        profilePictureUrl: userProfile.value.profilePictureUrl,
+      };
     } else {
       throw new Error("No se encontró el perfil del usuario.");
     }
@@ -361,7 +379,15 @@ const updateProfile = async () => {
 
     if (data.value) {
       successMessage.value = "Perfil actualizado exitosamente!";
-      userProfile.value = { ...data.value, email: userProfile.value.email };
+      userProfile.value = {
+        id: data.value.id || -1,
+        username: data.value.username,
+        email: data.value.email,
+        profilePictureUrl:
+          data.value.profilePictureUrl ||
+          "/resources/studio/previewProfile.webp",
+        bio: data.value.bio || "",
+      };
 
       // Actualizar el almacenamiento local si los datos del usuario se guardan allí
       if (storedUser.username === userProfile.value.username) {

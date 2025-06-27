@@ -181,7 +181,6 @@ function getProfilePictureUrl(user: any) {
   if (!user.profilePictureUrl || user.profilePictureUrl === '/resources/studio/previewProfile.webp') {
     return '/resources/studio/previewProfile.webp';
   }
-  // Si ya es una URL absoluta (por ejemplo, empieza con http), no concatenar
   if (user.profilePictureUrl.startsWith('http')) {
     return user.profilePictureUrl;
   }
