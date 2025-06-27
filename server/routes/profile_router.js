@@ -61,13 +61,13 @@ router.get(
 );
 
 router.post(
-  '/saved-playlists/:id',
+  '/saved-playlists/:playlistId',
   passport.authenticate('jwt', { session: false }),
   validatorHandler(getPlaylistSchema, 'params'),
   async (req, res, next) => {
     try {
       const userId = req.user.sub;
-      const { id: playlistId } = req.params;
+      const { playlistId: playlistId } = req.params;
 
       const rta = await userService.savePlaylist(userId, playlistId);
 
@@ -79,13 +79,13 @@ router.post(
 );
 
 router.delete(
-  '/saved-playlists/:id',
+  '/saved-playlists/:playlistId',
   passport.authenticate('jwt', { session: false }),
   validatorHandler(getPlaylistSchema, 'params'),
   async (req, res, next) => {
     try {
       const userId = req.user.sub;
-      const { id: playlistId } = req.params;
+      const { playlistId: playlistId } = req.params;
 
       const rta = await userService.unsavePlaylist(userId, playlistId);
 

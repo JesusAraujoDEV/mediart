@@ -7,7 +7,8 @@ const {
   updatePlaylistSchema
 } = require('./../schemas/playlist_schema');
 const {
-  addItemsToPlaylistUnifiedSchema
+  addItemsToPlaylistUnifiedSchema,
+  removeItemFromPlaylistSchema
 } = require('../schemas/playlist_item_schema');
 const passport = require('passport');
 const boom = require('@hapi/boom');
@@ -27,12 +28,12 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.get('/:id',
+router.get('/:playlistId',
   validatorHandler(getPlaylistSchema, 'params'),
   async (req, res, next) => {
     try {
-      const { id } = req.params;
-      const playlist = await service.findOne(id);
+      const { playlistId } = req.params;
+      const playlist = await service.findOne(playlistId);
       res.json(playlist);
     } catch (error) {
       next(error);
@@ -66,18 +67,18 @@ router.post('/',
   }
 );
 
-router.patch('/:id',
+router.patch('/:playlistId',
   passport.authenticate('jwt', { session: false }),
   validatorHandler(getPlaylistSchema, 'params'),
   uploadPlaylistPicture.single('thumbnail'),
   validatorHandler(updatePlaylistSchema, 'body'),
   async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const { playlistId } = req.params;
       const body = req.body;
       const userId = req.user.sub;
 
-      const playlist = await service.findOne(id);
+      const playlist = await service.findOne(playlistId);
       // Verificar si el usuario autenticado es el dueño de la playlist
       if (playlist.ownerUserId !== userId) {
         throw boom.forbidden('You are not the owner of this playlist.');
@@ -94,7 +95,7 @@ router.patch('/:id',
         delete body.thumbnailUrl;
       }
 
-      const updatedPlaylist = await service.update(id, body);
+      const updatedPlaylist = await service.update(playlistId, body);
       res.json(updatedPlaylist);
     } catch (error) {
       next(error);
@@ -102,21 +103,21 @@ router.patch('/:id',
   }
 );
 
-router.delete('/:id',
+router.delete('/:playlistId',
   passport.authenticate('jwt', { session: false }),
   validatorHandler(getPlaylistSchema, 'params'),
   async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const { playlistId } = req.params;
       const userId = req.user.sub;
 
-      const playlist = await service.findOne(id);
+      const playlist = await service.findOne(playlistId);
       if (playlist.ownerUserId !== userId) {
         throw boom.forbidden('You are not the owner of this playlist.');
       }
 
-      await service.delete(id);
-      res.status(200).json({ id, message: 'Playlist deleted successfully' });
+      await service.delete(playlistId);
+      res.status(200).json({ playlistId, message: 'Playlist deleted successfully' });
     } catch (error) {
       next(error);
     }
@@ -124,13 +125,13 @@ router.delete('/:id',
 );
 
 router.post(
-  '/:id/items',
+  '/:playlistId/items',
   passport.authenticate('jwt', { session: false }),
   validatorHandler(getPlaylistSchema, 'params'),
   validatorHandler(addItemsToPlaylistUnifiedSchema, 'body'),
   async (req, res, next) => {
     try {
-      const { id: playlistId } = req.params;
+      const { playlistId: playlistId } = req.params;
       const body = req.body;
       const userId = req.user.sub;
 
@@ -159,7 +160,7 @@ router.post(
 router.delete(
   '/:playlistId/items/:itemId',
   passport.authenticate('jwt', { session: false }),
-  validatorHandler(getPlaylistSchema, 'params'),
+  validatorHandler(removeItemFromPlaylistSchema, 'params'),
   async (req, res, next) => {
     try {
       const { playlistId, itemId } = req.params;
@@ -181,17 +182,17 @@ router.delete(
 );
 
 router.post(
-  '/:id/collaborators',
+  '/:playlistId/collaborators',
   passport.authenticate('jwt', { session: false }),
   validatorHandler(getPlaylistSchema, 'params'),
   validatorHandler(addCollaboratorsSchema, 'body'),
   async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const { playlistId } = req.params;
       const { userId, userIds } = req.body;
       const currentUserId = req.user.sub;
 
-      const playlist = await service.findOne(id);
+      const playlist = await service.findOne(playlistId);
 
       if (!playlist.isCollaborative) {
         throw boom.badRequest('This playlist is not configured as collaborative.');
@@ -203,9 +204,9 @@ router.post(
 
       let result;
       if (userId) {
-        result = await service.addCollaborator(id, userId);
+        result = await service.addCollaborator(playlistId, userId);
       } else if (userIds && userIds.length > 0) {
-        result = await service.addMultipleCollaborators(id, userIds);
+        result = await service.addMultipleCollaborators(playlistId, userIds);
       } else {
         throw boom.badRequest('Must provide either "userId" or "userIds" to add collaborators.');
       }

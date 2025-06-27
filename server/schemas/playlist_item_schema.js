@@ -1,6 +1,6 @@
 const Joi = require('joi');
 const {
-  id: itemIdSchema,
+  itemId: itemIdSchema,
   type,
   externalId,
   externalSource,
@@ -11,6 +11,8 @@ const {
   avgRating,
   externalUrl,
 } = require('./item_schema');
+
+const { playlistId } = require('./playlist_schema'); // <-- Añade esta línea
 
 const addExistingItemsToPlaylistSchema = Joi.object({
   itemIds: Joi.array().items(itemIdSchema.required()).min(1).required(),
@@ -35,7 +37,13 @@ const addItemsToPlaylistUnifiedSchema = Joi.alternatives().try(
   })
 );
 
+const removeItemFromPlaylistSchema = Joi.object({
+  playlistId: playlistId.required(),
+  itemId: itemIdSchema.required()
+});
+
 module.exports = {
   addItemsToPlaylistUnifiedSchema,
   recommendedItemSchema,
+  removeItemFromPlaylistSchema,
 };

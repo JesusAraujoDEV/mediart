@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-const id = Joi.number().integer();
+const playlistId = Joi.number().integer();
 const name = Joi.string().min(1).max(100);
 const description = Joi.string().allow(null, '').max(500);
 const isCollaborative = Joi.boolean().optional();
@@ -34,7 +34,7 @@ const updatePlaylistSchema = Joi.object({
 });
 
 const getPlaylistSchema = Joi.object({
-    id: id.required()
+    playlistId: playlistId.required()
 });
 
 // Nota: No veo que uses addItemsToPlaylistUnifiedSchema en tu playlist_schema.js actual.
@@ -45,6 +45,7 @@ module.exports = {
     createPlaylistSchema,
     updatePlaylistSchema,
     getPlaylistSchema,
+    playlistId
     // No incluyo addItemsToPlaylistSchema si ya lo tienes en playlist_item_schema.js
     // Si lo necesitas aquí, asegúrate de definirlo como lo hicimos antes.
 };

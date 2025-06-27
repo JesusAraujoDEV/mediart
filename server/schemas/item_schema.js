@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-const id = Joi.number().integer();
+const itemId = Joi.number().integer();
 const title = Joi.string();
 const type = Joi.string().valid('movie', 'song', 'artist', 'album', 'tvshow', 'book', 'videogame').required();
 const description = Joi.string().max(5000).allow(null, '');
@@ -36,14 +36,14 @@ const updateItemSchema = Joi.object({
 });
 
 const getItemSchema = Joi.object({
-    id: id.required()
+    itemId: itemId.required()
 });
 
 module.exports = {
   createItemSchema,
   updateItemSchema,
   getItemSchema,
-  id,
+  itemId,
   title,
   type,
   description,

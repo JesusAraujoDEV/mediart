@@ -17,12 +17,12 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.get('/:id',
+router.get('/:itemId',
   validatorHandler(getItemSchema, 'params'),
   async (req, res, next) => {
     try {
-      const { id } = req.params;
-      const items = await service.findOne(id);
+      const { itemId } = req.params;
+      const items = await service.findOne(itemId);
       res.json(items);
     } catch (error) {
       next(error);
@@ -43,14 +43,14 @@ router.post('/',
   }
 );
 
-router.patch('/:id',
+router.patch('/:itemId',
   validatorHandler(getItemSchema, 'params'),
   validatorHandler(updateItemSchema, 'body'),
   async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const { itemId } = req.params;
       const body = req.body;
-      const item = await service.update(id, body);
+      const item = await service.update(itemId, body);
       res.json(item);
     } catch (error) {
       next(error);
@@ -58,13 +58,13 @@ router.patch('/:id',
   }
 );
 
-router.delete('/:id',
+router.delete('/:itemId',
   validatorHandler(getItemSchema, 'params'),
   async (req, res, next) => {
     try {
-      const { id } = req.params;
-      await service.delete(id);
-      res.status(201).json({id});
+      const { itemId } = req.params;
+      await service.delete(itemId);
+      res.status(201).json({itemId});
     } catch (error) {
       next(error);
     }
