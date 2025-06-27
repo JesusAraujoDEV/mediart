@@ -19,7 +19,7 @@
     </div>
 
     <div v-else class="flex flex-col flex-grow w-full max-w-6xl mt-20 md:mt-24 pb-4">
-      <div class="glassEffect bg-gray-800/50 rounded-lg p-6 mb-6 shadow-xl flex flex-col md:flex-row items-center md:items-start text-center md:text-left">
+      <div class="glassEffect bg-gray-800/50 rounded-lg p-6 mb-6 shadow-xl flex flex-col md:flex-row items-center md:items-start text-center md:text-left relative">
         <div class="w-40 h-40 rounded-lg mb-4 md:mb-0 md:mr-6 flex-shrink-0 shadow-md border border-gray-600 overflow-hidden">
           <img
             v-if="playlist.coverUrl"
@@ -55,45 +55,67 @@
             </svg>
             Colaborativa
           </div>
+          <!-- Aviso de modo edición -->
+          <div v-if="editMode" class="mt-4 mb-2 flex items-center gap-2 justify-center md:justify-start">
+            <Icon name="material-symbols:edit" size="1.2em" class="text-purple-400 animate-pulse" />
+            <span class="text-purple-300 font-semibold text-base">Modo edición activo: puedes eliminar elementos</span>
+          </div>
+          <!-- Botón de editar -->
+          <button @click="toggleEditMode" :class="['absolute cursor-pointer top-4 right-4 rounded-full p-2 shadow-md transition-colors', editMode ? 'bg-purple-600 text-white' : 'bg-gray-700 hover:bg-purple-600 text-white']" title="Editar playlist">
+            <Icon name="material-symbols:edit" size="1.5em" />
+          </button>
         </div>
       </div>
 
       <div class="glassEffect bg-gray-800/50 rounded-lg p-6 shadow-xl flex-grow overflow-y-auto custom-scroll">
         <h2 class="text-2xl font-bold mb-5 text-gray-200">Contenido de la Playlist ({{ playlist.items?.length || 0 }})</h2>
         <div v-if="playlist.items && playlist.items.length > 0" class="grid grid-cols-1 gap-4">
-          <NuxtLink
-            v-for="item in playlist.items"
+          <div
+            v-for="(item, idx) in playlist.items"
             :key="item.id"
-            :to="`/studio/item/${item.id}`"
-            class="bg-gray-700/60 rounded-lg p-3 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white"
+            class="bg-gray-700/60 rounded-lg p-3 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white relative group"
           >
-            <img
-              :src="item.coverUrl || '/resources/item-placeholder.webp'"
-              :alt="item.title || 'Item Cover'"
-              class="w-24 h-24 object-cover rounded-md mb-3 sm:mb-0 sm:mr-4 flex-shrink-0 shadow-sm border border-gray-500"
-            />
-            <div class="flex-grow flex flex-col justify-center items-center sm:items-start">
-              <h3 class="font-bold text-lg text-white mb-1">{{ item.title }}</h3>
-              <p class="text-sm text-gray-300 capitalize mb-1">
-                Tipo: {{ item.type }} <span class="opacity-70">({{ item.externalSource }})</span>
-              </p>
-              <p v-if="item.description" class="text-xs text-gray-400 max-h-12 overflow-hidden text-ellipsis mb-1">
-                {{ item.description }}
-              </p>
-              <p v-if="item.releaseDate" class="text-xs text-gray-400 mb-1">
-                Lanzamiento: {{ new Date(item.releaseDate).getFullYear() }}
-              </p>
-              <p v-if="item.avgRating !== null && item.avgRating !== undefined" class="text-xs text-gray-400 mb-2">
-                Valoración: {{ parseFloat(item.avgRating.toString()).toFixed(1) }} / 10
-              </p>
-              <span
-                v-if="item.externalUrl"
-                class="text-blue-400 text-sm font-semibold mt-1"
-              >
-                Ver más en {{ item.externalSource }}
-              </span>
-            </div>
-          </NuxtLink>
+            <!-- Botón de eliminar en modo edición -->
+            <button
+              v-if="editMode"
+              @click="confirmDeleteItem(item.id, idx)"
+              class="absolute cursor-pointer top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors z-10"
+              title="Eliminar este elemento de la playlist"
+            >
+              <Icon name="material-symbols:close" size="1.2em" />
+            </button>
+            <NuxtLink
+              :to="`/studio/item/${item.id}`"
+              class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left flex-grow"
+            >
+              <img
+                :src="item.coverUrl || '/resources/item-placeholder.webp'"
+                :alt="item.title || 'Item Cover'"
+                class="w-24 h-24 object-cover rounded-md mb-3 sm:mb-0 sm:mr-4 flex-shrink-0 shadow-sm border border-gray-500"
+              />
+              <div class="flex-grow flex flex-col justify-center items-center sm:items-start">
+                <h3 class="font-bold text-lg text-white mb-1">{{ item.title }}</h3>
+                <p class="text-sm text-gray-300 capitalize mb-1">
+                  Tipo: {{ item.type }} <span class="opacity-70">({{ item.externalSource }})</span>
+                </p>
+                <p v-if="item.description" class="text-xs text-gray-400 max-h-12 overflow-hidden text-ellipsis mb-1">
+                  {{ item.description }}
+                </p>
+                <p v-if="item.releaseDate" class="text-xs text-gray-400 mb-1">
+                  Lanzamiento: {{ new Date(item.releaseDate).getFullYear() }}
+                </p>
+                <p v-if="item.avgRating !== null && item.avgRating !== undefined" class="text-xs text-gray-400 mb-2">
+                  Valoración: {{ parseFloat(item.avgRating.toString()).toFixed(1) }} / 10
+                </p>
+                <span
+                  v-if="item.externalUrl"
+                  class="text-blue-400 text-sm font-semibold mt-1"
+                >
+                  Ver más en {{ item.externalSource }}
+                </span>
+              </div>
+            </NuxtLink>
+          </div>
         </div>
         <div v-else class="text-center text-gray-400 text-lg py-10">
           <p>Esta playlist no tiene elementos aún.</p>
@@ -107,6 +129,7 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
+import Swal from "sweetalert2";
 
 definePageMeta({
   layout: "custom",
@@ -166,6 +189,8 @@ const errorMessage = ref<string | null>(null);
 const route = useRoute();
 const config = useRuntimeConfig();
 
+const editMode = ref(false);
+
 // Función para formatear la fecha y hora
 const formatDateTime = (dateString: string): string => {
   if (!dateString) return 'Fecha desconocida';
@@ -224,6 +249,60 @@ const fetchPlaylist = async () => {
     isLoading.value = false;
   }
 };
+
+function toggleEditMode() {
+  editMode.value = !editMode.value;
+}
+
+async function confirmDeleteItem(itemId: number, idx: number) {
+  const result = await Swal.fire({
+    title: '¿Eliminar elemento?',
+    text: '¿Estás seguro de que quieres eliminar este elemento de la playlist? Esta acción no se puede deshacer.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+  });
+  if (result.isConfirmed) {
+    await deleteItemFromPlaylist(itemId, idx);
+  }
+}
+
+async function deleteItemFromPlaylist(itemId: number, idx: number) {
+  const playlistId = playlist.value.id;
+  try {
+    const { data, error } = await useFetch(
+      `${config.public.backend}/api/playlists/${playlistId}/items/${itemId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+        }
+      }
+    );
+    if (error.value) {
+      throw new Error(error.value.data?.message || error.value.message || "No se pudo eliminar el item.");
+    }
+    // Eliminar del array local
+    playlist.value.items?.splice(idx, 1);
+    Swal.fire({
+      icon: 'success',
+      title: 'Eliminado',
+      text: 'El elemento fue eliminado de la playlist.',
+      timer: 1500,
+      showConfirmButton: false
+    });
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: (err as Error).message || 'No se pudo eliminar el elemento.',
+    });
+  }
+}
 
 onMounted(() => {
   fetchPlaylist();

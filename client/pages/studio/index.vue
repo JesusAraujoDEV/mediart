@@ -177,10 +177,19 @@
           <h3 class="text-3xl font-extrabold mb-6">Tus Recomendaciones</h3>
           <div class="grid grid-cols-1 gap-6 w-full flex-grow pb-4 px-2">
             <div
-              v-for="item in recommendations"
+              v-for="(item, index) in recommendations"
               :key="item.externalId || item.title"
-              class="bg-gray-700/60 rounded-xl p-4 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-lg transform transition-transform duration-300 hover:scale-105 hover:bg-gray-600/70 cursor-pointer border border-gray-600"
+              class="bg-gray-700/60 rounded-xl p-4 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-lg transform transition-transform duration-300 hover:scale-105 hover:bg-gray-600/70 border border-gray-600 relative group"
             >
+              <!-- Botón de eliminar -->
+              <button
+                @click="removeRecommendation(index)"
+                class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 z-10"
+                title="Eliminar de la playlist"
+              >
+                <Icon name="material-symbols:close" size="1.2em" />
+              </button>
+
               <img
                 v-if="item.coverUrl"
                 :src="item.coverUrl"
@@ -225,9 +234,10 @@
           <div class="flex max-md:flex-col justify-center gap-6 mt-8 pb-4">
             <button
               @click="showPlaylistModal = true"
-              class="bg-green-600 cursor-pointer hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg"
+              :disabled="recommendations.length === 0"
+              class="bg-green-600 cursor-pointer hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Aceptar
+              Aceptar ({{ recommendations.length }} items)
             </button>
             <button
               @click="sendData"
@@ -903,14 +913,23 @@ const createPlaylist = async () => {
 
   playlistSaving.value = true; // <--- Activa el spinner
 
-  // Obtener la imagen del primer item si existe
+  // Buscar el primer link válido (thumbnailUrl, coverUrl o imageUrl) que no sea placeholder
   let thumbnailUrl = null;
   if (recommendations.value.length > 0) {
-    const first = recommendations.value[0] as any;
-    thumbnailUrl = first.coverUrl || first.thumbnailUrl || first.imageUrl || null;
+    const validItem = recommendations.value.find((item: any) => {
+      const thumb = item.thumbnailUrl || item.coverUrl || item.imageUrl;
+      return thumb && !thumb.includes('placeholder');
+    });
+    if (validItem) {
+      thumbnailUrl = validItem.thumbnailUrl || validItem.coverUrl || validItem.imageUrl;
+    } else {
+      // Si todos son placeholder, usar el primero disponible
+      const first = recommendations.value[0] as any;
+      thumbnailUrl = first.thumbnailUrl || first.coverUrl || first.imageUrl || null;
+    }
   }
 
-  console.log('thumbnailUrl:', thumbnailUrl); 
+  console.log('coverUrl:', thumbnailUrl); 
   console.log('recommendations.value:', recommendations.value);
 
   try {
@@ -925,7 +944,7 @@ const createPlaylist = async () => {
         description: newPlaylist.value.description,
         isCollaborative: newPlaylist.value.isCollaborative,
         items: recommendations.value,
-        thumbnailUrl,
+        thumbnailUrl: thumbnailUrl || 'https://images.rawpixel.com/image_800/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvcGR2YW5nb2doLXNlbGYtcG9ydHJhaXQtbTAxLWpvYjY2MV8yLWwxMDBvNmVmLmpwZw.jpg',
       }),
     });
 
@@ -958,6 +977,11 @@ const createPlaylist = async () => {
   } finally {
     playlistSaving.value = false; // <--- Desactiva el spinner
   }
+};
+
+// Función para eliminar una recomendación del array
+const removeRecommendation = (index: number) => {
+  recommendations.value.splice(index, 1);
 };
 
 // Agregar watcher para searchType para que se actualice en tiempo real
