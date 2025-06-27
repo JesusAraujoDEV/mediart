@@ -1,6 +1,11 @@
 const boom = require('@hapi/boom');
 const { models } = require('../libs/sequelize');
 const bcrypt = require('bcrypt');
+const path = require('path');
+const fs = require('fs');
+
+const PROFILE_PICTURES_DIR = path.join(__dirname, '../../uploads/profile_pictures');
+
 
 class UserService {
 
@@ -351,15 +356,22 @@ class UserService {
     const user = await this.findOne(id);
 
     if (changes.profilePictureUrl !== undefined && user.profilePictureUrl) {
-      const oldPicturePath = path.join(PROFILE_PICTURES_DIR, path.basename(user.profilePictureUrl));
-      if (fs.existsSync(oldPicturePath)) {
-        fs.unlink(oldPicturePath, (err) => {
-          if (err) console.error('Error deleting old profile picture:', err);
-        });
+      const oldPictureFilename = path.basename(user.profilePictureUrl);
+      const oldPicturePath = path.join(PROFILE_PICTURES_DIR, oldPictureFilename);
+
+      // Solo borramos si el nuevo valor no es el mismo que el actual
+      // O si el nuevo valor es nulo (indicando que se quiere eliminar)
+      if (changes.profilePictureUrl !== user.profilePictureUrl || changes.profilePictureUrl === null) {
+        if (fs.existsSync(oldPicturePath)) {
+          fs.unlink(oldPicturePath, (err) => {
+            if (err) console.error('Error deleting old profile picture:', err);
+          });
+        }
       }
     }
 
     const rta = await user.update(changes);
+
     return rta;
   }
 
