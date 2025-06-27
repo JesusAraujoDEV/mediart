@@ -37,6 +37,7 @@ const config = {
     igdbClientSecret: process.env.VIDEOGAMES_CLIENT_SECRET,
     googleGemini: process.env.GOOGLE_GEMINI_API_KEY,
     deepseek: process.env.DEEPSEEK_API_KEY,
+    imgbbApiKey: process.env.IMGBB_API_KEY  
   },
 
 /*

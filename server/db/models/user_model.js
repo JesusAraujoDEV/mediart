@@ -29,6 +29,11 @@ const UserSchema = {
     type: DataTypes.STRING,
     field: 'profile_picture_url'
   },
+  imgbbDeleteUrl: {
+    allowNull: true,
+    type: DataTypes.STRING,
+    field: 'imgbb_delete_url'
+  },
   bio: {
     allowNull: true,
     type: DataTypes.TEXT
