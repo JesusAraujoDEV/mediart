@@ -43,13 +43,13 @@
 
 /**
  * @swagger
- * /api/playlists/{id}:
+ * /api/playlists/{playlistId}:
  *   get:
  *     summary: Obtener una playlist por su ID
  *     tags: [Playlist]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: playlistId
  *         required: true
  *         schema:
  *           type: integer
@@ -67,7 +67,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: playlistId
  *         required: true
  *         schema:
  *           type: integer
@@ -87,7 +87,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: playlistId
  *         required: true
  *         schema:
  *           type: integer
@@ -98,7 +98,7 @@
 
 /**
  * @swagger
- * /api/playlists/{id}/items:
+ * /api/playlists/{playlistId}/items:
  *   post:
  *     summary: Agregar ítems a una playlist
  *     tags: [Playlist]
@@ -106,7 +106,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: playlistId
  *         description: ID de la playlist
  *         required: true
  *         schema:
@@ -148,7 +148,7 @@
 
 /**
  * @swagger
- * /api/playlists/{id}/collaborators:
+ * /api/playlists/{playlistId}/collaborators:
  *   post:
  *     summary: Agregar uno o más colaboradores a una playlist
  *     tags: [Playlist]
@@ -156,7 +156,7 @@
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: playlistId
  *         description: ID de la playlist
  *         required: true
  *         schema:

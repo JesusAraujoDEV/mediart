@@ -53,14 +53,14 @@
  *               items:
  *                 $ref: '#/components/schemas/Playlist'
  *
- * /api/profile/saved-playlists/{id}:
+ * /api/profile/saved-playlists/{playlistId}:
  *   post:
  *     summary: Guardar una playlist en el perfil del usuario
  *     tags: [Profile]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: id
+ *       - name: playlistId
  *         in: path
  *         description: ID de la playlist
  *         required: true
@@ -76,7 +76,7 @@
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: id
+ *       - name: playlistId
  *         in: path
  *         description: ID de la playlist
  *         required: true

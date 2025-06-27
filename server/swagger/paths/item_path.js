@@ -40,13 +40,13 @@
 
 /**
  * @swagger
- * /api/items/{id}:
+ * /api/items/{itemId}:
  *   get:
  *     summary: Obtener un ítem por ID
  *     tags: [Item]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: itemId
  *         description: ID del ítem
  *         required: true
  *         schema:
@@ -63,7 +63,7 @@
  *     tags: [Item]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: itemId
  *         description: ID del ítem
  *         required: true
  *         schema:
@@ -86,7 +86,7 @@
  *     tags: [Item]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: itemId
  *         description: ID del ítem
  *         required: true
  *         schema:
@@ -99,7 +99,7 @@
  *             schema:
  *               type: object
  *               properties:
- *                 id:
+ *                 itemId:
  *                   type: integer
  *                   example: 1
  */
