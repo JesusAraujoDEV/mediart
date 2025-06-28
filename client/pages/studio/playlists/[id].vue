@@ -64,6 +64,25 @@
           <button @click="toggleEditMode" :class="['absolute cursor-pointer top-4 right-4 rounded-full p-2 shadow-md transition-colors', editMode ? 'bg-purple-600 text-white' : 'bg-gray-700 hover:bg-purple-600 text-white']" title="Editar playlist">
             <Icon name="material-symbols:edit" size="1.5em" />
           </button>
+          <!-- Botón de configuraciones -->
+          <button @click="openSettingsModal" class="absolute cursor-pointer top-4 right-16 rounded-full p-2 shadow-md transition-colors bg-gray-700 hover:bg-purple-600 text-white" title="Configuraciones de la playlist">
+            <Icon name="material-symbols:settings" size="1.5em" />
+          </button>
+          <!-- Botón de guardar playlist -->
+          <button 
+            @click="toggleSavePlaylist" 
+            :disabled="isSavingPlaylist"
+            :class="[
+              'absolute cursor-pointer top-4 right-28 rounded-full p-2 shadow-md transition-colors',
+              isSavingPlaylist ? 'bg-gray-600 text-gray-400' : 
+              isPlaylistSaved ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-700 hover:bg-purple-600 text-white'
+            ]" 
+            :title="isPlaylistSaved ? 'Quitar de mi biblioteca' : 'Guardar en mi biblioteca'"
+          >
+            <Icon v-if="isSavingPlaylist" name="material-symbols:sync" size="1.5em" class="animate-spin" />
+            <Icon v-else-if="isPlaylistSaved" name="material-symbols:bookmark" size="1.5em" />
+            <Icon v-else name="material-symbols:bookmark-add" size="1.5em" />
+          </button>
         </div>
       </div>
 
@@ -122,6 +141,179 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Configuraciones -->
+    <div v-if="showSettingsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-gray-800 rounded-xl p-8 w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl border border-gray-600">
+        <div class="flex justify-between items-center mb-8 border-b border-gray-600 pb-4">
+          <h2 class="text-3xl font-bold text-white">Configuraciones de la Playlist</h2>
+          <button @click="closeSettingsModal" class="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-700">
+            <Icon name="material-symbols:close" size="1.8em" />
+          </button>
+        </div>
+
+        <form @submit.prevent="savePlaylistSettings" class="space-y-8">
+          <!-- Nombre -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-300 mb-3">Nombre de la Playlist</label>
+            <input
+              v-model="settingsForm.name"
+              type="text"
+              class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              required
+            />
+          </div>
+
+          <!-- Descripción -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-300 mb-3">Descripción</label>
+            <textarea
+              v-model="settingsForm.description"
+              rows="4"
+              class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
+              placeholder="Describe tu playlist..."
+            ></textarea>
+          </div>
+
+          <!-- Imagen de portada -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-300 mb-3">Imagen de Portada</label>
+            <input
+              v-model="settingsForm.coverUrl"
+              type="url"
+              placeholder="https://ejemplo.com/imagen.jpg"
+              class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+            />
+            <p class="text-xs text-gray-400 mt-2">Deja vacío para usar la imagen por defecto</p>
+          </div>
+
+          <!-- Colaborativa -->
+          <div class="flex items-center p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+            <input
+              v-model="settingsForm.isCollaborative"
+              type="checkbox"
+              id="collaborative"
+              class="w-5 h-5 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-2"
+            />
+            <label for="collaborative" class="ml-3 text-base font-medium text-gray-300">
+              Hacer colaborativa
+            </label>
+            <div class="ml-auto">
+              <Icon name="material-symbols:group" size="1.5em" class="text-purple-400" />
+            </div>
+          </div>
+
+          <!-- Sección de colaboradores (solo si es colaborativa) -->
+          <div v-if="settingsForm.isCollaborative" class="space-y-6 p-6 bg-gray-700/30 rounded-lg border border-gray-600">
+            <div class="flex items-center gap-3 mb-4">
+              <Icon name="material-symbols:group" size="1.8em" class="text-purple-400" />
+              <h3 class="text-xl font-semibold text-white">Colaboradores</h3>
+            </div>
+            
+            <!-- Lista de colaboradores actuales -->
+            <div v-if="playlist.collaborators && playlist.collaborators.length > 0" class="space-y-3">
+              <h4 class="text-sm font-semibold text-gray-300 border-b border-gray-600 pb-2">Colaboradores actuales:</h4>
+              <div v-for="collaborator in playlist.collaborators" :key="collaborator.id" class="flex items-center justify-between bg-gray-600 p-4 rounded-lg">
+                <div class="flex items-center">
+                  <img
+                    v-if="collaborator.profilePictureUrl"
+                    :src="collaborator.profilePictureUrl"
+                    :alt="collaborator.username"
+                    class="w-10 h-10 rounded-full mr-4 border-2 border-gray-500"
+                  />
+                  <div v-else class="w-10 h-10 rounded-full mr-4 bg-gray-500 flex items-center justify-center border-2 border-gray-400">
+                    <Icon name="material-symbols:person" size="1.5em" class="text-gray-300" />
+                  </div>
+                  <div>
+                    <span class="text-white font-medium">{{ collaborator.username }}</span>
+                    <p class="text-xs text-gray-400">Colaborador</p>
+                  </div>
+                </div>
+                <button
+                  @click="removeCollaborator(collaborator.id)"
+                  type="button"
+                  class="text-red-400 hover:text-red-300 p-2 rounded-full hover:bg-red-500/10 transition-colors"
+                  title="Eliminar colaborador"
+                >
+                  <Icon name="material-symbols:remove" size="1.3em" />
+                </button>
+              </div>
+            </div>
+
+            <!-- Agregar nuevo colaborador -->
+            <div class="space-y-4">
+              <h4 class="text-sm font-semibold text-gray-300 border-b border-gray-600 pb-2">Agregar colaborador:</h4>
+              <div class="relative">
+                <input
+                  v-model="newCollaboratorUsername"
+                  @input="handleSearchInput"
+                  type="text"
+                  placeholder="Buscar usuario por nombre..."
+                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                />
+                
+                <!-- Loading indicator -->
+                <div v-if="isSearching" class="absolute right-4 top-1/2 transform -translate-y-1/2">
+                  <svg class="animate-spin h-5 w-5 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+
+                <!-- Search results dropdown -->
+                <div v-if="showSearchResults && searchResults.length > 0" class="absolute top-full left-0 right-0 bg-gray-700 border border-gray-600 rounded-lg mt-2 max-h-56 overflow-y-auto z-10 shadow-xl">
+                  <div
+                    v-for="user in searchResults"
+                    :key="user.id"
+                    @click="selectUser(user)"
+                    class="flex items-center p-4 hover:bg-gray-600 cursor-pointer transition-colors border-b border-gray-600 last:border-b-0"
+                  >
+                    <img
+                      v-if="user.profilePictureUrl"
+                      :src="user.profilePictureUrl"
+                      :alt="user.username"
+                      class="w-10 h-10 rounded-full mr-4 border-2 border-gray-500"
+                    />
+                    <div v-else class="w-10 h-10 rounded-full mr-4 bg-gray-500 flex items-center justify-center border-2 border-gray-400">
+                      <Icon name="material-symbols:person" size="1.5em" class="text-gray-300" />
+                    </div>
+                    <div>
+                      <span class="text-white font-medium">{{ user.username }}</span>
+                      <p class="text-xs text-gray-400">Click para agregar</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- No results message -->
+                <div v-if="showSearchResults && searchResults.length === 0 && !isSearching && newCollaboratorUsername.trim().length >= 2" class="absolute top-full left-0 right-0 bg-gray-700 border border-gray-600 rounded-lg mt-2 p-4 text-gray-400 text-center">
+                  <Icon name="material-symbols:search-off" size="1.5em" class="mx-auto mb-2 text-gray-500" />
+                  No se encontraron usuarios
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="flex justify-end gap-4 pt-6 border-t border-gray-600">
+            <button
+              type="button"
+              @click="closeSettingsModal"
+              class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              :disabled="isSavingSettings"
+              class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
+            >
+              <Icon v-if="isSavingSettings" name="material-symbols:sync" size="1.2em" class="animate-spin" />
+              {{ isSavingSettings ? 'Guardando...' : 'Guardar Cambios' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </main>
 </template>
 
@@ -173,6 +365,17 @@ interface Playlist {
   coverUrl?: string;
 }
 
+interface CollaboratorResponse {
+  collaborator: PlaylistOwner;
+  message: string;
+}
+
+interface UserSearchResult {
+  id: number;
+  username: string;
+  profilePictureUrl?: string;
+}
+
 const playlist = ref<Playlist>({
   id: 0,
   ownerUserId: 0,
@@ -190,6 +393,23 @@ const route = useRoute();
 const config = useRuntimeConfig();
 
 const editMode = ref(false);
+const showSettingsModal = ref(false);
+const isSavingSettings = ref(false);
+const isAddingCollaborator = ref(false);
+const newCollaboratorUsername = ref('');
+const searchResults = ref<UserSearchResult[]>([]);
+const isSearching = ref(false);
+const showSearchResults = ref(false);
+const isSavingPlaylist = ref(false);
+const isPlaylistSaved = ref(false);
+
+// Formulario de configuraciones
+const settingsForm = ref({
+  name: '',
+  description: '',
+  coverUrl: '',
+  isCollaborative: false
+});
 
 // Función para formatear la fecha y hora
 const formatDateTime = (dateString: string): string => {
@@ -239,6 +459,9 @@ const fetchPlaylist = async () => {
         ...data.value,
         items: data.value.items || [], // Ensure items is an array
       };
+      
+      // Verificar si la playlist está guardada
+      await checkIfPlaylistSaved();
     } else {
       throw new Error("No se encontró la playlist con el ID proporcionado.");
     }
@@ -247,6 +470,68 @@ const fetchPlaylist = async () => {
     errorMessage.value = (err as Error).message || "Error al cargar la playlist.";
   } finally {
     isLoading.value = false;
+  }
+};
+
+const checkIfPlaylistSaved = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    
+    const response = await fetch(`${config.public.backend}/api/users/by-username/${JSON.parse(localStorage.getItem('user') || '{}').username}?include=savedPlaylists`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      const savedPlaylists = data.savedPlaylists || [];
+      isPlaylistSaved.value = savedPlaylists.some((p: any) => p.id === playlist.value.id);
+    }
+  } catch (err) {
+    console.error('Error al verificar si la playlist está guardada:', err);
+  }
+};
+
+const toggleSavePlaylist = async () => {
+  if (isSavingPlaylist.value) return;
+  
+  isSavingPlaylist.value = true;
+  try {
+    const { error } = await useFetch(
+      `${config.public.backend}/api/profile/saved-playlists/${playlist.value.id}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      }
+    );
+
+    if (error.value) {
+      throw new Error(error.value.data?.message || error.value.message || 'Error al guardar la playlist');
+    }
+
+    isPlaylistSaved.value = true;
+    Swal.fire({
+      icon: 'success',
+      title: 'Playlist guardada',
+      text: 'La playlist se ha guardado en tu biblioteca.',
+      timer: 1500,
+      showConfirmButton: false
+    });
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: (err as Error).message || 'No se pudo guardar la playlist.',
+    });
+  } finally {
+    isSavingPlaylist.value = false;
   }
 };
 
@@ -300,6 +585,210 @@ async function deleteItemFromPlaylist(itemId: number, idx: number) {
       icon: 'error',
       title: 'Error',
       text: (err as Error).message || 'No se pudo eliminar el elemento.',
+    });
+  }
+}
+
+function openSettingsModal() {
+  // Cargar datos actuales en el formulario
+  settingsForm.value = {
+    name: playlist.value.name,
+    description: playlist.value.description,
+    coverUrl: playlist.value.coverUrl || '',
+    isCollaborative: playlist.value.isCollaborative
+  };
+  showSettingsModal.value = true;
+}
+
+function closeSettingsModal() {
+  showSettingsModal.value = false;
+  newCollaboratorUsername.value = '';
+}
+
+async function savePlaylistSettings() {
+  isSavingSettings.value = true;
+  try {
+    const { data, error } = await useFetch(
+      `${config.public.backend}/api/playlists/${playlist.value.id}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: {
+          name: settingsForm.value.name,
+          description: settingsForm.value.description,
+          coverUrl: settingsForm.value.coverUrl || null,
+          isCollaborative: settingsForm.value.isCollaborative
+        }
+      }
+    );
+
+    if (error.value) {
+      throw new Error(error.value.data?.message || error.value.message || 'Error al guardar los cambios');
+    }
+
+    // Actualizar datos locales
+    playlist.value.name = settingsForm.value.name;
+    playlist.value.description = settingsForm.value.description;
+    playlist.value.coverUrl = settingsForm.value.coverUrl;
+    playlist.value.isCollaborative = settingsForm.value.isCollaborative;
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Cambios guardados',
+      text: 'Las configuraciones se han actualizado correctamente.',
+      timer: 1500,
+      showConfirmButton: false
+    });
+
+    closeSettingsModal();
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: (err as Error).message || 'No se pudieron guardar los cambios.',
+    });
+  } finally {
+    isSavingSettings.value = false;
+  }
+}
+
+async function searchUsers(query: string) {
+  if (!query.trim() || query.length < 2) {
+    searchResults.value = [];
+    showSearchResults.value = false;
+    return;
+  }
+
+  isSearching.value = true;
+  try {
+    const { data, error } = await useFetch<UserSearchResult[]>(
+      `${config.public.backend}/api/search/users?q=${encodeURIComponent(query)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      }
+    );
+
+    if (error.value) {
+      throw new Error(error.value.data?.message || error.value.message || 'Error al buscar usuarios');
+    }
+
+    searchResults.value = data.value || [];
+    showSearchResults.value = searchResults.value.length > 0;
+  } catch (err) {
+    console.error('Error al buscar usuarios:', err);
+    searchResults.value = [];
+    showSearchResults.value = false;
+  } finally {
+    isSearching.value = false;
+  }
+}
+
+async function addCollaborator(userId: number, username: string) {
+  isAddingCollaborator.value = true;
+  try {
+    const { data, error } = await useFetch<CollaboratorResponse>(
+      `${config.public.backend}/api/playlists/${playlist.value.id}/collaborators`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: {
+          userId: userId
+        }
+      }
+    );
+
+    if (error.value) {
+      throw new Error(error.value.data?.message || error.value.message || 'Error al agregar colaborador');
+    }
+
+    // Actualizar lista de colaboradores
+    if (data.value && data.value.collaborator) {
+      if (!playlist.value.collaborators) {
+        playlist.value.collaborators = [];
+      }
+      playlist.value.collaborators.push(data.value.collaborator);
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Colaborador agregado',
+      text: `${username} ha sido agregado como colaborador.`,
+      timer: 1500,
+      showConfirmButton: false
+    });
+
+    // Limpiar búsqueda
+    newCollaboratorUsername.value = '';
+    searchResults.value = [];
+    showSearchResults.value = false;
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: (err as Error).message || 'No se pudo agregar el colaborador.',
+    });
+  } finally {
+    isAddingCollaborator.value = false;
+  }
+}
+
+function handleSearchInput() {
+  if (newCollaboratorUsername.value.trim()) {
+    searchUsers(newCollaboratorUsername.value);
+  } else {
+    searchResults.value = [];
+    showSearchResults.value = false;
+  }
+}
+
+function selectUser(user: UserSearchResult) {
+  addCollaborator(user.id, user.username);
+}
+
+async function removeCollaborator(collaboratorId: number) {
+  try {
+    const { error } = await useFetch(
+      `${config.public.backend}/api/playlists/${playlist.value.id}/collaborators/${collaboratorId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        }
+      }
+    );
+
+    if (error.value) {
+      throw new Error(error.value.data?.message || error.value.message || 'Error al eliminar colaborador');
+    }
+
+    // Remover de la lista local
+    if (playlist.value.collaborators) {
+      playlist.value.collaborators = playlist.value.collaborators.filter(c => c.id !== collaboratorId);
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Colaborador eliminado',
+      text: 'El colaborador ha sido removido de la playlist.',
+      timer: 1500,
+      showConfirmButton: false
+    });
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: (err as Error).message || 'No se pudo eliminar el colaborador.',
     });
   }
 }

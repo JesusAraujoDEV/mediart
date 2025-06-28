@@ -62,6 +62,8 @@
         <div
           v-for="playlist in visiblePlaylists"
           :key="playlist.id"
+          @click="viewPlaylistDetails(playlist)"
+          :class="{ 'cursor-pointer': !loadingPlaylistDetails.has(playlist.id.toString()) }"
           class="bg-gray-800/70 rounded-xl p-0 shadow-lg transform transition-all duration-300 hover:scale-[1.01] hover:bg-gray-700/80 border border-gray-600 flex flex-col md:flex-row items-stretch overflow-hidden"
         >
           <!-- Imagen optimizada con lazy loading -->
@@ -91,9 +93,32 @@
                 <span class="font-semibold">Colaborativa:</span> {{ playlist.isCollaborative ? 'Sí' : 'No' }}
               </p>
             </div>
-            <div class="mt-4 flex justify-end">
+            <div class="mt-4 flex justify-end gap-2">
               <button
-                @click="viewPlaylistDetails(playlist)"
+                v-if="isOwnLibrary || playlist.ownerUserId === currentUserId"
+                @click.stop="toggleSavePlaylist(playlist)"
+                :disabled="isSavingPlaylist.has(playlist.id.toString())"
+                :class="[
+                  'px-4 py-2 rounded-full shadow-md transition-all duration-200 text-lg flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-75 disabled:cursor-not-allowed',
+                  isSavingPlaylist.has(playlist.id.toString()) ? 'bg-gray-600 text-white' :
+                  'bg-red-600 hover:bg-red-700 text-white'
+                ]"
+                :title="isSavingPlaylist.has(playlist.id.toString()) ? 'Procesando...' : 'Quitar de mi biblioteca'"
+              >
+                <template v-if="isSavingPlaylist.has(playlist.id.toString())">
+                  <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Procesando...
+                </template>
+                <template v-else>
+                  <Icon name="material-symbols:bookmark-remove" size="1.2em" class="mr-2" />
+                  Quitar
+                </template>
+              </button>
+              <button
+                @click.stop="viewPlaylistDetails(playlist)"
                 :disabled="loadingPlaylistDetails.has(playlist.id.toString())"
                 class="bg-purple-600 cursor-pointer hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-all duration-200 text-lg flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-75 disabled:cursor-not-allowed"
               >
@@ -147,6 +172,7 @@ import { ref, onMounted, computed, watch, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import type { Playlist } from "~/types/Playlist";
 import type { User } from "~/types/User";
+import Swal from "sweetalert2";
 
 // Composables
 const router = useRouter();
@@ -158,8 +184,11 @@ const savedPlaylists = ref<Playlist[]>([]);
 const loadingPlaylists = ref(false);
 const errorPlaylists = ref<string | null>(null);
 const loadingPlaylistDetails = ref<Set<string>>(new Set());
+const isSavingPlaylist = ref<Set<string>>(new Set());
 const searchQuery = ref('');
 const username = ref(route.params.username as string);
+const currentUserId = ref<number | null>(null);
+const isOwnLibrary = ref(false);
 
 // Virtualización y paginación
 const itemsPerPage = 10;
@@ -222,6 +251,22 @@ const loadMorePlaylists = () => {
   currentPage.value++;
 };
 
+// Get current user's ID from localStorage
+const getCurrentUserId = (): number | null => {
+  if (typeof localStorage === 'undefined') return null;
+  const user = localStorage.getItem("user");
+  if (user) {
+    try {
+      const parsedUser = JSON.parse(user);
+      return parsedUser.id || null;
+    } catch (e) {
+      console.error("Error parsing user from localStorage:", e);
+      return null;
+    }
+  }
+  return null;
+};
+
 // API functions optimizadas
 const fetchSavedPlaylists = async () => {
   if (loadingPlaylists.value) return; // Prevent multiple requests
@@ -250,6 +295,10 @@ const fetchSavedPlaylists = async () => {
 
     const data = await response.json();
     savedPlaylists.value = data.savedPlaylists || [];
+    
+    // Verificar si es la biblioteca propia
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    isOwnLibrary.value = currentUser.username === username.value;
     
     if (savedPlaylists.value.length === 0) {
       errorPlaylists.value = "Aún no tiene playlists guardadas en la biblioteca.";
@@ -309,6 +358,68 @@ const viewPlaylistDetails = async (playlist: Playlist) => {
   }
 };
 
+const toggleSavePlaylist = async (playlist: Playlist) => {
+  const playlistId = playlist.id.toString();
+  
+  if (isSavingPlaylist.value.has(playlistId)) return;
+  
+  isSavingPlaylist.value.add(playlistId);
+  
+  try {
+    // Confirmar antes de quitar
+    const result = await Swal.fire({
+      title: '¿Quitar playlist?',
+      text: `¿Estás seguro de que quieres quitar "${playlist.name}" de tu biblioteca?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, quitar',
+      cancelButtonText: 'Cancelar',
+    });
+    
+    if (!result.isConfirmed) {
+      isSavingPlaylist.value.delete(playlistId);
+      return;
+    }
+
+    // Llamar al endpoint para quitar la playlist
+    const { error } = await useFetch(
+      `${config.public.backend}/api/profile/saved-playlists/${playlist.id}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      }
+    );
+
+    if (error.value) {
+      throw new Error(error.value.data?.message || error.value.message || 'Error al quitar la playlist');
+    }
+
+    // Remover de la lista local
+    savedPlaylists.value = savedPlaylists.value.filter(p => p.id !== playlist.id);
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'Playlist removida',
+      text: 'La playlist se ha quitado de tu biblioteca.',
+      timer: 1500,
+      showConfirmButton: false
+    });
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: (err as Error).message || 'No se pudo quitar la playlist.',
+    });
+  } finally {
+    isSavingPlaylist.value.delete(playlistId);
+  }
+};
+
 // Watchers optimizados
 watch(searchQuery, () => {
   currentPage.value = 1; // Reset pagination when search changes
@@ -317,6 +428,7 @@ watch(searchQuery, () => {
 // Lifecycle hooks
 onMounted(async () => {
   await nextTick();
+  currentUserId.value = getCurrentUserId();
   await fetchSavedPlaylists();
 });
 
