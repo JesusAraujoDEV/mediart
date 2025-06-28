@@ -20,9 +20,9 @@ const swaggerOptions = {
       version: '1.0.0',
       description: 'Documentación de la API de MediArt, una plataforma para gestionar y compartir contenido multimedia (playlists de películas, series, libros, etc.).',
       contact: {
-        name: 'Tu Nombre/Equipo',
+        name: 'Mediart Team',
         url: config.clientUrl, // Puedes dejar esta URL del cliente si no es la del backend de Swagger
-        email: 'chamitolol777@gmail.com',
+        email: 'mediart.noreply@gmail.com',
       },
     },
     servers: [
