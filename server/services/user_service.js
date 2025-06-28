@@ -1,60 +1,25 @@
+// services/user_service.js
 const boom = require('@hapi/boom');
 const { models } = require('../libs/sequelize');
 const bcrypt = require('bcrypt');
-const axios = require('axios');
-const FormData = require('form-data');
-const { config } = require('../config/config');
 
-const IMGBB_UPLOAD_URL = 'https://api.imgbb.com/1/upload';
+const { uploadImageToImgBB, deleteImageFromImgBB } = require('../utils/imgbb_uploader');
 
 class UserService {
 
   constructor(){
   }
 
-  // Helper para subir imagen a ImgBB
-  async uploadImageToImgBB(imageBuffer, imageName) {
-    if (!imageBuffer) {
-      return null;
-    }
-
-    const formData = new FormData();
-    formData.append('image', imageBuffer.toString('base64')); // ImgBB acepta base64
-    if (imageName) {
-      formData.append('name', imageName); // Nombre opcional del archivo
-    }
-    formData.append('key', config.apiKeys.imgbbApiKey); // Tu clave API de ImgBB
-
-    try {
-      const response = await axios.post(IMGBB_UPLOAD_URL, formData, {
-        headers: {
-          ...formData.getHeaders()
-        }
-      });
-
-      if (response.data.success) {
-        return {
-          url: response.data.data.url,
-          deleteUrl: response.data.data.delete_url
-        };
-      } else {
-        console.error('ImgBB upload error:', response.data.error.message);
-        throw boom.badGateway('Failed to upload image to ImgBB.');
-      }
-    } catch (error) {
-      console.error('Error uploading image to ImgBB:', error.message);
-      throw boom.badGateway('Failed to upload image to ImgBB.', error);
-    }
-  }
 
   async create(data, profilePictureBuffer = null) {
     const hash = await bcrypt.hash(data.passwordHash, 10);
-    
+
     let profilePictureUrl = null;
     let imgbbDeleteUrl = null;
 
     if (profilePictureBuffer) {
-      const uploadResult = await this.uploadImageToImgBB(profilePictureBuffer, data.username ? `${data.username}-profile` : 'user-profile');
+      // Usar la función importada de imgbb_uploader
+      const uploadResult = await uploadImageToImgBB(profilePictureBuffer, data.username ? `${data.username}-profile` : 'user-profile');
       if (uploadResult) {
         profilePictureUrl = uploadResult.url;
         imgbbDeleteUrl = uploadResult.deleteUrl;
@@ -189,16 +154,16 @@ class UserService {
     if (findOptions.include.length === 0) {
         findOptions.include.push(
             {
-                model: models.User,
-                as: 'followersUsers',
-                attributes: ['id', 'username', 'email', 'profilePictureUrl'],
-                through: { attributes: [] }
+              model: models.User,
+              as: 'followersUsers',
+              attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+              through: { attributes: [] }
             },
             {
-                model: models.User,
-                as: 'followingUsers',
-                attributes: ['id', 'username', 'email', 'profilePictureUrl'],
-                through: { attributes: [] }
+              model: models.User,
+              as: 'followingUsers',
+              attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+              through: { attributes: [] }
             }
         );
     }
@@ -288,18 +253,6 @@ class UserService {
     if (!includeRecoveryToken) {
       findOptions.attributes.exclude.push('recoveryToken');
     }
-    // Asegurarse de que imgbbDeleteUrl siempre se incluya cuando se busca un usuario para el servicio,
-    // a menos que sea específicamente excluido por findOptions.attributes.exclude.
-    // Opcional: si sabes que siempre la vas a necesitar para delete/update, puedes asegurarte aquí.
-    // Si ya la excluyes en el schema global para el usuario, asegúrate de añadirla aquí
-    // para que findOne la devuelva cuando se necesite.
-    if (!findOptions.attributes.exclude.includes('imgbbDeleteUrl')) {
-        findOptions.attributes.exclude.push('imgbbDeleteUrl'); // Si la quieres siempre, NO la excluyas.
-                                                              // Si la excluyes por defecto para el cliente,
-                                                              // pero la necesitas internamente, la pides aquí.
-    }
-    // La forma más sencilla es no excluirla por defecto en el schema del User
-    // y solo excluirla para las respuestas API que no la necesiten.
 
     findOptions.include = [];
 
@@ -418,8 +371,7 @@ class UserService {
   }
 
   async update(id, changes, profilePictureBuffer = null) {
-    // Es CRUCIAL obtener la delete_url de la base de datos para poder eliminar la imagen anterior
-    const user = await models.User.findByPk(id); // Traemos el usuario completo, incluyendo imgbbDeleteUrl
+    const user = await models.User.findByPk(id);
 
     if (!user) {
         throw boom.notFound('User not found');
@@ -427,12 +379,18 @@ class UserService {
 
     const updatedChanges = { ...changes };
 
+    // Si se envía un passwordHash en los cambios, hashearlo
+    if (updatedChanges.passwordHash) {
+      updatedChanges.passwordHash = await bcrypt.hash(updatedChanges.passwordHash, 10);
+    }
+
     // Lógica para el manejo de la imagen de perfil
     if (profilePictureBuffer) {
       // Si se envió un nuevo archivo, primero intentar borrar el antiguo de ImgBB
       if (user.imgbbDeleteUrl) {
         try {
-          await axios.get(user.imgbbDeleteUrl); // ImgBB usa GET para la delete_url
+          // Usar la función importada de imgbb_uploader
+          await deleteImageFromImgBB(user.imgbbDeleteUrl);
           console.log(`Old profile picture deleted from ImgBB: ${user.imgbbDeleteUrl}`);
         } catch (error) {
           console.error(`Failed to delete old profile picture from ImgBB (might already be gone or URL expired):`, error.message);
@@ -441,7 +399,8 @@ class UserService {
       }
 
       // Subir el nuevo archivo a ImgBB
-      const uploadResult = await this.uploadImageToImgBB(profilePictureBuffer, user.username ? `${user.username}-profile` : `user-${id}-profile`);
+      // Usar la función importada de imgbb_uploader
+      const uploadResult = await uploadImageToImgBB(profilePictureBuffer, user.username ? `${user.username}-profile` : `user-${id}-profile`);
       if (uploadResult) {
         updatedChanges.profilePictureUrl = uploadResult.url;
         updatedChanges.imgbbDeleteUrl = uploadResult.deleteUrl; // Guarda la nueva delete_url
@@ -450,7 +409,8 @@ class UserService {
       // Si el frontend envió profilePictureUrl como cadena vacía, significa que se quiere eliminar la imagen
       if (user.profilePictureUrl && user.imgbbDeleteUrl) { // Solo si hay una URL existente y su delete_url
         try {
-          await axios.get(user.imgbbDeleteUrl);
+          // Usar la función importada de imgbb_uploader
+          await deleteImageFromImgBB(user.imgbbDeleteUrl);
           console.log(`Profile picture deleted from ImgBB upon explicit removal: ${user.imgbbDeleteUrl}`);
         } catch (error) {
           console.error(`Failed to delete profile picture from ImgBB (might already be gone or URL expired) upon explicit removal:`, error.message);
@@ -467,6 +427,8 @@ class UserService {
     }
 
     const rta = await user.update(updatedChanges);
+    // Excluir passwordHash del objeto retornado después de la actualización
+    delete rta.dataValues.passwordHash;
     return rta;
   }
 
@@ -481,7 +443,8 @@ class UserService {
     // Si el usuario tiene una imagen de perfil y su delete_url, intentar eliminarla de ImgBB
     if (user.profilePictureUrl && user.imgbbDeleteUrl) {
       try {
-        await axios.get(user.imgbbDeleteUrl); // Hacer la petición GET a la delete_url
+        // Usar la función importada de imgbb_uploader
+        await deleteImageFromImgBB(user.imgbbDeleteUrl);
         console.log(`Profile picture deleted from ImgBB for user ${id}: ${user.imgbbDeleteUrl}`);
       } catch (error) {
         console.error(`Failed to delete profile picture from ImgBB for user ${id} (might already be gone or URL expired):`, error.message);

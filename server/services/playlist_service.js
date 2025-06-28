@@ -318,8 +318,8 @@ class PlaylistService {
     return rta;
   }
 
-  async delete(id) {
-    const playlist = await this.findOne(id);
+  async delete(id) {
+    const playlist = await this.findOne(id);
 
     // Eliminar la imagen de ImgBB si existe
     if (playlist.imgbbDeleteUrl) {
@@ -331,10 +331,11 @@ class PlaylistService {
         // No impedimos la eliminación de la playlist si falla la eliminación de la imagen
       }
     }
+    
+    await playlist.destroy();
 
-    await playlist.destroy();
-    return { id, message: 'Playlist deleted successfully' };
-  }
+    return { id, message: 'Playlist deleted successfully' };
+  }
 
   async addItemsToPlaylist(playlist, itemsData) {
     if (!Array.isArray(itemsData) || itemsData.length === 0) {

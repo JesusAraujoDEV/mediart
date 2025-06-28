@@ -1,16 +1,13 @@
 /**
  * @swagger
  * tags:
- *   name: Playlist
- *   description: Endpoints relacionados con la gestión de playlists
- */
-
-/**
- * @swagger
+ *   - name: Playlists
+ *     description: Endpoints relacionados con listas de reproducción
+ *
  * /api/playlists:
  *   get:
  *     summary: Obtener todas las playlists
- *     tags: [Playlist]
+ *     tags: [Playlists]
  *     responses:
  *       200:
  *         description: Lista de playlists
@@ -19,10 +16,11 @@
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/PlaylistResponse'
+ *                 $ref: '#/components/schemas/Playlist'
+ *
  *   post:
  *     summary: Crear una nueva playlist
- *     tags: [Playlist]
+ *     tags: [Playlists]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -30,23 +28,28 @@
  *       content:
  *         multipart/form-data:
  *           schema:
- *             allOf:
- *               - $ref: '#/components/schemas/CreatePlaylistRequest'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               isCollaborative:
+ *                 type: boolean
+ *               playlistCover:
+ *                 type: string
+ *                 format: binary
+ *               playlistCoverUrl:
+ *                 type: string
+ *                 description: URL remota o vacía para eliminar
  *     responses:
  *       201:
- *         description: Playlist creada correctamente
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/PlaylistResponse'
- */
-
-/**
- * @swagger
+ *         description: Playlist creada exitosamente
+ *
  * /api/playlists/{playlistId}:
  *   get:
- *     summary: Obtener una playlist por su ID
- *     tags: [Playlist]
+ *     summary: Obtener una playlist por ID
+ *     tags: [Playlists]
  *     parameters:
  *       - in: path
  *         name: playlistId
@@ -55,14 +58,15 @@
  *           type: integer
  *     responses:
  *       200:
- *         description: Detalle de la playlist
+ *         description: Playlist encontrada
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/PlaylistResponse'
+ *               $ref: '#/components/schemas/Playlist'
+ *
  *   patch:
- *     summary: Actualizar una playlist existente
- *     tags: [Playlist]
+ *     summary: Actualizar una playlist
+ *     tags: [Playlists]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -76,13 +80,28 @@
  *       content:
  *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/UpdatePlaylistRequest'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               isCollaborative:
+ *                 type: boolean
+ *               playlistCover:
+ *                 type: string
+ *                 format: binary
+ *               playlistCoverUrl:
+ *                 type: string
+ *                 example: ""
+ *                 description: URL remota o cadena vacía para eliminar
  *     responses:
  *       200:
- *         description: Playlist actualizada correctamente
+ *         description: Playlist actualizada
+ *
  *   delete:
  *     summary: Eliminar una playlist
- *     tags: [Playlist]
+ *     tags: [Playlists]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -93,21 +112,17 @@
  *           type: integer
  *     responses:
  *       200:
- *         description: Playlist eliminada correctamente
- */
-
-/**
- * @swagger
+ *         description: Playlist eliminada
+ *
  * /api/playlists/{playlistId}/items:
  *   post:
- *     summary: Agregar ítems a una playlist
- *     tags: [Playlist]
+ *     summary: Añadir ítems a una playlist
+ *     tags: [Playlists]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: playlistId
- *         description: ID de la playlist
  *         required: true
  *         schema:
  *           type: integer
@@ -116,18 +131,27 @@
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/AddItemsToPlaylistRequest'
+ *             oneOf:
+ *               - type: object
+ *                 properties:
+ *                   itemIds:
+ *                     type: array
+ *                     items:
+ *                       type: integer
+ *               - type: object
+ *                 properties:
+ *                   items:
+ *                     type: array
+ *                     items:
+ *                       $ref: '#/components/schemas/Item'
  *     responses:
  *       201:
- *         description: Ítems agregados correctamente
- */
-
-/**
- * @swagger
+ *         description: Ítems añadidos
+ *
  * /api/playlists/{playlistId}/items/{itemId}:
  *   delete:
  *     summary: Eliminar un ítem de una playlist
- *     tags: [Playlist]
+ *     tags: [Playlists]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -143,21 +167,17 @@
  *           type: integer
  *     responses:
  *       200:
- *         description: Ítem eliminado correctamente
- */
-
-/**
- * @swagger
+ *         description: Ítem eliminado
+ *
  * /api/playlists/{playlistId}/collaborators:
  *   post:
- *     summary: Agregar uno o más colaboradores a una playlist
- *     tags: [Playlist]
+ *     summary: Agregar colaboradores a una playlist
+ *     tags: [Playlists]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: playlistId
- *         description: ID de la playlist
  *         required: true
  *         schema:
  *           type: integer
@@ -166,8 +186,50 @@
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/AddCollaboratorsRequest'
+ *             oneOf:
+ *               - type: object
+ *                 properties:
+ *                   userId:
+ *                     type: integer
+ *               - type: object
+ *                 properties:
+ *                   userIds:
+ *                     type: array
+ *                     items:
+ *                       type: integer
  *     responses:
  *       200:
- *         description: Colaboradores agregados correctamente
+ *         description: Colaboradores añadidos
+ *
+ * /api/playlists/{playlistId}/collaborators/remove:
+ *   patch:
+ *     summary: Eliminar colaboradores de una playlist
+ *     tags: [Playlists]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: playlistId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             oneOf:
+ *               - type: object
+ *                 properties:
+ *                   userId:
+ *                     type: integer
+ *               - type: object
+ *                 properties:
+ *                   userIds:
+ *                     type: array
+ *                     items:
+ *                       type: integer
+ *     responses:
+ *       200:
+ *         description: Colaboradores eliminados
  */
