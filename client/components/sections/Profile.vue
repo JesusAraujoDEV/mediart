@@ -63,6 +63,30 @@
     <NuxtLink v-else to="/profile/edit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
       >Editar Perfil</NuxtLink
     >
+
+    <div v-if="createdPlaylists.length > 0" class="w-full mt-8">
+      <h2 class="text-xl font-bold mb-2 text-center">Playlists creadas</h2>
+      <div class="flex flex-col gap-4">
+        <div v-for="playlist in createdPlaylists" :key="playlist.id" class="bg-gray-800/70 rounded-lg p-4 flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-semibold text-lg">{{ playlist.name }}</div>
+              <div class="text-sm text-gray-400">{{ playlist.description }}</div>
+            </div>
+            <button
+              v-if="!isOwner && !savedPlaylistsIds.includes(playlist.id)"
+              :disabled="isSavingPlaylist[playlist.id]"
+              @click="savePlaylist(playlist.id)"
+              class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span v-if="!isSavingPlaylist[playlist.id]">Guardar en mi biblioteca</span>
+              <span v-else>Guardando...</span>
+            </button>
+            <span v-else-if="!isOwner && savedPlaylistsIds.includes(playlist.id)" class="text-green-400 font-semibold">Guardada</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -71,11 +95,13 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useFetch } from '#app';
 import type { UserProfile as UserProfileType } from "~/types/User";
+import type { Playlist } from "~/types/Playlist";
 import Swal from 'sweetalert2';
 
 interface UserProfile extends UserProfileType {
   followersUsers?: any[];
   followingUsers?: any[];
+  playlists?: Playlist[];
 }
 
 interface FollowEntry {
@@ -123,7 +149,9 @@ const defaultProfile: UserProfile = {
   followingUsers: [],
 };
 
-
+const createdPlaylists = ref<Playlist[]>([]);
+const savedPlaylistsIds = ref<number[]>([]);
+const isSavingPlaylist = ref<{ [key: number]: boolean }>({});
 
 // Get current user's ID from localStorage (assuming it's stored after login)
 const getCurrentUserId = (): number | null => {
@@ -347,6 +375,28 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
+
+  await fetchSavedPlaylistsIds();
+  // Obtener playlists creadas por el usuario (si existen)
+  if (userProfile.value && (userProfile.value as any).playlists) {
+    createdPlaylists.value = (userProfile.value as any).playlists;
+  } else {
+    // Intentar obtenerlas del backend si no están
+    try {
+      const usernameFromUrl = route.params.username as string;
+      const response = await fetch(`${config.public.backend}/api/users/by-username/${usernameFromUrl}?include=playlists`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        createdPlaylists.value = data.playlists || [];
+      }
+    } catch {}
+  }
 });
 
 function goToFollowing() {
@@ -357,6 +407,45 @@ function goToFollowers() {
   if (!userProfile.value.username) return;
   router.push(`/profile/${userProfile.value.username}/followers`);
 }
+
+const fetchSavedPlaylistsIds = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const response = await fetch(`${config.public.backend}/api/users/by-username/${JSON.parse(localStorage.getItem('user') || '{}').username}?include=savedPlaylists`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) return;
+    const data = await response.json();
+    savedPlaylistsIds.value = (data.savedPlaylists || []).map((p: Playlist) => p.id);
+  } catch (e) {
+    savedPlaylistsIds.value = [];
+  }
+};
+
+const savePlaylist = async (playlistId: number) => {
+  isSavingPlaylist.value[playlistId] = true;
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${config.public.backend}/api/profile/saved-playlists/${playlistId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error('No se pudo guardar la playlist');
+    savedPlaylistsIds.value.push(playlistId);
+    Swal.fire({ icon: 'success', title: 'Playlist guardada en tu biblioteca', timer: 1500, showConfirmButton: false });
+  } catch (e) {
+    Swal.fire({ icon: 'error', title: 'Error al guardar la playlist', timer: 2000, showConfirmButton: false });
+  } finally {
+    isSavingPlaylist.value[playlistId] = false;
+  }
+};
 
 defineExpose({ goToFollowing, goToFollowers });
 </script>

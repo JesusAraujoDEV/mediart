@@ -329,8 +329,7 @@ const updateProfile = async () => {
       formData = new FormData();
       formData.append("username", editableUserProfile.value.username);
       formData.append("bio", editableUserProfile.value.bio);
-      formData.append("profilePictureUrl", fileToUpload!);
-      console.log(formData);  
+      formData.append("profilePicture", fileToUpload!);
       requestOptions = {
         method: "PATCH",
         headers: {
