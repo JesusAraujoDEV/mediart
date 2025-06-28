@@ -126,7 +126,12 @@ class UserService {
   }
 
   async find(options = {}) {
-    const users = await models.User.findAll(options);
+    const users = await models.User.findAll({
+      ...options,
+      attributes: {
+        exclude: ['passwordHash', 'recoveryToken', 'imgbbDeleteUrl']
+      }
+      });
     return users;
   }
 

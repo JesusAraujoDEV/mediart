@@ -1,7 +1,19 @@
+// user_schema.js
 const Joi = require('joi');
 
 const id = Joi.number().integer();
-const username = Joi.string().min(3).max(20);
+
+const username = Joi.string()
+  .min(3)
+  .max(30)
+  .trim()
+  .pattern(/^[a-zA-Z0-9]+$/)
+  .messages({
+    'string.pattern.base': 'Username can only contain alphanumeric characters (letters and numbers).',
+    'string.min': 'Username must be at least {#limit} characters long.',
+    'string.max': 'Username cannot exceed {#limit} characters.'
+  });
+
 const email = Joi.string().email();
 const passwordHash = Joi.string().min(8);
 const profilePictureUrl = Joi.string().allow(null, '').max(255);
