@@ -51,12 +51,12 @@
  *               profilePicture:
  *                 type: string
  *                 format: binary
- *                 description: Imagen JPEG, PNG, GIF o WEBP (máx 2MB)
+ *                 description: Imagen JPEG, PNG, GIF o WEBP (máx. 2MB)
  *               profilePictureUrl:
  *                 type: string
  *                 format: uri
- *                 example: https://cdn.ejemplo.com/avatar.png
- *                 description: URL externa de la foto de perfil (opcional)
+ *                 example: https://cdn.miapp.com/avatar.png
+ *                 description: URL remota de la imagen (opcional)
  *     responses:
  *       201:
  *         description: Usuario creado exitosamente
@@ -79,22 +79,12 @@
  *         required: true
  *         schema:
  *           type: string
- *         description: Nombre de usuario
  *       - in: query
  *         name: include
  *         schema:
  *           type: string
  *           example: ownedPlaylists,savedPlaylists
- *         description: |
- *           Lista separada por comas de relaciones a incluir. Las opciones válidas son:
- *           - ownedPlaylists
- *           - savedPlaylists
- *           - followersUsers
- *           - followingUsers
- *           - libraryEntries
- *           - initiatedFollows
- *           - receivedFollows
- *           - collaboratorPlaylists
+ *         description: Relaciones a incluir (separadas por coma)
  *     responses:
  *       200:
  *         description: Usuario encontrado
@@ -108,10 +98,7 @@
  *         $ref: '#/components/responses/NotFound'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
- */
-
-/**
- * @swagger
+ *
  * /api/users/{id}:
  *   get:
  *     summary: Obtener un usuario por su ID
@@ -171,11 +158,11 @@
  *               profilePicture:
  *                 type: string
  *                 format: binary
- *                 description: Nueva imagen de perfil a subir
+ *                 description: Nueva imagen a subir como foto de perfil
  *               profilePictureUrl:
  *                 type: string
  *                 example: ""
- *                 description: URL externa de la nueva imagen o cadena vacía ("") para eliminarla
+ *                 description: URL remota para imagen o cadena vacía para eliminarla
  *     responses:
  *       200:
  *         description: Usuario actualizado exitosamente
@@ -206,7 +193,7 @@
  *         schema:
  *           type: integer
  *     responses:
- *       201:
+ *       200:
  *         description: Usuario eliminado exitosamente
  *         content:
  *           application/json:
@@ -215,7 +202,9 @@
  *               properties:
  *                 id:
  *                   type: integer
- *                   example: 1
+ *                 message:
+ *                   type: string
+ *                   example: User deleted successfully
  *       400:
  *         $ref: '#/components/responses/BadRequest'
  *       401:

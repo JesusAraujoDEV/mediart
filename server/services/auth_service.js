@@ -22,7 +22,7 @@ class AuthService{
         }
 
         delete user.dataValues.passwordHash;
-        //delete user.dataValues.recoveryToken; 
+        delete user.dataValues.recoveryToken; 
         return user;
     }
 

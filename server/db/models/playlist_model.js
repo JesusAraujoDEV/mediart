@@ -34,10 +34,15 @@ const PlaylistSchema = {
     type: DataTypes.BOOLEAN,
     field: 'is_collaborative'
   },
-  thumbnailUrl: {
+  playlistCoverUrl: {
     allowNull: true,
     type: DataTypes.STRING,
-    field: 'thumbnail_url'
+    field: 'playlist_cover_url'
+  },
+  imgbbDeleteUrl: {
+    allowNull: true,
+    type: DataTypes.STRING,
+    field: 'imgbb_delete_url'
   },
   createdAt: {
     allowNull: false,

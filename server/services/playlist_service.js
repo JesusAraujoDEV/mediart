@@ -1,9 +1,8 @@
+// services/playlist_service.js
 const boom = require('@hapi/boom');
 const { models } = require('../libs/sequelize');
 const ItemService = require('./item_service');
-const fs = require('fs');
-const path = require('path');
-const { PLAYLIST_PICTURES_DIR } = require('./../utils/multer_config');
+const { uploadImageToImgBB, deleteImageFromImgBB } = require('../utils/imgbb_uploader');
 
 
 class PlaylistService {
@@ -12,16 +11,38 @@ class PlaylistService {
     this.itemService = new ItemService();
   }
 
-  async create(data) {
+  async create(data, playlistCoverBuffer = null) {
     const { items, ...playlistData } = data;
 
     const user = await models.User.findByPk(playlistData.ownerUserId);
     if (!user) {
       throw boom.notFound('User not found');
     }
+    
+    let playlistCoverUrl = null;
+    let imgbbDeleteUrl = null;
+
+    // Si hay una imagen de portada, subirla a ImgBB
+    if (playlistCoverBuffer) {
+      try {
+        const uploadResult = await uploadImageToImgBB(playlistCoverBuffer, `playlist_${Date.now()}.png`); // Nombre de archivo simple
+        playlistCoverUrl = uploadResult.url;
+        imgbbDeleteUrl = uploadResult.deleteUrl;
+      } catch (uploadError) {
+        console.error('Error uploading playlist cover to ImgBB:', uploadError);
+        // Si falla la subida de la imagen, lanzamos un error que el router capturará
+        throw boom.badImplementation('Failed to upload playlist cover image.', uploadError);
+      }
+    }
+
+    // Asegurarse de que los campos del modelo se actualicen
+    playlistData.playlistCoverUrl = playlistCoverUrl;
+    playlistData.imgbbDeleteUrl = imgbbDeleteUrl;
+    // Elimina thumbnailUrl si viene en data, ya que ahora usamos playlistCoverUrl
+    delete playlistData.thumbnailUrl;
 
     const newPlaylist = await models.Playlist.create(playlistData);
-
+    
     try {
       await models.Library.create({
         userId: user.id,
@@ -30,9 +51,14 @@ class PlaylistService {
       });
     } catch (libraryError) {
       console.error("Error creating Library entry for new playlist:", libraryError);
+      // Si falla la entrada en Library, deberías considerar también eliminar la imagen subida
+      if (newPlaylist.imgbbDeleteUrl) {
+        await deleteImageFromImgBB(newPlaylist.imgbbDeleteUrl);
+        console.log('Cleaned up ImgBB image due to Library entry error.');
+      }
       throw boom.internal('Failed to save playlist to user library after creation.', libraryError);
     }
-
+    
     if (items && Array.isArray(items) && items.length > 0) {
       try {
         const addItemsResult = await this.addItemsToPlaylist(newPlaylist, items);
@@ -40,10 +66,16 @@ class PlaylistService {
         newPlaylist.dataValues.itemsAdded = addItemsResult.playlistItems.map(pi => pi.itemId);
       } catch (addItemsError) {
         console.error(`Error adding items to new playlist ${newPlaylist.id}:`, addItemsError);
-        throw boom.internal('Playlist created, but failed to add initial items.', addItemsError);
+        // Si falla la adición de ítems, deberías considerar también eliminar la imagen subida y la playlist.
+        if (newPlaylist.imgbbDeleteUrl) {
+          await deleteImageFromImgBB(newPlaylist.imgbbDeleteUrl);
+          console.log('Cleaned up ImgBB image due to item addition error.');
+        }
+        await newPlaylist.destroy(); // Eliminar la playlist recién creada
+        console.log(`Cleaned up new playlist ${newPlaylist.id} due to item addition error.`);
+        throw boom.internal('Playlist created, but failed to add initial items. Rolled back playlist creation.', addItemsError);
       }
     }
-
     return newPlaylist;
   }
 
@@ -234,40 +266,75 @@ class PlaylistService {
     return playlist;
   }
 
-  async update(id, changes) {
+  async update(id, changes, playlistCoverBuffer = null) {
     const playlist = await this.findOne(id); // Obtener la playlist para tener la URL actual
-
-    // Si se está actualizando la imagen de portada (thumbnailUrl)
-    // y la playlist ya tenía una imagen de portada anterior, eliminarla.
-    // changes.thumbnailUrl !== undefined: Significa que el frontend envió el campo, ya sea con una nueva URL o null/vacío.
-    if (changes.thumbnailUrl !== undefined && playlist.thumbnailUrl) {
-      const oldPicturePath = path.join(PLAYLIST_PICTURES_DIR, path.basename(playlist.thumbnailUrl));
-      if (fs.existsSync(oldPicturePath)) {
-        fs.unlink(oldPicturePath, (err) => {
-          if (err) console.error('Error deleting old playlist cover image:', err);
-          else console.log(`Deleted old playlist cover image: ${oldPicturePath}`);
-        });
+    
+    let newPlaylistCoverUrl = changes.playlistCoverUrl;
+    let newImgbbDeleteUrl = changes.imgbbDeleteUrl; // Aunque no se espera que venga del frontend, lo manejamos por si acaso
+    
+    // 1. Manejo de la nueva imagen subida (si existe)
+    if (playlistCoverBuffer) {
+      try {
+        const uploadResult = await uploadImageToImgBB(playlistCoverBuffer, `playlist_${Date.now()}.png`);
+        newPlaylistCoverUrl = uploadResult.url;
+        newImgbbDeleteUrl = uploadResult.deleteUrl;
+        
+        // Si ya existía una imagen anterior en ImgBB, eliminarla
+        if (playlist.imgbbDeleteUrl) {
+          await deleteImageFromImgBB(playlist.imgbbDeleteUrl);
+          console.log(`Old ImgBB playlist cover deleted for playlist ${id}.`);
+        }
+      } catch (uploadError) {
+        console.error('Error uploading new playlist cover to ImgBB:', uploadError);
+        throw boom.badImplementation('Failed to upload new playlist cover image.', uploadError);
       }
     }
 
+    else if (changes.playlistCoverUrl === '') {
+      // 2. Si el frontend indica que se quiere eliminar la imagen (pasando playlistCoverUrl como cadena vacía)
+      // y la playlist tenía una imagen
+      if (playlist.imgbbDeleteUrl) {
+        await deleteImageFromImgBB(playlist.imgbbDeleteUrl);
+        console.log(`ImgBB playlist cover deleted for playlist ${id} due to explicit removal.`);
+      }
+      newPlaylistCoverUrl = null; // Establecer a null en la BD
+      newImgbbDeleteUrl = null; // Eliminar también la URL de borrado
+    }
+
+    else {
+      // 3. Si no se subió una nueva imagen y no se pidió eliminar,
+      // conservar la URL de la imagen actual (o null si no había)
+      newPlaylistCoverUrl = playlist.playlistCoverUrl;
+      newImgbbDeleteUrl = playlist.imgbbDeleteUrl;
+    }
+    
+    // Actualizar los campos en 'changes' para la actualización de la base de datos
+    changes.playlistCoverUrl = newPlaylistCoverUrl;
+    changes.imgbbDeleteUrl = newImgbbDeleteUrl;
+    // Asegurarse de eliminar la propiedad thumbnailUrl si aún existe en changes
+    delete changes.thumbnailUrl;
+    
     const rta = await playlist.update(changes);
     return rta;
   }
 
-  async delete(id) {
-    const playlist = await this.findOne(id);
-    if (playlist.thumbnailUrl) {
-      const picturePath = path.join(PLAYLIST_PICTURES_DIR, path.basename(playlist.thumbnailUrl));
-      if (fs.existsSync(picturePath)) {
-        fs.unlink(picturePath, (err) => {
-          if (err) console.error('Error deleting playlist cover image on delete:', err);
-          else console.log(`Deleted playlist cover image: ${picturePath} on playlist delete.`);
-        });
+  async delete(id) {
+    const playlist = await this.findOne(id);
+
+    // Eliminar la imagen de ImgBB si existe
+    if (playlist.imgbbDeleteUrl) {
+      try {
+        await deleteImageFromImgBB(playlist.imgbbDeleteUrl);
+        console.log(`ImgBB playlist cover deleted for playlist ${id} on playlist deletion.`);
+      } catch (error) {
+        console.error(`Failed to delete ImgBB playlist cover for playlist ${id}:`, error);
+        // No impedimos la eliminación de la playlist si falla la eliminación de la imagen
       }
     }
-    await playlist.destroy();
-    return { id, message: 'Playlist deleted successfully' };
-  }
+
+    await playlist.destroy();
+    return { id, message: 'Playlist deleted successfully' };
+  }
 
   async addItemsToPlaylist(playlist, itemsData) {
     if (!Array.isArray(itemsData) || itemsData.length === 0) {

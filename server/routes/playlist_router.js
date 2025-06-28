@@ -1,3 +1,4 @@
+// playlist_router.js
 const express = require('express');
 const PlaylistService = require('./../services/playlist_service');
 const validatorHandler = require('./../middlewares/validator_handler');
@@ -44,7 +45,7 @@ router.get('/:playlistId',
 
 router.post('/',
   passport.authenticate('jwt', { session: false }),
-  uploadPlaylistPicture.single('thumbnail'),
+  uploadPlaylistPicture.single('playlistCover'),
   validatorHandler(createPlaylistSchema, 'body'),
   async (req, res, next) => {
     try {
@@ -54,13 +55,13 @@ router.post('/',
         ownerUserId: req.user.sub
       };
 
+      let playlistCoverBuffer = null;
       if (req.file) {
-        bodyWithUserId.thumbnailUrl = `/uploads/playlist_pictures/${req.file.filename}`;
-      } else {
-        delete bodyWithUserId.thumbnailUrl;
+        playlistCoverBuffer = req.file.buffer;
       }
+
       
-      const newPlaylist = await service.create(bodyWithUserId);
+      const newPlaylist = await service.create(bodyWithUserId, playlistCoverBuffer);
       res.status(201).json(newPlaylist);
     } catch (error) {
       next(error);
@@ -71,7 +72,7 @@ router.post('/',
 router.patch('/:playlistId',
   passport.authenticate('jwt', { session: false }),
   validatorHandler(getPlaylistSchema, 'params'),
-  uploadPlaylistPicture.single('thumbnail'),
+  uploadPlaylistPicture.single('playlistCover'),
   validatorHandler(updatePlaylistSchema, 'body'),
   async (req, res, next) => {
     try {
@@ -85,18 +86,16 @@ router.patch('/:playlistId',
         throw boom.forbidden('You are not the owner of this playlist.');
       }
 
-      // Lógica para manejar la imagen de portada
+      let playlistCoverBuffer = null;
       if (req.file) {
-        // Si se subió un nuevo archivo, usar su ruta
-        body.thumbnailUrl = `/uploads/playlist_pictures/${req.file.filename}`;
-      } else if (body.thumbnailUrl === '') {
-        // Si el frontend envía thumbnailUrl como cadena vacía, significa que se quiere eliminar la imagen
-        body.thumbnailUrl = null;
-      } else {
-        delete body.thumbnailUrl;
+        playlistCoverBuffer = req.file.buffer;
       }
 
-      const updatedPlaylist = await service.update(playlistId, body);
+      // `body.playlistCoverUrl` desde el frontend se usará para indicar si se quiere eliminar
+      // Si el frontend envía `playlistCoverUrl: ''` significa eliminar.
+      // Si se envía un archivo nuevo, `playlistCoverBuffer` tendrá el buffer.
+      // Si no se envía ni archivo ni `playlistCoverUrl: ''`, la URL actual se mantiene.
+      const updatedPlaylist = await service.update(playlistId, body, playlistCoverBuffer);
       res.json(updatedPlaylist);
     } catch (error) {
       next(error);
@@ -117,7 +116,7 @@ router.delete('/:playlistId',
         throw boom.forbidden('You are not the owner of this playlist.');
       }
 
-      await service.delete(playlistId);
+      await service.delete(playlistId); // El servicio ahora se encarga de eliminar de ImgBB
       res.status(200).json({ playlistId, message: 'Playlist deleted successfully' });
     } catch (error) {
       next(error);
