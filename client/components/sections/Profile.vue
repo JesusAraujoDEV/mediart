@@ -412,7 +412,10 @@ const fetchSavedPlaylistsIds = async () => {
   try {
     const token = localStorage.getItem('token');
     if (!token) return;
-    const response = await fetch(`${config.public.backend}/api/profile/saved-playlists`, {
+    
+    // Usar el endpoint que permite ver las playlists guardadas del usuario actual
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const response = await fetch(`${config.public.backend}/api/users/by-username/${currentUser.username}?include=savedPlaylists`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -421,7 +424,7 @@ const fetchSavedPlaylistsIds = async () => {
     });
     if (!response.ok) return;
     const data = await response.json();
-    savedPlaylistsIds.value = (data || []).map((p: Playlist) => p.id);
+    savedPlaylistsIds.value = (data.savedPlaylists || []).map((p: Playlist) => p.id);
   } catch (e) {
     savedPlaylistsIds.value = [];
   }

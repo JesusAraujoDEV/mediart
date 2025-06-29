@@ -280,7 +280,8 @@ const fetchSavedPlaylists = async () => {
       throw new Error("No hay token de autenticación disponible. Por favor, inicia sesión.");
     }
 
-    const response = await fetch(`${config.public.backend}/api/profile/saved-playlists`, {
+    // Usar el endpoint que permite ver las playlists de un usuario específico
+    const response = await fetch(`${config.public.backend}/api/users/by-username/${username.value || ''}?include=savedPlaylists`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -294,7 +295,7 @@ const fetchSavedPlaylists = async () => {
     }
 
     const data = await response.json();
-    savedPlaylists.value = data || [];
+    savedPlaylists.value = data.savedPlaylists || [];
     
     // Verificar si es la biblioteca propia
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
