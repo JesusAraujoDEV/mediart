@@ -66,22 +66,22 @@
           :class="{ 'cursor-pointer': !loadingPlaylistDetails.has(playlist.id.toString()) }"
           class="bg-gray-800/70 rounded-xl p-0 shadow-lg transform transition-all duration-300 hover:scale-[1.01] hover:bg-gray-700/80 border border-gray-600 flex flex-col md:flex-row items-stretch overflow-hidden"
         >
-          <!-- Imagen optimizada con lazy loading -->
-          <div class="flex items-center justify-center bg-gray-900/60 md:w-48 w-full md:h-auto h-40 flex-shrink-0">
+          <!-- Imagen optimizada con lazy loading - Contenedor independiente -->
+          <div class="w-full h-48 md:w-48 md:h-auto flex-shrink-0 bg-gray-900/60 overflow-hidden">
             <img
               v-if="getPlaylistImage(playlist)"
               :src="getPlaylistImage(playlist)"
               :alt="playlist.name"
-              class="object-cover w-full h-full md:w-48 md:h-48 rounded-l-xl md:rounded-none md:rounded-l-xl border border-gray-700 shadow-md"
+              class="w-full h-full object-cover rounded-t-xl md:rounded-l-xl md:rounded-t-none border border-gray-700 shadow-md"
               loading="lazy"
               @error="handleImageError"
             />
-            <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-4xl bg-gray-700 rounded-l-xl md:rounded-none md:rounded-l-xl border border-gray-700">
+            <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-4xl bg-gray-700 rounded-t-xl md:rounded-l-xl md:rounded-t-none border border-gray-700">
               <span>🎵</span>
             </div>
           </div>
           
-          <!-- Datos optimizados -->
+          <!-- Contenido de la playlist - Contenedor separado -->
           <div class="flex flex-col flex-grow p-6 justify-between">
             <div>
               <div class="flex items-center justify-between mb-2">
@@ -222,7 +222,7 @@ const hasMorePlaylists = computed(() => {
 
 // Memoized functions
 const getPlaylistImage = (playlist: Playlist): string | undefined => {
-  return (playlist as any).thumbnailUrl || (playlist as any).coverUrl || (playlist as any).imageUrl || undefined;
+  return playlist.playlistCoverUrl || undefined;
 };
 
 // Event handlers optimizados
@@ -280,7 +280,7 @@ const fetchSavedPlaylists = async () => {
       throw new Error("No hay token de autenticación disponible. Por favor, inicia sesión.");
     }
 
-    const response = await fetch(`${config.public.backend}/api/users/by-username/${username.value || ''}?include=savedPlaylists`, {
+    const response = await fetch(`${config.public.backend}/api/profile/saved-playlists`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -294,7 +294,7 @@ const fetchSavedPlaylists = async () => {
     }
 
     const data = await response.json();
-    savedPlaylists.value = data.savedPlaylists || [];
+    savedPlaylists.value = data || [];
     
     // Verificar si es la biblioteca propia
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');

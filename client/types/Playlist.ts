@@ -6,11 +6,13 @@ export interface Playlist {
   name: string;
   description: string | null;
   isCollaborative: boolean;
+  playlistCoverUrl?: string | null;
+  imgbbDeleteUrl?: string | null;
   createdAt: string;
   updatedAt: string;
   owner_user_id: number; // Mantenemos si viene así del backend
-  Library: {
+  Library?: {
     savedAt: string;
   };
-  items: RecommendationItem[];
+  items?: RecommendationItem[];
 }

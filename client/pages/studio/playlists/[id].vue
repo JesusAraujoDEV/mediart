@@ -22,8 +22,8 @@
       <div class="glassEffect bg-gray-800/50 rounded-lg p-6 mb-6 shadow-xl flex flex-col md:flex-row items-center md:items-start text-center md:text-left relative">
         <div class="w-40 h-40 rounded-lg mb-4 md:mb-0 md:mr-6 flex-shrink-0 shadow-md border border-gray-600 overflow-hidden">
           <img
-            v-if="playlist.coverUrl"
-            :src="playlist.coverUrl"
+            v-if="playlist.playlistCoverUrl"
+            :src="playlist.playlistCoverUrl"
             alt="Playlist Cover"
             class="w-full h-full object-cover"
           />
@@ -178,13 +178,57 @@
           <!-- Imagen de portada -->
           <div>
             <label class="block text-sm font-semibold text-gray-300 mb-3">Imagen de Portada</label>
-            <input
-              v-model="settingsForm.coverUrl"
-              type="url"
-              placeholder="https://ejemplo.com/imagen.jpg"
-              class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-            />
-            <p class="text-xs text-gray-400 mt-2">Deja vacío para usar la imagen por defecto</p>
+            
+            <!-- Opciones de imagen -->
+            <div class="space-y-4">
+              <!-- Opción 1: Subir archivo -->
+              <div class="p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                <div class="flex items-center gap-3 mb-3">
+                  <Icon name="material-symbols:upload-file" size="1.5em" class="text-purple-400" />
+                  <h4 class="text-base font-medium text-white">Subir archivo</h4>
+                </div>
+                <input
+                  type="file"
+                  @change="handleCoverFileUpload"
+                  accept="image/*"
+                  ref="coverFileInput"
+                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+                />
+                <p class="text-xs text-gray-400 mt-2">Formatos soportados: JPG, PNG, GIF, WEBP</p>
+              </div>
+
+              <!-- Opción 2: URL remota -->
+              <div class="p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                <div class="flex items-center gap-3 mb-3">
+                  <Icon name="material-symbols:link" size="1.5em" class="text-purple-400" />
+                  <h4 class="text-base font-medium text-white">URL remota</h4>
+                </div>
+                <input
+                  v-model="settingsForm.playlistCoverUrl"
+                  type="url"
+                  placeholder="https://ejemplo.com/imagen.jpg"
+                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                />
+                <p class="text-xs text-gray-400 mt-2">Deja vacío para eliminar la imagen actual</p>
+              </div>
+
+              <!-- Vista previa de la imagen actual -->
+              <div v-if="currentCoverPreview" class="p-4 bg-gray-700/30 rounded-lg border border-gray-600">
+                <h4 class="text-sm font-medium text-gray-300 mb-3">Vista previa actual:</h4>
+                <img
+                  :src="currentCoverPreview"
+                  alt="Vista previa de portada"
+                  class="w-32 h-32 object-cover rounded-lg border border-gray-500"
+                />
+                <button
+                  @click="removeCurrentCover"
+                  type="button"
+                  class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                >
+                  Eliminar imagen actual
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Colaborativa -->
@@ -226,10 +270,13 @@
                   </div>
                   <div>
                     <span class="text-white font-medium">{{ collaborator.username }}</span>
-                    <p class="text-xs text-gray-400">Colaborador</p>
+                    <p class="text-xs text-gray-400">
+                      {{ collaborator.id === playlist.ownerUserId ? 'Owner' : 'Colaborador' }}
+                    </p>
                   </div>
                 </div>
                 <button
+                  v-if="collaborator.id !== playlist.ownerUserId"
                   @click="removeCollaborator(collaborator.id)"
                   type="button"
                   class="text-red-400 hover:text-red-300 p-2 rounded-full hover:bg-red-500/10 transition-colors"
@@ -362,7 +409,8 @@ interface Playlist {
   items?: PlaylistItem[];
   savedByUsers?: PlaylistOwner[];
   collaborators?: PlaylistOwner[];
-  coverUrl?: string;
+  playlistCoverUrl?: string;
+  imgbbDeleteUrl?: string;
 }
 
 interface CollaboratorResponse {
@@ -402,12 +450,15 @@ const isSearching = ref(false);
 const showSearchResults = ref(false);
 const isSavingPlaylist = ref(false);
 const isPlaylistSaved = ref(false);
+const coverFileInput = ref<HTMLInputElement | null>(null);
+const currentCoverPreview = ref<string | null>(null);
+const selectedCoverFile = ref<File | null>(null);
 
 // Formulario de configuraciones
 const settingsForm = ref({
   name: '',
   description: '',
-  coverUrl: '',
+  playlistCoverUrl: '',
   isCollaborative: false
 });
 
@@ -594,23 +645,71 @@ function openSettingsModal() {
   settingsForm.value = {
     name: playlist.value.name,
     description: playlist.value.description,
-    coverUrl: playlist.value.coverUrl || '',
+    playlistCoverUrl: playlist.value.playlistCoverUrl || '',
     isCollaborative: playlist.value.isCollaborative
   };
+  
+  // Establecer vista previa de la imagen actual
+  currentCoverPreview.value = playlist.value.playlistCoverUrl || null;
+  selectedCoverFile.value = null;
+  
   showSettingsModal.value = true;
 }
 
 function closeSettingsModal() {
   showSettingsModal.value = false;
   newCollaboratorUsername.value = '';
+  currentCoverPreview.value = null;
+  selectedCoverFile.value = null;
+}
+
+// Función para manejar la subida de archivo de imagen
+function handleCoverFileUpload(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  
+  if (file) {
+    selectedCoverFile.value = file;
+    currentCoverPreview.value = URL.createObjectURL(file);
+    // Limpiar URL remota cuando se selecciona un archivo
+    settingsForm.value.playlistCoverUrl = '';
+  }
+}
+
+// Función para eliminar la imagen actual
+function removeCurrentCover() {
+  currentCoverPreview.value = null;
+  selectedCoverFile.value = null;
+  settingsForm.value.playlistCoverUrl = '';
+  if (coverFileInput.value) {
+    coverFileInput.value.value = '';
+  }
 }
 
 async function savePlaylistSettings() {
   isSavingSettings.value = true;
   try {
-    const { data, error } = await useFetch(
-      `${config.public.backend}/api/playlists/${playlist.value.id}`,
-      {
+    let requestOptions: any;
+    
+    // Determinar si se está subiendo un archivo o usando URL
+    if (selectedCoverFile.value) {
+      // Usar multipart/form-data para subir archivo
+      const formData = new FormData();
+      formData.append('name', settingsForm.value.name);
+      formData.append('description', settingsForm.value.description);
+      formData.append('isCollaborative', settingsForm.value.isCollaborative.toString());
+      formData.append('playlistCover', selectedCoverFile.value);
+      
+      requestOptions = {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: formData
+      };
+    } else {
+      // Usar JSON para URL o eliminar imagen
+      requestOptions = {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -619,10 +718,15 @@ async function savePlaylistSettings() {
         body: {
           name: settingsForm.value.name,
           description: settingsForm.value.description,
-          coverUrl: settingsForm.value.coverUrl || null,
+          playlistCoverUrl: settingsForm.value.playlistCoverUrl || '', // Cadena vacía para eliminar
           isCollaborative: settingsForm.value.isCollaborative
         }
-      }
+      };
+    }
+
+    const { data, error } = await useFetch<Playlist>(
+      `${config.public.backend}/api/playlists/${playlist.value.id}`,
+      requestOptions
     );
 
     if (error.value) {
@@ -632,8 +736,12 @@ async function savePlaylistSettings() {
     // Actualizar datos locales
     playlist.value.name = settingsForm.value.name;
     playlist.value.description = settingsForm.value.description;
-    playlist.value.coverUrl = settingsForm.value.coverUrl;
     playlist.value.isCollaborative = settingsForm.value.isCollaborative;
+    
+    // Actualizar la imagen de portada
+    if (data.value && data.value.playlistCoverUrl !== undefined) {
+      playlist.value.playlistCoverUrl = data.value.playlistCoverUrl;
+    }
 
     Swal.fire({
       icon: 'success',
@@ -711,13 +819,8 @@ async function addCollaborator(userId: number, username: string) {
       throw new Error(error.value.data?.message || error.value.message || 'Error al agregar colaborador');
     }
 
-    // Actualizar lista de colaboradores
-    if (data.value && data.value.collaborator) {
-      if (!playlist.value.collaborators) {
-        playlist.value.collaborators = [];
-      }
-      playlist.value.collaborators.push(data.value.collaborator);
-    }
+    // Actualizar la lista de colaboradores obteniendo los datos más recientes
+    await refreshCollaboratorsList();
 
     Swal.fire({
       icon: 'success',
@@ -742,6 +845,33 @@ async function addCollaborator(userId: number, username: string) {
   }
 }
 
+// Función para actualizar la lista de colaboradores desde el servidor
+async function refreshCollaboratorsList() {
+  try {
+    const { data, error } = await useFetch<Playlist>(
+      `${config.public.backend}/api/playlists/${playlist.value.id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`,
+        },
+      }
+    );
+
+    if (error.value) {
+      console.error("Error al actualizar la lista de colaboradores:", error.value);
+      return;
+    }
+
+    if (data.value && data.value.collaborators) {
+      playlist.value.collaborators = data.value.collaborators;
+    }
+  } catch (err) {
+    console.error("Error al refrescar la lista de colaboradores:", err);
+  }
+}
+
 function handleSearchInput() {
   if (newCollaboratorUsername.value.trim()) {
     searchUsers(newCollaboratorUsername.value);
@@ -758,12 +888,15 @@ function selectUser(user: UserSearchResult) {
 async function removeCollaborator(collaboratorId: number) {
   try {
     const { error } = await useFetch(
-      `${config.public.backend}/api/playlists/${playlist.value.id}/collaborators/${collaboratorId}`,
+      `${config.public.backend}/api/playlists/${playlist.value.id}/collaborators/remove`,
       {
-        method: 'DELETE',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: {
+          userId: collaboratorId
         }
       }
     );
@@ -772,10 +905,8 @@ async function removeCollaborator(collaboratorId: number) {
       throw new Error(error.value.data?.message || error.value.message || 'Error al eliminar colaborador');
     }
 
-    // Remover de la lista local
-    if (playlist.value.collaborators) {
-      playlist.value.collaborators = playlist.value.collaborators.filter(c => c.id !== collaboratorId);
-    }
+    // Actualizar la lista de colaboradores obteniendo los datos más recientes
+    await refreshCollaboratorsList();
 
     Swal.fire({
       icon: 'success',

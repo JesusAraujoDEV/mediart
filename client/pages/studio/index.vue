@@ -911,25 +911,22 @@ const createPlaylist = async () => {
     return;
   }
 
-  playlistSaving.value = true; // <--- Activa el spinner
+  playlistSaving.value = true;
 
-  // Buscar el primer link válido (thumbnailUrl, coverUrl o imageUrl) que no sea placeholder
-  let thumbnailUrl = null;
+  // Obtener la primera imagen del primer item como portada de la playlist
+  let playlistCoverUrl = null;
   if (recommendations.value.length > 0) {
-    const validItem = recommendations.value.find((item: any) => {
-      const thumb = item.thumbnailUrl || item.coverUrl || item.imageUrl;
-      return thumb && !thumb.includes('placeholder');
-    });
-    if (validItem) {
-      thumbnailUrl = validItem.thumbnailUrl || validItem.coverUrl || validItem.imageUrl;
-    } else {
-      // Si todos son placeholder, usar el primero disponible
-      const first = recommendations.value[0] as any;
-      thumbnailUrl = first.thumbnailUrl || first.coverUrl || first.imageUrl || null;
+    const firstItem = recommendations.value[0];
+    // Buscar la imagen en diferentes campos posibles usando type assertion
+    playlistCoverUrl = (firstItem as any).coverUrl || (firstItem as any).thumbnailUrl || (firstItem as any).imageUrl || null;
+    
+    // Verificar que no sea una imagen placeholder
+    if (playlistCoverUrl && playlistCoverUrl.includes('placeholder')) {
+      playlistCoverUrl = null;
     }
   }
 
-  console.log('coverUrl:', thumbnailUrl); 
+  console.log('playlistCoverUrl:', playlistCoverUrl);
   console.log('recommendations.value:', recommendations.value);
 
   try {
@@ -943,8 +940,8 @@ const createPlaylist = async () => {
         name: newPlaylist.value.name,
         description: newPlaylist.value.description,
         isCollaborative: newPlaylist.value.isCollaborative,
+        playlistCoverUrl: playlistCoverUrl, // Usar la primera imagen como portada
         items: recommendations.value,
-        thumbnailUrl: thumbnailUrl || 'https://images.rawpixel.com/image_800/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvcGR2YW5nb2doLXNlbGYtcG9ydHJhaXQtbTAxLWpvYjY2MV8yLWwxMDBvNmVmLmpwZw.jpg',
       }),
     });
 
@@ -963,10 +960,10 @@ const createPlaylist = async () => {
       text: "Tu playlist ha sido creada exitosamente.",
       icon: "success",
     });
-    showPlaylistModal.value = false; // Cierra el modal
+    showPlaylistModal.value = false;
     router.push(
       `/profile/${JSON.parse(localStorage.getItem("user") || "{}").username}`
-    ); // Redirige al perfil o a donde sea necesario
+    );
   } catch (error: any) {
     console.error("Error al aceptar recomendaciones y crear playlist:", error);
     Swal.fire({
@@ -975,7 +972,7 @@ const createPlaylist = async () => {
       icon: "error",
     });
   } finally {
-    playlistSaving.value = false; // <--- Desactiva el spinner
+    playlistSaving.value = false;
   }
 };
 
