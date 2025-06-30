@@ -2,8 +2,8 @@
   <NuxtLayout :name="'custom'">
     <NuxtPage />
     <main class="w-screen h-dvh flex justify-center items-center">
+      <NavigationNavbar /> 
       <NuxtLink to="/login" class="hover:underline text-center text-2xl">
-        <p>Iniciar de sesión</p>
       </NuxtLink>
     </main>
   </NuxtLayout>

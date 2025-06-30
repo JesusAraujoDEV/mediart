@@ -9,4 +9,13 @@ export default defineNuxtConfig({
       backend: process.env.BACKEND_URL || 'http://localhost:3000',
     },
   },
+
+  vite: {
+    server: {
+      host: true, // Esto es crucial para que el servidor escuche correctamente en GitPod
+      allowedHosts: [
+        '.gitpod.io' // Esto permite todas las URLs generadas por GitPod
+      ]
+    }
+  }
 })
