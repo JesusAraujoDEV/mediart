@@ -88,6 +88,70 @@
 
       <div class="glassEffect bg-gray-800/50 rounded-lg p-6 shadow-xl flex-grow overflow-y-auto custom-scroll">
         <h2 class="text-2xl font-bold mb-5 text-gray-200">Contenido de la Playlist ({{ playlist.items?.length || 0 }})</h2>
+
+        <!-- Buscador de ítems para agregar a la playlist (solo en modo edición) -->
+        <div v-if="editMode" class="mb-8 p-4 bg-gray-700/40 rounded-lg border border-gray-600">
+          <div class="flex flex-col md:flex-row md:items-end gap-4 mb-4">
+            <div class="flex flex-col flex-1">
+              <label class="text-sm text-gray-300 mb-1">Buscar ítems</label>
+              <input
+                v-model="itemSearchQuery"
+                @input="debouncedSearchItems"
+                type="text"
+                :placeholder="getItemSearchPlaceholder()"
+                class="p-3 w-full rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+              />
+            </div>
+            <div class="flex flex-col w-40">
+              <label class="text-sm text-gray-300 mb-1">Tipo</label>
+              <select
+                v-model="itemSearchType"
+                @change="debouncedSearchItems"
+                class="p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="general">Todo</option>
+                <option value="song">Canciones</option>
+                <option value="artist">Artistas</option>
+                <option value="album">Álbumes</option>
+                <option value="movie">Películas</option>
+                <option value="tvshow">Series</option>
+                <option value="book">Libros</option>
+                <option value="videogame">Videojuegos</option>
+              </select>
+            </div>
+          </div>
+          <div v-if="isItemSearching" class="flex items-center gap-2 text-gray-400 mb-2">
+            <Icon name="material-symbols:sync" size="1.2em" class="animate-spin" /> Buscando...
+          </div>
+          <div v-if="itemSearchResults.length > 0" class="mb-2 max-h-64 overflow-y-auto custom-scroll divide-y divide-gray-700">
+            <div
+              v-for="item in itemSearchResults"
+              :key="item.type + '-' + item.externalId"
+              class="flex items-center gap-3 p-2 hover:bg-gray-600/40 rounded transition-colors"
+            >
+              <img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title" class="w-12 h-12 object-cover rounded border border-gray-500" />
+              <div v-else class="w-12 h-12 bg-gray-600 rounded flex items-center justify-center text-gray-400 text-xs border border-gray-500">Sin portada</div>
+              <div class="flex-grow">
+                <div class="font-semibold text-white">{{ item.title }}</div>
+                <div class="text-xs text-gray-300 capitalize">{{ item.type }}</div>
+                <div v-if="item.description" class="text-xs text-gray-400 line-clamp-1">{{ item.description }}</div>
+              </div>
+              <button
+                @click="addSingleItemToPlaylist(item)"
+                :disabled="isAddingItemsMap[item.externalId] || isItemInPlaylist(item.externalId)"
+                class="ml-2 px-3 py-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                :title="isItemInPlaylist(item.externalId) ? 'Ya está en la playlist' : 'Agregar a la playlist'"
+              >
+                <Icon v-if="isAddingItemsMap[item.externalId]" name="material-symbols:sync" size="1.2em" class="animate-spin" />
+                <Icon v-else name="material-symbols:add" size="1.2em" />
+              </button>
+            </div>
+          </div>
+          <div v-if="itemSearchResults.length === 0 && itemSearchQuery.trim() && !isItemSearching" class="text-gray-400 text-sm mb-2">No se encontraron resultados.</div>
+          <div v-if="addItemsSuccessMessage" class="text-green-400 text-sm mt-2">{{ addItemsSuccessMessage }}</div>
+          <div v-if="addItemsErrorMessage" class="text-red-400 text-sm mt-2">{{ addItemsErrorMessage }}</div>
+        </div>
+        <!-- Fin buscador de ítems -->
         <div v-if="playlist.items && playlist.items.length > 0" class="grid grid-cols-1 gap-4">
           <div
             v-for="(item, idx) in playlist.items"
@@ -365,7 +429,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 import Swal from "sweetalert2";
@@ -461,6 +525,230 @@ const settingsForm = ref({
   playlistCoverUrl: '',
   isCollaborative: false
 });
+
+// --- Buscador de ítems para agregar a la playlist ---
+const itemSearchQuery = ref("");
+const itemSearchType = ref("general");
+const itemSearchResults = ref<any[]>([]);
+const isItemSearching = ref(false);
+const selectedItemIds = ref<string[]>([]);
+const isAddingItems = ref(false);
+const addItemsSuccessMessage = ref("");
+const addItemsErrorMessage = ref("");
+const isAddingItemsMap = ref<Record<string, boolean>>({});
+let itemSearchAbortController: AbortController | null = null;
+
+function getItemSearchPlaceholder() {
+  switch (itemSearchType.value) {
+    case 'song': return 'Buscar canciones...';
+    case 'artist': return 'Buscar artistas...';
+    case 'album': return 'Buscar álbumes...';
+    case 'movie': return 'Buscar películas...';
+    case 'tvshow': return 'Buscar series...';
+    case 'book': return 'Buscar libros...';
+    case 'videogame': return 'Buscar videojuegos...';
+    case 'general':
+    default: return 'Buscar en todo...';
+  }
+}
+
+const debounce = (func: Function, delay: number) => {
+  let timeout: ReturnType<typeof setTimeout>;
+  return function(this: any, ...args: any[]) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), delay);
+  };
+};
+
+const internalSearchItems = async () => {
+  if (!itemSearchQuery.value.trim()) {
+    itemSearchResults.value = [];
+    return;
+  }
+  if (itemSearchAbortController) itemSearchAbortController.abort();
+  itemSearchAbortController = new AbortController();
+  const signal = itemSearchAbortController.signal;
+  isItemSearching.value = true;
+  try {
+    const url = `${config.public.backend}/api/search?q=${encodeURIComponent(itemSearchQuery.value.trim())}&type=${itemSearchType.value}`;
+    const { data, error } = await useFetch<any>(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem('token')}`,
+      },
+      signal,
+    });
+    if (signal.aborted) return;
+    if (error.value) throw new Error(error.value.data?.message || error.value.message || 'Error al buscar ítems');
+    const newResults: any[] = [];
+    // Procesar resultados igual que en search.vue
+    if (itemSearchType.value === 'song' && data.value?.songs) {
+      newResults.push(...data.value.songs.map((item: any) => ({
+        title: item.title,
+        coverUrl: item.thumbnail_url || null,
+        type: "song",
+        externalId: item.id?.toString(),
+        description: `${item.artist_name} - ${item.album_name}`,
+        externalUrl: item.external_url || null,
+      })));
+    } else if (itemSearchType.value === 'movie' && data.value?.movies) {
+      newResults.push(...data.value.movies.map((item: any) => ({
+        title: item.title,
+        coverUrl: item.poster_url || null,
+        type: "movie",
+        externalId: item.id?.toString(),
+        description: item.overview || null,
+        externalUrl: item.external_url || null,
+      })));
+    } else if (itemSearchType.value === 'tvshow' && data.value?.tvshows) {
+      newResults.push(...data.value.tvshows.map((item: any) => ({
+        title: item.title || item.name,
+        coverUrl: item.poster_url || null,
+        type: "tvshow",
+        externalId: item.id?.toString(),
+        description: item.overview || null,
+        externalUrl: item.external_url || null,
+      })));
+    } else if (itemSearchType.value === 'artist' && data.value?.artists) {
+      newResults.push(...data.value.artists.map((item: any) => ({
+        title: item.name,
+        coverUrl: item.image_url || null,
+        type: "artist",
+        externalId: item.id?.toString(),
+        description: null,
+        externalUrl: item.external_url || null,
+      })));
+    } else if (itemSearchType.value === 'album' && data.value?.albums) {
+      newResults.push(...data.value.albums.map((item: any) => ({
+        title: item.name,
+        coverUrl: item.thumbnail_url || null,
+        type: "album",
+        externalId: item.id?.toString(),
+        description: item.artist_name || null,
+        externalUrl: item.external_url || null,
+      })));
+    } else if (itemSearchType.value === 'book' && data.value?.books) {
+      newResults.push(...data.value.books.map((item: any) => ({
+        title: item.title || item.name,
+        coverUrl: item.thumbnail_url || null,
+        type: "book",
+        externalId: item.id?.toString(),
+        description: item.description || null,
+        externalUrl: item.external_url || null,
+      })));
+    } else if (itemSearchType.value === 'videogame' && data.value?.videogames) {
+      newResults.push(...data.value.videogames.map((item: any) => ({
+        title: item.name,
+        coverUrl: item.cover_url || null,
+        type: "videogame",
+        externalId: item.id?.toString(),
+        description: item.description || null,
+        externalUrl: item.external_url || null,
+      })));
+    } else if (itemSearchType.value === 'general') {
+      if (data.value?.movies) newResults.push(...data.value.movies.map((item: any) => ({
+        title: item.title,
+        coverUrl: item.poster_url || null,
+        type: "movie",
+        externalId: item.id?.toString(),
+        description: item.overview || null,
+        externalUrl: item.external_url || null,
+      })));
+      if (data.value?.tvshows) newResults.push(...data.value.tvshows.map((item: any) => ({
+        title: item.title || item.name,
+        coverUrl: item.poster_url || null,
+        type: "tvshow",
+        externalId: item.id?.toString(),
+        description: item.overview || null,
+        externalUrl: item.external_url || null,
+      })));
+      if (data.value?.songs) newResults.push(...data.value.songs.map((item: any) => ({
+        title: item.title,
+        coverUrl: item.thumbnail_url || null,
+        type: "song",
+        externalId: item.id?.toString(),
+        description: `${item.artist_name} - ${item.album_name}`,
+        externalUrl: item.external_url || null,
+      })));
+      if (data.value?.artists) newResults.push(...data.value.artists.map((item: any) => ({
+        title: item.name,
+        coverUrl: item.image_url || null,
+        type: "artist",
+        externalId: item.id?.toString(),
+        description: null,
+        externalUrl: item.external_url || null,
+      })));
+      if (data.value?.albums) newResults.push(...data.value.albums.map((item: any) => ({
+        title: item.name,
+        coverUrl: item.thumbnail_url || null,
+        type: "album",
+        externalId: item.id?.toString(),
+        description: item.artist_name || null,
+        externalUrl: item.external_url || null,
+      })));
+      if (data.value?.books) newResults.push(...data.value.books.map((item: any) => ({
+        title: item.title || item.name,
+        coverUrl: item.thumbnail_url || null,
+        type: "book",
+        externalId: item.id?.toString(),
+        description: item.description || null,
+        externalUrl: item.external_url || null,
+      })));
+      if (data.value?.videogames) newResults.push(...data.value.videogames.map((item: any) => ({
+        title: item.name,
+        coverUrl: item.cover_url || null,
+        type: "videogame",
+        externalId: item.id?.toString(),
+        description: item.description || null,
+        externalUrl: item.external_url || null,
+      })));
+    }
+    itemSearchResults.value = newResults;
+  } catch (err: any) {
+    if (err.name === 'AbortError') return;
+    itemSearchResults.value = [];
+  } finally {
+    isItemSearching.value = false;
+    itemSearchAbortController = null;
+  }
+};
+
+const debouncedSearchItems = debounce(internalSearchItems, 300);
+
+function isItemInPlaylist(externalId: string) {
+  return playlist.value.items?.some(item => String(item.externalId) === String(externalId));
+}
+
+async function addSingleItemToPlaylist(item: any) {
+  console.log('Item seleccionado para agregar:', item);
+  isAddingItemsMap.value = { ...isAddingItemsMap.value, [item.externalId]: true };
+  addItemsSuccessMessage.value = "";
+  addItemsErrorMessage.value = "";
+  try {
+    const playlistId = playlist.value.id;
+    const body = { items: [item] };
+    console.log('Body de la petición para agregar ítem:', body);
+    const response = await fetch(`${config.public.backend}/api/playlists/${playlistId}/items`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al agregar ítem');
+    }
+    addItemsSuccessMessage.value = `Ítem agregado exitosamente!`;
+    await fetchPlaylist(); // Refrescar la playlist
+  } catch (err: any) {
+    addItemsErrorMessage.value = err.message || 'Error al agregar ítem.';
+  } finally {
+    isAddingItemsMap.value = { ...isAddingItemsMap.value, [item.externalId]: false };
+  }
+}
 
 // Función para formatear la fecha y hora
 const formatDateTime = (dateString: string): string => {
