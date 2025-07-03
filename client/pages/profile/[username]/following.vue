@@ -84,6 +84,7 @@
               <img
                 :src="(friend.profilePictureUrl ? (friend.profilePictureUrl.startsWith('http') ? friend.profilePictureUrl : config.public.backend + friend.profilePictureUrl) : '/resources/studio/previewProfile.webp')"
                 :alt="friend.username"
+                @error="handleImageError"
                 class="w-12 h-12 rounded-full object-cover"
               />
               <div class="flex-grow min-w-0">
