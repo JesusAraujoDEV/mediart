@@ -1,0 +1,39 @@
+{
+    "name": "mediart",
+    "version": "1.0.0",
+    "description": "Mediart - Your Art-ssistant",
+    "private": true,
+    "workspaces": [
+        "client",
+        "server",
+        "test"
+    ],
+    "scripts": {
+        "dev": "cd client && npm run dev",
+        "build": "cd client && npm run build",
+        "preview": "cd client && npm run preview",
+        "test": "cd test && npm run test",
+        "test:run": "cd test && npm run test:run",
+        "test:coverage": "cd test && npm run test:coverage",
+        "test:ui": "cd test && npm run test:ui",
+        "lint": "cd test && npm run lint",
+        "lint:fix": "cd test && npm run lint:fix",
+        "type-check": "cd test && npm run type-check",
+        "install:all": "npm install && cd client && npm install && cd ../test && npm install",
+        "prepare": "cd test && npm run prepare"
+    },
+    "keywords": [
+        "mediart",
+        "art",
+        "assistant",
+        "ai",
+        "vue",
+        "nuxt",
+        "typescript"
+    ],
+    "author": "Mediart Team",
+    "license": "MIT",
+    "devDependencies": {
+        "husky": "^9.0.11"
+    }
+}
