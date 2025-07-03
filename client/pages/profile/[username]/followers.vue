@@ -84,6 +84,7 @@
               <img
                 :src="(follower.profilePictureUrl ? (follower.profilePictureUrl.startsWith('http') ? follower.profilePictureUrl : config.public.backend + follower.profilePictureUrl) : '/resources/studio/previewProfile.webp')"
                 :alt="follower.username"
+                @error="handleImageError"
                 class="w-12 h-12 rounded-full object-cover"
               />
               <div class="flex-grow min-w-0">
