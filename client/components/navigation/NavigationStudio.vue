@@ -21,6 +21,7 @@
         v-else
         class="icon rounded-full object-cover"
         :src="(userProfile.profilePictureUrl ? (userProfile.profilePictureUrl.startsWith('http') ? userProfile.profilePictureUrl : config.public.backend + userProfile.profilePictureUrl) : '/resources/studio/previewProfile.webp')"
+        @error="handleImageError"
         alt="Profile Preview"
       />
     </NuxtLink>
@@ -102,6 +103,12 @@ const logout = () => {
   router.push('/');
   console.log("Redirecting to homepage.");
 };
+
+// Función para manejar el error de carga de imagen
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  img.src = '/resources/studio/previewProfile.webp';
+}
 
 onMounted(() => {
   loadUserProfile();
