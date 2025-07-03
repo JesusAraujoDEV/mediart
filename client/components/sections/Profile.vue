@@ -6,11 +6,13 @@
       v-if="isLoading"
       class="size-36 animate-pulse rounded-full object-cover"
       :src="(userProfile.profilePictureUrl ? (userProfile.profilePictureUrl.startsWith('http') ? userProfile.profilePictureUrl : config.public.backend + userProfile.profilePictureUrl) : '/resources/studio/previewProfile.webp')"
+      @error="handleImageError"
       alt="Cargando perfil..."
     />
     <img
       v-else
       :src="(userProfile.profilePictureUrl ? (userProfile.profilePictureUrl.startsWith('http') ? userProfile.profilePictureUrl : config.public.backend + userProfile.profilePictureUrl) : '/resources/studio/previewProfile.webp')"
+      @error="handleImageError"
       alt="Profile"
       class="size-36 rounded-full object-cover"
     />
@@ -449,6 +451,12 @@ const savePlaylist = async (playlistId: number) => {
     isSavingPlaylist.value[playlistId] = false;
   }
 };
+
+// Función para manejar el error de carga de imagen
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  img.src = '/resources/studio/previewProfile.webp';
+}
 
 defineExpose({ goToFollowing, goToFollowers });
 </script>
