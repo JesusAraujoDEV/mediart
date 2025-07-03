@@ -1,11 +1,10 @@
 <template>
   <NuxtLayout :name="'custom'">
     <NuxtPage /> 
-
-    <main class="w-screen h-dvh flex justify-center items-center">
-      <NavigationNavbar /> 
-      
-      <MainSection /> 
+    <NavigationNavbar /> 
+    <main class="w-screen min-h-dvh flex flex-col">
+      <LandingMainSection />
+      <LandingHowItWorksSection />
       
       <NuxtLink to="/login" class="hover:underline text-center text-2xl">
         </NuxtLink>

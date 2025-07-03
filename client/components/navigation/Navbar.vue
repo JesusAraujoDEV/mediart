@@ -9,8 +9,8 @@
       </div>
 
       <div class="hidden md:flex flex-grow justify-center space-x-8">
-        <NuxtLink to="#categorias" class="text-white hover:text-gray-300 transition-colors duration-300 text-lg font-semibold">Categorías</NuxtLink>
         <NuxtLink to="#como-funciona" class="text-white hover:text-gray-300 transition-colors duration-300 text-lg font-semibold">Cómo Funciona</NuxtLink>
+        <NuxtLink to="#categorias" class="text-white hover:text-gray-300 transition-colors duration-300 text-lg font-semibold">Categorías</NuxtLink>
         <NuxtLink to="#por-que-elegirnos" class="text-white hover:text-gray-300 transition-colors duration-300 text-lg font-semibold">Por Qué Elegirnos</NuxtLink>
         <NuxtLink to="#comunidad" class="text-white hover:text-gray-300 transition-colors duration-300 text-lg font-semibold">Comunidad</NuxtLink>
       </div>

@@ -1,6 +1,6 @@
 <template>
   <section 
-        class="relative flex-grow w-full flex items-center p-4 md:p-8 overflow-hidden"
+  class="relative w-full h-screen flex items-center p-4 md:p-8 overflow-hidden"
         :style="{ backgroundImage: `url('/client/assets/backgroundNeat2.webp')`, backgroundSize: 'cover', backgroundPosition: 'center right' }"
       >
         <div class="relative z-10 text-white text-left max-w-xl mx-auto md:mx-0 md:ml-[calc(10% + 4rem)] lg:ml-[calc(15% + 6rem)]">
