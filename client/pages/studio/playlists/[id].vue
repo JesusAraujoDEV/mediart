@@ -107,7 +107,7 @@
               <select
                 v-model="itemSearchType"
                 @change="debouncedSearchItems"
-                class="p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                class="p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
               >
                 <option value="general">Todo</option>
                 <option value="song">Canciones</option>
@@ -256,7 +256,7 @@
                   @change="handleCoverFileUpload"
                   accept="image/*"
                   ref="coverFileInput"
-                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
                 />
                 <p class="text-xs text-gray-400 mt-2">Formatos soportados: JPG, PNG, GIF, WEBP</p>
               </div>
@@ -286,9 +286,9 @@
               v-model="settingsForm.isCollaborative"
               type="checkbox"
               id="collaborative"
-              class="w-5 h-5 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-2"
+              class="w-5 h-5 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-2 cursor-pointer"
             />
-            <label for="collaborative" class="ml-3 text-base font-medium text-gray-300">
+            <label for="collaborative" class="ml-3 text-base font-medium text-gray-300 cursor-pointer">
               Hacer colaborativa
             </label>
             <div class="ml-auto">
