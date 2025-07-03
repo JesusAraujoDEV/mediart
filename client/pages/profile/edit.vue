@@ -12,6 +12,7 @@
           <img
             :src="getProfilePictureUrl()"
             alt="Profile"
+            @error="handleImageError"
             class="size-36 rounded-full object-cover border-2 border-white/50 shadow-md"
           />
           <input
@@ -215,6 +216,12 @@ function getProfilePictureUrl() {
     return editableUserProfile.value.profilePictureUrl;
   }
   return config.public.backend + editableUserProfile.value.profilePictureUrl;
+}
+
+// Función para manejar el error de carga de imagen
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  img.src = '/resources/studio/previewProfile.webp';
 }
 
 const fetchUserProfile = async () => {
