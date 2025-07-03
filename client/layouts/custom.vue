@@ -22,7 +22,7 @@
   </head>
   <div
     id="layout"
-    class="w-full h-fit text-white font-[Raleway] overflow-hidden relative pt-16 md:pt-0"
+    class="w-full h-fit text-white font-[Raleway] overflow-hidden relative"
   >
     <slot />
   </div>
@@ -57,11 +57,6 @@
 @media (max-width: 768px) {
   #layout {
     min-height: 100vh;
-  }
-  
-  /* Asegurar que el contenido no se superponga con el navbar */
-  main {
-    padding-top: 1rem;
   }
 }
 
