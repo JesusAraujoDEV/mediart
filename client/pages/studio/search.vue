@@ -68,6 +68,7 @@
             <img
               :src="getProfilePictureUrl(user)"
               alt="Profile Picture"
+              @error="handleImageError"
               class="w-16 h-16 object-cover rounded-full flex-shrink-0 mr-4 shadow-sm border border-gray-500"
             />
             <div class="flex-grow">
@@ -185,6 +186,12 @@ function getProfilePictureUrl(user: any) {
     return user.profilePictureUrl;
   }
   return config.public.backend + user.profilePictureUrl;
+}
+
+// Función para manejar el error de carga de imagen
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  img.src = '/resources/studio/previewProfile.webp';
 }
 
 // Simple debounce function
