@@ -3,11 +3,13 @@
     <NuxtPage /> 
     <NavigationNavbar /> 
     <main class="w-screen min-h-dvh flex flex-col">
+
       <LandingMainSection />
       <LandingHowItWorksSection />
       <LandingCategoriesSection />
       <LandingWhyChooseUsSection />
       <LandingCommunitySection />
+      <LandingCtaSection />
       
       <NuxtLink to="/login" class="hover:underline text-center text-2xl">
         </NuxtLink>
