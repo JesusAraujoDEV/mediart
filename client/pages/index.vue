@@ -6,6 +6,7 @@
       <LandingMainSection />
       <LandingHowItWorksSection />
       <LandingCategoriesSection />
+      <LandingWhyChooseUsSection />
       
       <NuxtLink to="/login" class="hover:underline text-center text-2xl">
         </NuxtLink>
