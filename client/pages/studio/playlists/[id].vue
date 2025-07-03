@@ -261,21 +261,6 @@
                 <p class="text-xs text-gray-400 mt-2">Formatos soportados: JPG, PNG, GIF, WEBP</p>
               </div>
 
-              <!-- Opción 2: URL remota -->
-              <div class="p-4 bg-gray-700/50 rounded-lg border border-gray-600">
-                <div class="flex items-center gap-3 mb-3">
-                  <Icon name="material-symbols:link" size="1.5em" class="text-purple-400" />
-                  <h4 class="text-base font-medium text-white">URL remota</h4>
-                </div>
-                <input
-                  v-model="settingsForm.playlistCoverUrl"
-                  type="url"
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                />
-                <p class="text-xs text-gray-400 mt-2">Deja vacío para eliminar la imagen actual</p>
-              </div>
-
               <!-- Vista previa de la imagen actual -->
               <div v-if="currentCoverPreview" class="p-4 bg-gray-700/30 rounded-lg border border-gray-600">
                 <h4 class="text-sm font-medium text-gray-300 mb-3">Vista previa actual:</h4>
@@ -522,7 +507,6 @@ const selectedCoverFile = ref<File | null>(null);
 const settingsForm = ref({
   name: '',
   description: '',
-  playlistCoverUrl: '',
   isCollaborative: false
 });
 
@@ -933,7 +917,6 @@ function openSettingsModal() {
   settingsForm.value = {
     name: playlist.value.name,
     description: playlist.value.description,
-    playlistCoverUrl: playlist.value.playlistCoverUrl || '',
     isCollaborative: playlist.value.isCollaborative
   };
   
@@ -959,8 +942,6 @@ function handleCoverFileUpload(event: Event) {
   if (file) {
     selectedCoverFile.value = file;
     currentCoverPreview.value = URL.createObjectURL(file);
-    // Limpiar URL remota cuando se selecciona un archivo
-    settingsForm.value.playlistCoverUrl = '';
   }
 }
 
@@ -968,7 +949,6 @@ function handleCoverFileUpload(event: Event) {
 function removeCurrentCover() {
   currentCoverPreview.value = null;
   selectedCoverFile.value = null;
-  settingsForm.value.playlistCoverUrl = '';
   if (coverFileInput.value) {
     coverFileInput.value.value = '';
   }
@@ -979,7 +959,7 @@ async function savePlaylistSettings() {
   try {
     let requestOptions: any;
     
-    // Determinar si se está subiendo un archivo o usando URL
+    // Solo manejar subida de archivo
     if (selectedCoverFile.value) {
       // Usar multipart/form-data para subir archivo
       const formData = new FormData();
@@ -996,7 +976,7 @@ async function savePlaylistSettings() {
         body: formData
       };
     } else {
-      // Usar JSON para URL o eliminar imagen
+      // Usar JSON para actualizar solo texto
       requestOptions = {
         method: 'PATCH',
         headers: {
@@ -1006,7 +986,6 @@ async function savePlaylistSettings() {
         body: {
           name: settingsForm.value.name,
           description: settingsForm.value.description,
-          playlistCoverUrl: settingsForm.value.playlistCoverUrl || '', // Cadena vacía para eliminar
           isCollaborative: settingsForm.value.isCollaborative
         }
       };
