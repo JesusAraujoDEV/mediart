@@ -1,0 +1,26 @@
+# Dependencias
+node_modules/
+
+# Salidas de build
+dist/
+
+# Cobertura de tests
+coverage/
+
+# Archivos de logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Salidas de husky
+.husky/_/
+
+# Salidas de lint-staged
+.lintstagedrc*
+
+# Otros
+.vitest* 
