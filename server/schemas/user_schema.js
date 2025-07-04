@@ -7,9 +7,10 @@ const username = Joi.string()
   .min(3)
   .max(30)
   .trim()
-  .pattern(/^[a-zA-Z0-9]+$/)
+  .lowercase()
+  .pattern(/^[a-zA-Z0-9._]+$/)
   .messages({
-    'string.pattern.base': 'Username can only contain alphanumeric characters (letters and numbers).',
+    'string.pattern.base': 'Username can only contain alphanumeric characters, periods (.), and underscores (_).',
     'string.min': 'Username must be at least {#limit} characters long.',
     'string.max': 'Username cannot exceed {#limit} characters.'
   });
@@ -77,4 +78,4 @@ module.exports = {
   getFollowedUserSchema,
   getUserByUsernameSchema,
   getUserQuerySchema
-}
+};
