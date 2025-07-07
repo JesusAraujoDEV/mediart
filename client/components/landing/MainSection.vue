@@ -37,7 +37,7 @@
       </div>
       
       <div class="flex justify-center lg:justify-end items-end pr-0 lg:pr-8 xl:pr-16 order-1 lg:order-2 h-full pt-16 pb-8"> 
-        <div class="relative w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl 2xl:max-w-3xl h-[calc(100vh-10rem)] md:h-[calc(100vh-12rem)] lg:h-[calc(100vh-14rem)]"> 
+        <div class="relative w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl 2xl:max-w-3xl h-[calc(100vh-4rem)] md:h-[calc(100vh-6rem)] lg:h-[calc(100vh-8rem)]"> 
           <div class="relative w-full h-full">
             <TransitionGroup name="carousel" tag="div" class="relative w-full h-full">
               <div
@@ -66,7 +66,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 // Array de imágenes para el carrusel
 const images = ref([
   {
-    src: '/landingImages/Scorcese.png',
+    src: '/landingImages/Martin-Scorsese.webp',
     alt: 'Movies'
   },
   {

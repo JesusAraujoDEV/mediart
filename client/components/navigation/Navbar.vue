@@ -4,7 +4,11 @@
                 bg-white/10 backdrop-blur-md rounded-full shadow-xl border border-white/20">
       <div class="flex-shrink-0">
         <NuxtLink to="/">
-          <img src="/public/mediart/mediartLogo.webp" alt="Mediart Logo" class="h-10 w-auto" />
+          <img
+          id="logoNavbar"
+          src="/mediart/mediartLogo.webp" 
+          alt="Mediart Logo" 
+          class="h-10 w-auto" />
         </NuxtLink>
       </div>
 
@@ -29,4 +33,7 @@
 </script>
 
 <style scoped>
+#logoNavbar {
+  filter: brightness(0) invert(1);
+}
 </style>
