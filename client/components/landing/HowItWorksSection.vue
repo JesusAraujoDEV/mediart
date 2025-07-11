@@ -1,11 +1,11 @@
 <template>
   <section
     id="como-funciona"
-    class="relative w-full min-h-screen flex flex-col justify-center items-center p-4 md:p-8 overflow-hidden" 
-    >
+    ref="sectionRef"
+    class="relative w-full min-h-screen flex flex-col justify-center items-center p-4 md:p-8 overflow-hidden"
+  >
     <div class="absolute inset-0 bg-black/10"></div>
-
-    <div class="relative z-10 text-white text-center max-w-6xl mx-auto"> 
+    <div class="relative z-10 text-white text-center max-w-6xl mx-auto">
       <div class="mb-16">
         <div class="flex items-center justify-center mb-6">
           <div class="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
@@ -25,20 +25,25 @@
 
       <!--Paso1-->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-        <div class="relative group">
+        <div 
+          ref="step1Ref"
+          :class="[
+            'relative group transition-all duration-3000 ease-out',
+            isVisible ? 'step-slide-in step-delay-1' : 'step-hidden',
+            isVisible ? 'step-floating' : ''
+          ]"
+        >
           <div class="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
-          <div class="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300">
-            <div class="text-center mb-6">
+          <div class="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300 flex flex-col h-full"> <div class="text-center mb-6">
               <div class="inline-flex items-center justify-center w-12 h-12 bg-purple-500/20 rounded-xl mb-4">
                 <User class="w-6 h-6 text-purple-300" />
               </div>
               <div class="text-sm font-semibold text-purple-300 mb-2">PASO 1</div>
               <h3 class="text-xl font-bold mb-2">Regístrate en Mediart</h3>
-              <p class="text-sm text-purple-200">Solo necesitas tu correo, nombre de usuario y una contraseña.</p>
+              <p class="text-sm text-purple-200">Comienza tu viaje artístico registrándote con tu correo electrónico, creando un nombre de usuario y estableciendo una contraseña segura. <br>¡Es rápido y sencillo!</p>
             </div>
             
-            <div class="space-y-3">
-              <div class="bg-white/5 rounded-lg p-3 border border-white/10">
+            <div class="space-y-3 mt-auto"> <div class="bg-white/5 rounded-lg p-3 border border-white/10">
                 <div class="flex items-center space-x-2">
                   <Mail class="w-4 h-4 text-purple-300" />
                   <span class="text-sm text-purple-200">Correo Electrónico</span>
@@ -61,10 +66,16 @@
         </div>
 
         <!--Paso2-->
-        <div class="relative group">
+        <div 
+          ref="step2Ref"
+          :class="[
+            'relative group transition-all duration-4000 ease-out',
+            isVisible ? 'step-slide-in step-delay-2' : 'step-hidden',
+            isVisible ? 'step-floating step-floating-delay-1' : ''
+          ]"
+        >
           <div class="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
-          <div class="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300">
-            <div class="text-center mb-6">
+          <div class="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300 flex flex-col h-full"> <div class="text-center mb-6">
               <div class="inline-flex items-center justify-center w-12 h-12 bg-indigo-500/20 rounded-xl mb-4">
                 <Heart class="w-6 h-6 text-indigo-300"/>
               </div>
@@ -75,8 +86,7 @@
               </p>
             </div>
             
-            <div class="space-y-4">
-              <div class="bg-white/5 rounded-lg p-3 border border-white/10">
+            <div class="space-y-4 mt-auto"> <div class="bg-white/5 rounded-lg p-3 border border-white/10">
                 <div class="flex items-center space-x-2">
                   <Search class="w-4 h-4 text-indigo-300"/>
                   <span class="text-sm text-indigo-200">Ej: Olivia Rodrigo</span>
@@ -86,20 +96,20 @@
               <div class="text-xs text-indigo-200 text-left">Quiero recomendaciones de:</div>
               <div class="grid grid-cols-2 gap-2 text-sm">
                 <div class="bg-indigo-500/20 rounded-lg p-2 border border-indigo-500/30 flex items-center justify-center space-x-2 hover:bg-indigo-500/30 transition-colors duration-200 cursor-pointer">
-                    <Music class="w-4 h-4 text-indigo-300"/>
-                    <span>Música</span>
+                  <Music class="w-4 h-4 text-indigo-300"/>
+                  <span>Música</span>
                 </div>
                 <div class="bg-white/5 rounded-lg p-2 border border-white/10 flex items-center justify-center space-x-2 hover:bg-white/10 transition-colors duration-200 cursor-pointer">
-                    <Clapperboard class="w-4 h-4 text-indigo-300"/>
-                    <span>Películas</span>
+                  <Clapperboard class="w-4 h-4 text-indigo-300"/>
+                  <span>Películas</span>
                 </div>
                 <div class="bg-white/5 rounded-lg p-2 border border-white/10 flex items-center justify-center space-x-2 hover:bg-white/10 transition-colors duration-200 cursor-pointer">
-                    <Gamepad2 class="w-4 h-4 text-indigo-300"/>
-                    <span>Juegos</span>
+                  <Gamepad2 class="w-4 h-4 text-indigo-300"/>
+                  <span>Juegos</span>
                 </div>
                 <div class="bg-white/5 rounded-lg p-2 border border-white/10 flex items-center justify-center space-x-2 hover:bg-white/10 transition-colors duration-200 cursor-pointer">
-                    <BookText class="w-4 h-4 text-indigo-300"/>
-                    <span>Libros</span>
+                  <BookText class="w-4 h-4 text-indigo-300"/>
+                  <span>Libros</span>
                 </div>
               </div>
             </div>
@@ -107,10 +117,16 @@
         </div>
 
         <!--Paso 3-->
-        <div class="relative group">
+        <div 
+          ref="step3Ref"
+          :class="[
+            'relative group transition-all duration-5000 ease-out',
+            isVisible ? 'step-slide-in step-delay-3' : 'step-hidden',
+            isVisible ? 'step-floating step-floating-delay-2' : ''
+          ]"
+        >
           <div class="absolute inset-0 bg-gradient-to-r from-pink-600/20 to-purple-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
-          <div class="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300">
-            <div class="text-center mb-6">
+          <div class="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300 flex flex-col h-full"> <div class="text-center mb-6">
               <div class="inline-flex items-center justify-center w-12 h-12 bg-pink-500/20 rounded-xl mb-4">
                 <Sparkles class="w-6 h-6 text-pink-300" />
               </div>
@@ -121,28 +137,27 @@
               </p>
             </div>
             
-            <div class="space-y-3">
-                <div class="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <List className="w-4 h-4 text-pink-300" />
-                        <span class="text-sm text-pink-200">Recomendaciones en lista</span>
-                    </div>
-                    <Check className="w-4 h-4 text-green-400" />
+            <div class="space-y-3 mt-auto"> <div class="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <List class="w-4 h-4 text-pink-300" />
+                  <span class="text-sm text-pink-200">Recomendaciones en lista</span>
                 </div>
-                <div class="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <Folder className="w-4 h-4 text-pink-300" />
-                        <span class="text-sm text-pink-200">Guarda en tus Playlists</span>
-                    </div>
-                    <Check className="w-4 h-4 text-green-400" />
+                <Check class="w-4 h-4 text-green-400" />
+              </div>
+              <div class="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <Folder class="w-4 h-4 text-pink-300" />
+                  <span class="text-sm text-pink-200">Guarda en tus Playlists</span>
                 </div>
-                <div class="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <SearchIcon className="w-4 h-4 text-pink-300" />
-                        <span class="text-sm text-pink-200">Busca en tu Biblioteca</span>
-                    </div>
-                    <Check className="w-4 h-4 text-green-400" />
+                <Check class="w-4 h-4 text-green-400" />
+              </div>
+              <div class="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <Search class="w-4 h-4 text-pink-300" />
+                  <span class="text-sm text-pink-200">Busca en tu Biblioteca</span>
                 </div>
+                <Check class="w-4 h-4 text-green-400" />
+              </div>
             </div>
           </div>
         </div>
@@ -152,7 +167,46 @@
 </template>
 
 <script setup lang="ts">
-import { User, Mail, Lock, Search, Heart, Music, Gamepad2, BookText, Clapperboard, Sparkles, List, Folder, Search as SearchIcon, Check } from 'lucide-vue-next'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { User, Mail, Lock, Search, Heart, Music, Gamepad2, BookText, Clapperboard, Sparkles, List, Folder, Check } from 'lucide-vue-next'
+
+const sectionRef = ref<HTMLElement>()
+const step1Ref = ref<HTMLElement>()
+const step2Ref = ref<HTMLElement>()
+const step3Ref = ref<HTMLElement>()
+const isVisible = ref(false)
+
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  // Crear el Intersection Observer
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
+          isVisible.value = true
+          // Una vez que se activa la animación, podemos desconectar el observer
+          observer?.disconnect()
+        }
+      })
+    },
+    {
+      threshold: 0.4, // Se activa cuando el 30% de la sección es visible
+      rootMargin: '-50px 0px -50px 0px' // Margen para activar un poco antes
+    }
+  )
+
+  // Observar la sección
+  if (sectionRef.value) {
+    observer.observe(sectionRef.value)
+  }
+})
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect()
+  }
+})
 </script>
 
 <style scoped>
@@ -169,6 +223,97 @@ h1 {
   }
   .backdrop-blur-lg {
     backdrop-filter: blur(20px);
+  }
+}
+
+/* Estados iniciales y animaciones de entrada */
+.step-hidden {
+  opacity: 0;
+  transform: translateX(100px);
+}
+
+.step-slide-in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Delays escalonados para cada paso */
+.step-delay-1 {
+  transition-delay: 0.5s;
+}
+
+.step-delay-2 {
+  transition-delay: 1.0s;
+}
+
+.step-delay-3 {
+  transition-delay: 1.5s;
+}
+
+/* Animaciones de flotación */
+.step-floating {
+  animation: gentle-float 8s ease-in-out infinite;
+  animation-delay: 0.5s
+}
+
+.step-floating-delay-1 {
+  animation: gentle-float 8s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+.step-floating-delay-2 {
+  animation: gentle-float 8s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+/* Keyframes para flotar suave */
+@keyframes gentle-float {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px);
+  }
+  25% { 
+    transform: translateY(-8px) translateX(2px);
+  }
+  50% { 
+    transform: translateY(-4px) translateX(-1px);
+  }
+  75% { 
+    transform: translateY(-12px) translateX(1px);
+  }
+}
+
+/* Efecto hover mejorado */
+.group:hover {
+  transform: translateY(-5px);
+  transition: transform 0.3s ease-out;
+}
+
+/* Animación más suave en dispositivos móviles */
+@media (max-width: 768px) {
+  .step-hidden {
+    transform: translateX(50px);
+  }
+  
+  @keyframes gentle-float {
+    0%, 100% { 
+      transform: translateY(0px);
+    }
+    50% { 
+      transform: translateY(-6px);
+    }
+  }
+}
+
+/* Reducir movimiento para usuarios que prefieren menos animación */
+@media (prefers-reduced-motion: reduce) {
+  .step-floating,
+  .step-floating-delay-1,
+  .step-floating-delay-2 {
+    animation: none;
+  }
+  
+  .step-slide-in {
+    transition-duration: 0.3s;
   }
 }
 </style>
