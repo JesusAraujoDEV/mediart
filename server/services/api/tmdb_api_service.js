@@ -11,10 +11,7 @@ class TmdbApiService {
     async search(query) {
         if (!this.apiKey) {
             console.error('TMDB API Key not configured.');
-            // Retorna un objeto con arrays vacíos como lo tenías antes
-            // para mantener la compatibilidad con el retorno original si es necesario,
-            // pero los arrays internos ahora contendrán el formato unificado.
-            return { movies: [], tvshows: [] };
+            return []; // Devuelve un array vacío si no hay API Key
         }
 
         try {
@@ -27,62 +24,47 @@ class TmdbApiService {
             });
 
             const data = response.data.results;
-
-            const movies = [];
-            const tvshows = [];
+            let allItems = []; // Aquí acumularemos todas las películas y series
 
             data.forEach(item => {
-                // Mapear los datos de TMDB al formato de tu ItemSchema
-                // No incluir 'popularity' en el objeto final si no está en ItemSchema
-                // y se usa solo para el ordenamiento interno.
-
+                // Solo procesamos 'movie' y 'tv' del multi-search
                 if (item.media_type === 'movie') {
-                    movies.push({
-                        // Propiedades de ItemSchema
-                        // id: Sequelize generará su propio ID, así que este 'id' de TMDB no es el de tu DB.
-                        // Usaremos externalId para el ID de la API externa.
+                    allItems.push({
                         title: item.title,
-                        type: 'movie', // Coincide con tu columna 'type'
+                        type: 'movie', // Ya es el tipo correcto 'movie'
                         description: item.overview,
                         coverUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
-                        releaseDate: item.release_date, // Coincide con 'releaseDate'
-                        externalId: item.id.toString(), // ID de TMDB, guardado como string
-                        externalSource: 'TMDB', // Coincide con 'externalSource'
-                        avgRating: item.vote_average ? parseFloat(item.vote_average.toFixed(1)) : 0, // Asegura tipo DECIMAL, valor por defecto 0
-                        externalUrl: `https://www.themoviedb.org/movie/${item.id}`, // Nueva columna en tu schema
-                        // popularity: item.popularity // Mantener temporalmente para el ordenamiento
+                        releaseDate: item.release_date,
+                        externalId: String(item.id),
+                        externalSource: 'TMDB',
+                        avgRating: item.vote_average ? parseFloat(item.vote_average.toFixed(1)) : 0,
+                        externalUrl: `https://www.themoviedb.org/movie/${item.id}`,
                     });
                 } else if (item.media_type === 'tv') {
-                    tvshows.push({
-                        // Propiedades de ItemSchema
-                        title: item.name, // En series es 'name'
-                        type: 'tvshow', // Coincide con tu columna 'type'
+                    allItems.push({
+                        title: item.name,
+                        type: 'tvshow', // Ya es el tipo correcto 'tvshow'
                         description: item.overview,
                         coverUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
                         releaseDate: item.first_air_date,
-                        externalId: item.id.toString(),
+                        externalId: String(item.id),
                         externalSource: 'TMDB',
                         avgRating: item.vote_average ? parseFloat(item.vote_average.toFixed(1)) : 0,
                         externalUrl: `https://www.themoviedb.org/tv/${item.id}`,
-                        // popularity: item.popularity // Mantener temporalmente para el ordenamiento
                     });
                 }
+                // Si quieres incluir 'person' o otros tipos, puedes hacerlo aquí también,
+                // mapeándolos a tu ItemSchema.
             });
 
-            // Lógica de ordenamiento original (si sigues queriendo ordenar por popularidad ANTES de retornar)
-            // Asegúrate de que 'popularity' esté presente en los objetos para este paso.
-            movies.sort((a, b) => b.popularity - a.popularity); // Si popularity no está en el objeto final, deberías añadirla temporalmente en el push.
-            tvshows.sort((a, b) => b.popularity - a.popularity);
+            // Opcional: ordenar los resultados combinados por popularidad si deseas una priorización.
+            // allItems.sort((a, b) => b.popularity - a.popularity); // Asegúrate de que 'popularity' esté presente en los objetos si la usas aquí.
 
-            // Eliminar la propiedad 'popularity' si no es parte de tu ItemSchema final
-            const cleanedMovies = movies.map(({ popularity, ...rest }) => rest);
-            const cleanedTvshows = tvshows.map(({ popularity, ...rest }) => rest);
-
-            return { movies: cleanedMovies, tvshows: cleanedTvshows };
+            return allItems; // ¡Ahora devuelve un array plano!
 
         } catch (error) {
             console.error('Error searching TMDB:', error.response ? error.response.data : error.message);
-            return { movies: [], tvshows: [] };
+            throw error; // Es mejor lanzar el error para que el servicio superior lo capture
         }
     }
 
