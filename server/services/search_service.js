@@ -3,8 +3,8 @@ const TmdbApiService = require('./api/tmdb_api_service');
 const SpotifyApiService = require('./api/spotify_api_service');
 const GoogleBooksApiService = require('./api/googlebooks_api_service');
 const IgdbApiService = require('./api/igdb_api_service');
-const UserService = require('./user_service'); // <-- ¡NUEVA IMPORTACIÓN!
-const { Op } = require('sequelize'); // Para usar operadores como LIKE
+const UserService = require('./user_service');
+const { Op } = require('sequelize');
 
 class SearchService {
     constructor() {
@@ -21,8 +21,8 @@ class SearchService {
         const [tmdbPromise, spotifyPromise, googleBooksPromise, igdbPromise] = await Promise.allSettled([
             this.tmdbApiService.search(query),
             this.spotifyApiService.search(query),
-            this.googleBooksApiService.search(query), // ASUME que ya devuelve el formato unificado
-            this.igdbApiService.search(query) // ASUME que ya devuelve el formato unificado
+            this.googleBooksApiService.search(query),
+            this.igdbApiService.search(query)
         ]);
 
         let allResults = [];
@@ -53,10 +53,7 @@ class SearchService {
         }
 
         // Opcional: Ordenar todos los resultados combinados
-        // Podrías ordenar por avgRating si está disponible, o por algún otro criterio.
-        // Si no todos los items tienen avgRating, necesitas una lógica para manejarlos (ej. poner los nulos al final).
         allResults.sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0));
-
 
         return allResults; // Ahora devuelve un único array de objetos ItemSchema
     }
@@ -78,15 +75,16 @@ class SearchService {
     }
 
     /**
-     * Busca canciones, artistas y álbumes en Spotify.
-     * Ahora devuelve un array plano de Items unificados.
+     * Busca en Spotify, opcionalmente por un tipo específico (track, artist, album).
      * @param {string} query
+     * @param {string} [typeHint] - Opcional. 'track', 'artist', o 'album' para buscar solo ese tipo.
      * @returns {Promise<Array>}
      */
-    async searchSpotify(query) {
+    async searchSpotify(query, typeHint = 'track,artist,album') { // 👈 Acepta typeHint con valor por defecto
         try {
-            const result = await this.spotifyApiService.search(query);
-            return result; // spotifyApiService.search ya devuelve el array plano
+            // Pasamos el typeHint directamente al servicio de Spotify
+            const result = await this.spotifyApiService.search(query, typeHint);
+            return result;
         } catch (error) {
             console.error('Error in searchSpotify:', error);
             return [];
@@ -95,7 +93,6 @@ class SearchService {
 
     /**
      * Busca libros en Google Books.
-     * ASUME que googleBooksApiService.search ya devuelve el array plano.
      * @param {string} query
      * @returns {Promise<Array>}
      */
@@ -111,7 +108,6 @@ class SearchService {
 
     /**
      * Busca videojuegos en IGDB.
-     * ASUME que igdbApiService.search ya devuelve el array plano.
      * @param {string} query
      * @returns {Promise<Array>}
      */

@@ -29,16 +29,16 @@ router.get(
             results = { tvshows: results.tvshows || [] };
             break;
           case 'song':
-            results = await searchService.searchSpotify(q);
-            results = { songs: results.songs || [] };
+            results = await searchService.searchSpotify(q, 'track');
+            results = { songs: results || [] };
             break;
           case 'artist':
-            results = await searchService.searchSpotify(q);
-            results = { artists: results.artists || [] };
+            results = await searchService.searchSpotify(q, 'artist');
+            results = { artists: results || [] };
             break;
           case 'album':
-            results = await searchService.searchSpotify(q);
-            results = { albums: results.albums || [] };
+            results = await searchService.searchSpotify(q, 'album');
+            results = { albums: results || [] };
             break;
           case 'videogame':
             results = { videogames: await searchService.searchIgdb(q) };

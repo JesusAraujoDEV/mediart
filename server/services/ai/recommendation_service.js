@@ -1,3 +1,4 @@
+// services/ai/recommendation_service.js
 const SearchService = require('./../search_service');
 const GeminiAiService = require('./gemini_ai_service');
 const DeepSeekAiService = require('./deepseek_ai_service');
@@ -27,54 +28,54 @@ class RecommendationService {
         mappedItem.externalUrl = itemData.external_url || null;
         break;
 
-      case 'song':
+      case 'song': // El nuevo tipo para canciones unificadas
         mappedItem.title = itemData.title;
         mappedItem.description = itemData.description || null;
-        mappedItem.coverUrl = itemData.thumbnail_url || null;
-        mappedItem.releaseDate = itemData.release_date;
-        mappedItem.externalId = itemData.id;
+        mappedItem.coverUrl = itemData.coverUrl || null; // Usar coverUrl del item unificado
+        mappedItem.releaseDate = itemData.releaseDate; // Usar releaseDate del item unificado
+        mappedItem.externalId = itemData.externalId; // Usar externalId del item unificado
         mappedItem.avgRating = null;
-        mappedItem.externalUrl = itemData.external_url || null;
+        mappedItem.externalUrl = itemData.externalUrl || null;
         break;
 
-      case 'artist':
-        mappedItem.title = itemData.name;
-        mappedItem.description = null;
-        mappedItem.coverUrl = itemData.image_url || null;
+      case 'artist': // El nuevo tipo para artistas unificados
+        mappedItem.title = itemData.title; // name ahora es title
+        mappedItem.description = itemData.description || null;
+        mappedItem.coverUrl = itemData.coverUrl || null; // image_url ahora es coverUrl
         mappedItem.releaseDate = null;
-        mappedItem.externalId = itemData.id;
+        mappedItem.externalId = itemData.externalId; // Usar externalId del item unificado
         mappedItem.avgRating = null;
-        mappedItem.externalUrl = itemData.external_url || null;
+        mappedItem.externalUrl = itemData.externalUrl || null;
         break;
 
-      case 'album':
-        mappedItem.title = itemData.name;
-        mappedItem.description = null;
-        mappedItem.coverUrl = itemData.thumbnail_url || null;
-        mappedItem.releaseDate = itemData.release_date;
-        mappedItem.externalId = itemData.id;
+      case 'album': // El nuevo tipo para álbumes unificados
+        mappedItem.title = itemData.title; // name ahora es title
+        mappedItem.description = itemData.description || null;
+        mappedItem.coverUrl = itemData.coverUrl || null; // thumbnail_url ahora es coverUrl
+        mappedItem.releaseDate = itemData.releaseDate; // Usar releaseDate del item unificado
+        mappedItem.externalId = itemData.externalId; // Usar externalId del item unificado
         mappedItem.avgRating = null;
-        mappedItem.externalUrl = itemData.external_url || null;
+        mappedItem.externalUrl = itemData.externalUrl || null;
         break;
 
       case 'book':
         mappedItem.title = itemData.title;
         mappedItem.description = itemData.description;
-        mappedItem.coverUrl = itemData.thumbnail_url || null;
-        mappedItem.releaseDate = itemData.published_date === 'N/A' ? null : itemData.published_date;
-        mappedItem.externalId = itemData.id;
-        mappedItem.avgRating = itemData.avg_rating || null;
-        mappedItem.externalUrl = itemData.external_url || null;
+        mappedItem.coverUrl = itemData.coverUrl || null; // thumbnail_url ahora es coverUrl
+        mappedItem.releaseDate = itemData.releaseDate === 'N/A' ? null : itemData.releaseDate; // published_date ahora es releaseDate
+        mappedItem.externalId = itemData.externalId; // Usar externalId del item unificado
+        mappedItem.avgRating = itemData.avgRating || null; // avg_rating ahora es avgRating
+        mappedItem.externalUrl = itemData.externalUrl || null;
         break;
 
       case 'videogame':
-        mappedItem.title = itemData.name;
-        mappedItem.description = itemData.summary;
-        mappedItem.coverUrl = itemData.cover_url || null;
-        mappedItem.releaseDate = itemData.release_date === 'N/A' ? null : itemData.release_date;
-        mappedItem.externalId = itemData.id ? String(itemData.id) : null;
-        mappedItem.avgRating = itemData.avg_rating || null;
-        mappedItem.externalUrl = itemData.external_url || null;
+        mappedItem.title = itemData.title; // name ahora es title
+        mappedItem.description = itemData.description; // summary ahora es description
+        mappedItem.coverUrl = itemData.coverUrl || null;
+        mappedItem.releaseDate = itemData.releaseDate === 'N/A' ? null : itemData.releaseDate;
+        mappedItem.externalId = itemData.externalId;
+        mappedItem.avgRating = itemData.avgRating || null;
+        mappedItem.externalUrl = itemData.externalUrl || null;
         break;
 
       default:
@@ -108,16 +109,22 @@ class RecommendationService {
     return recommendedQueries;
   }
 
-
+  // RECUERDA: TMDB ahora debe devolver un array plano de ítems unificados.
   async recommendMovies(itemName) {
     try {
+      // searchTmdb ahora devuelve un array plano. Necesitamos encontrar el primer elemento que sea una película.
       const initialSearchResult = await this.searchService.searchTmdb(itemName);
-      const baseMovie = initialSearchResult.movies[0];
+      const baseMovie = initialSearchResult.find(item => item.type === 'movie'); // Encuentra la primera película
 
       let itemContext = '';
       if (baseMovie) {
-        if (baseMovie.genres && baseMovie.genres.length > 0) {
-            itemContext = `del género ${baseMovie.genres[0].name || baseMovie.genres[0]}`;
+        // En un ítem unificado de película, los géneros deberían estar accesibles directamente
+        // o ser parte de la descripción, no hay una propiedad 'genres' separada en el mapeo inicial.
+        // Si TmdbApiService mapea los géneros, podrían estar en una propiedad custom como 'genresList'.
+        // Aquí asumiré que si los tienes, están en baseMovie.genres (como array de strings o de objetos {id, name})
+        if (baseMovie.genres && Array.isArray(baseMovie.genres) && baseMovie.genres.length > 0) {
+          // Si genres es un array de objetos, toma el nombre. Si es array de strings, toma el string.
+          itemContext = `del género ${baseMovie.genres[0].name || baseMovie.genres[0]}`;
         }
       }
 
@@ -126,19 +133,24 @@ class RecommendationService {
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
 
+      // Las promesas de búsqueda ahora esperan un array plano
       const searchPromises = recommendedQueries.map(query => this.searchService.searchTmdb(query));
       const searchResults = await Promise.allSettled(searchPromises);
 
       for (const result of searchResults) {
-        if (result.status === 'fulfilled' && result.value.movies.length > 0) {
-          const movie = result.value.movies[0];
-          if (movie.id && !addedExternalIds.has(`movie-${movie.id}`)) {
-            const mappedMovie = this._mapToItemSchema(movie, 'movie', 'TMDB');
-            allRecommendedItems.push(mappedMovie);
-            addedExternalIds.add(`movie-${movie.id}`);
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+          // Filtrar solo las películas de los resultados
+          const movies = result.value.filter(item => item.type === 'movie');
+          for (const movie of movies) {
+            // Un item unificado ya tiene externalId y externalSource definidos
+            const uniqueKey = `${movie.type}-${movie.externalSource}-${movie.externalId}`;
+            if (movie.externalId && !addedExternalIds.has(uniqueKey)) {
+              // El item ya está en el formato ItemSchema, no necesita mapeo adicional si TmdbApiService lo hace bien.
+              allRecommendedItems.push(movie);
+              addedExternalIds.add(uniqueKey);
+            }
           }
         }
-        // ELIMINADO: if (allRecommendedItems.length >= 10) break;
       }
       return allRecommendedItems;
     } catch (error) {
@@ -147,54 +159,61 @@ class RecommendationService {
     }
   }
 
+  // RECUERDA: Spotify ahora debe devolver un array plano de ítems unificados.
   async recommendSongs(itemName) {
     try {
-        const initialSearchResult = await this.searchService.searchSpotify(itemName);
-        const baseSong = initialSearchResult.songs[0];
+      // Buscar canciones específicamente con type 'track'
+      const initialSearchResult = await this.searchService.searchSpotify(itemName, 'track');
+      // initialSearchResult ya es un array de canciones unificadas, toma la primera.
+      const baseSong = initialSearchResult[0]; // ¡CORREGIDO! initialSearchResult es el array
 
-        let itemContext = '';
-        if (baseSong) {
-            if (baseSong.artist_name) {
-                itemContext = `del artista ${baseSong.artist_name}`;
-            } else if (baseSong.artists && baseSong.artists.length > 0) {
-                itemContext = `del artista ${baseSong.artists[0].name}`;
-            }
+      let itemContext = '';
+      if (baseSong && baseSong.description) { // La descripción de la canción unificada contiene el artista
+        const artistMatch = baseSong.description.match(/Artista\(s\): ([^ ]+)/); // Ejemplo: "Artista(s): Artist Name"
+        if (artistMatch && artistMatch[1]) {
+          itemContext = `del artista ${artistMatch[1]}`;
         }
+      }
 
-        const recommendedQueries = await this._getRecommendedQueries('canciones', itemName, itemContext);
+      const recommendedQueries = await this._getRecommendedQueries('canciones', itemName, itemContext);
 
-        const allRecommendedItems = [];
-        const addedExternalIds = new Set();
+      const allRecommendedItems = [];
+      const addedExternalIds = new Set();
 
-        const searchPromises = recommendedQueries.map(query => this.searchService.searchSpotify(query));
-        const searchResults = await Promise.allSettled(searchPromises);
+      // Las promesas de búsqueda ahora esperan un array plano
+      const searchPromises = recommendedQueries.map(query => this.searchService.searchSpotify(query, 'track')); // Buscar solo tracks
+      const searchResults = await Promise.allSettled(searchPromises);
 
-        for (const result of searchResults) {
-            if (result.status === 'fulfilled' && result.value.songs.length > 0) {
-                const song = result.value.songs[0];
-                if (song.id && !addedExternalIds.has(`song-${song.id}`)) {
-                    const mappedSong = this._mapToItemSchema(song, 'song', 'Spotify');
-                    allRecommendedItems.push(mappedSong);
-                    addedExternalIds.add(`song-${song.id}`);
-                }
+      for (const result of searchResults) {
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+          // Filtrar solo las canciones de los resultados (aunque ya pedimos 'track' directamente)
+          const songs = result.value.filter(item => item.type === 'song');
+          for (const song of songs) {
+            const uniqueKey = `${song.type}-${song.externalSource}-${song.externalId}`;
+            if (song.externalId && !addedExternalIds.has(uniqueKey)) {
+              allRecommendedItems.push(song); // El item ya está en formato ItemSchema
+              addedExternalIds.add(uniqueKey);
             }
-            // ELIMINADO: if (allRecommendedItems.length >= 10) break;
+          }
         }
-        return allRecommendedItems;
+      }
+      return allRecommendedItems;
     } catch (error) {
-        console.error('Error in recommendSongs service:', error);
-        return [];
+      console.error('Error in recommendSongs service:', error);
+      return [];
     }
   }
 
+  // RECUERDA: TMDB ahora debe devolver un array plano de ítems unificados.
   async recommendTvShows(itemName) {
     try {
+      // searchTmdb ahora devuelve un array plano. Necesitamos encontrar el primer elemento que sea una serie.
       const initialSearchResult = await this.searchService.searchTmdb(itemName);
-      const baseTvShow = initialSearchResult.tvshows[0];
+      const baseTvShow = initialSearchResult.find(item => item.type === 'tvshow'); // Encuentra la primera serie
 
       let itemContext = '';
       if (baseTvShow) {
-        if (baseTvShow.genres && baseTvShow.genres.length > 0) {
+        if (baseTvShow.genres && Array.isArray(baseTvShow.genres) && baseTvShow.genres.length > 0) {
           itemContext = `del género ${baseTvShow.genres[0].name || baseTvShow.genres[0]}`;
         }
       }
@@ -208,15 +227,16 @@ class RecommendationService {
       const searchResults = await Promise.allSettled(searchPromises);
 
       for (const result of searchResults) {
-        if (result.status === 'fulfilled' && result.value.tvshows.length > 0) {
-          const tvShow = result.value.tvshows[0];
-          if (tvShow.id && !addedExternalIds.has(`tvshow-${tvShow.id}`)) {
-            const mappedTvShow = this._mapToItemSchema(tvShow, 'tvshow', 'TMDB');
-            allRecommendedItems.push(mappedTvShow);
-            addedExternalIds.add(`tvshow-${tvShow.id}`);
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+          const tvShows = result.value.filter(item => item.type === 'tvshow');
+          for (const tvShow of tvShows) {
+            const uniqueKey = `${tvShow.type}-${tvShow.externalSource}-${tvShow.externalId}`;
+            if (tvShow.externalId && !addedExternalIds.has(uniqueKey)) {
+              allRecommendedItems.push(tvShow); // El item ya está en formato ItemSchema
+              addedExternalIds.add(uniqueKey);
+            }
           }
         }
-        // ELIMINADO: if (allRecommendedItems.length >= 10) break;
       }
       return allRecommendedItems;
     } catch (error) {
@@ -225,16 +245,21 @@ class RecommendationService {
     }
   }
 
+  // RECUERDA: GoogleBooks ahora debe devolver un array plano de ítems unificados.
   async recommendBooks(itemName) {
     try {
       const initialSearchResult = await this.searchService.searchGoogleBooks(itemName);
-      const baseBook = initialSearchResult[0];
+      // initialSearchResult ya es un array de libros unificados, toma el primero.
+      const baseBook = initialSearchResult[0]; // ¡CORREGIDO! initialSearchResult es el array
 
       let itemContext = '';
-      if (baseBook && baseBook.authors) {
-          itemContext = `del autor ${baseBook.authors}`;
-      } else if (baseBook && baseBook.genres && Array.isArray(baseBook.genres) && baseBook.genres.length > 0) {
-        itemContext = `del género ${baseBook.genres[0]}`;
+      if (baseBook && baseBook.description) { // La descripción del libro unificada puede contener autores
+          const authorMatch = baseBook.description.match(/Autor\(es\): ([^.]+\.)/); // Ejemplo: "Autor(es): Author Name."
+          if (authorMatch && authorMatch[1]) {
+              itemContext = `del autor ${authorMatch[1].replace(/\.$/, '')}`; // Eliminar punto final
+          } else if (baseBook.genres && Array.isArray(baseBook.genres) && baseBook.genres.length > 0) {
+            itemContext = `del género ${baseBook.genres[0]}`;
+          }
       }
 
       const recommendedQueries = await this._getRecommendedQueries('libros', itemName, itemContext);
@@ -246,15 +271,16 @@ class RecommendationService {
       const searchResults = await Promise.allSettled(searchPromises);
 
       for (const result of searchResults) {
-        if (result.status === 'fulfilled' && result.value.length > 0) {
-          const book = result.value[0];
-          if (book.id && !addedExternalIds.has(`book-${book.id}`)) {
-            const mappedBook = this._mapToItemSchema(book, 'book', 'Google Books');
-            allRecommendedItems.push(mappedBook);
-            addedExternalIds.add(`book-${book.id}`);
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+          const books = result.value.filter(item => item.type === 'book');
+          for (const book of books) {
+            const uniqueKey = `${book.type}-${book.externalSource}-${book.externalId}`;
+            if (book.externalId && !addedExternalIds.has(uniqueKey)) {
+              allRecommendedItems.push(book); // El item ya está en formato ItemSchema
+              addedExternalIds.add(uniqueKey);
+            }
           }
         }
-        // ELIMINADO: if (allRecommendedItems.length >= 10) break;
       }
       return allRecommendedItems;
     } catch (error) {
@@ -263,22 +289,29 @@ class RecommendationService {
     }
   }
 
+  // RECUERDA: IGDB ahora debe devolver un array plano de ítems unificados.
   async recommendVideogames(itemName) {
     try {
       const initialSearchResult = await this.searchService.searchIgdb(itemName);
-      const baseVideogame = initialSearchResult[0];
+      // initialSearchResult ya es un array de videojuegos unificados, toma el primero.
+      const baseVideogame = initialSearchResult[0]; // ¡CORREGIDO! initialSearchResult es el array
 
       let itemContext = '';
       if (baseVideogame) {
-        if (baseVideogame.genres && Array.isArray(baseVideogame.genres) && baseVideogame.genres.length > 0) {
-            const genresArray = typeof baseVideogame.genres === 'string' ? baseVideogame.genres.split(',').map(g => g.trim()) : baseVideogame.genres;
-            itemContext = `del género ${genresArray[0]}`;
-        } else if (baseVideogame.genres && typeof baseVideogame.genres === 'string') {
-            const genresArray = baseVideogame.genres.split(',').map(g => g.trim());
-            if (genresArray.length > 0) {
-                itemContext = `del género ${genresArray[0]}`;
-            }
-        }
+          // Los géneros ya deberían estar en una propiedad `genres` en el item unificado, si tu IgdbApiService los mapea.
+          // O podrían ser parte de la descripción.
+          if (baseVideogame.genres && Array.isArray(baseVideogame.genres) && baseVideogame.genres.length > 0) {
+              itemContext = `del género ${baseVideogame.genres[0]}`;
+          } else if (baseVideogame.description) {
+              // Si los géneros están en la descripción (ej. "Géneros: RPG, Acción"), puedes extraerlos
+              const genresMatch = baseVideogame.description.match(/Géneros: ([^.]+)/);
+              if (genresMatch && genresMatch[1]) {
+                  const genresArray = genresMatch[1].split(',').map(g => g.trim());
+                  if (genresArray.length > 0) {
+                      itemContext = `del género ${genresArray[0]}`;
+                  }
+              }
+          }
       }
 
       const recommendedQueries = await this._getRecommendedQueries('videojuegos', itemName, itemContext);
@@ -290,15 +323,16 @@ class RecommendationService {
       const searchResults = await Promise.allSettled(searchPromises);
 
       for (const result of searchResults) {
-        if (result.status === 'fulfilled' && result.value.length > 0) {
-          const videogame = result.value[0];
-          if (videogame.id && !addedExternalIds.has(`videogame-${videogame.id}`)) {
-            const mappedVideogame = this._mapToItemSchema(videogame, 'videogame', 'IGDB');
-            allRecommendedItems.push(mappedVideogame);
-            addedExternalIds.add(`videogame-${videogame.id}`);
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+          const videogames = result.value.filter(item => item.type === 'videogame');
+          for (const videogame of videogames) {
+            const uniqueKey = `${videogame.type}-${videogame.externalSource}-${videogame.externalId}`;
+            if (videogame.externalId && !addedExternalIds.has(uniqueKey)) {
+              allRecommendedItems.push(videogame); // El item ya está en formato ItemSchema
+              addedExternalIds.add(uniqueKey);
+            }
           }
         }
-        // ELIMINADO: if (allRecommendedItems.length >= 10) break;
       }
       return allRecommendedItems;
     } catch (error) {
@@ -307,14 +341,23 @@ class RecommendationService {
     }
   }
 
+  // RECUERDA: Spotify ahora debe devolver un array plano de ítems unificados.
   async recommendArtists(itemName) {
     try {
-      const initialSearchResult = await this.searchService.searchSpotify(itemName);
-      const baseArtist = initialSearchResult.artists[0];
+      // Buscar artistas específicamente con type 'artist'
+      const initialSearchResult = await this.searchService.searchSpotify(itemName, 'artist');
+      // initialSearchResult ya es un array de artistas unificados, toma el primero.
+      const baseArtist = initialSearchResult[0]; // ¡CORREGIDO! initialSearchResult es el array
 
       let itemContext = '';
-      if (baseArtist && baseArtist.genres && baseArtist.genres.length > 0) {
-        itemContext = `del género ${baseArtist.genres[0]}`;
+      if (baseArtist && baseArtist.description) { // La descripción del artista unificada contiene los géneros
+        const genresMatch = baseArtist.description.match(/Géneros: ([^.]+)/);
+        if (genresMatch && genresMatch[1]) {
+          const genresArray = genresMatch[1].split(',').map(g => g.trim());
+          if (genresArray.length > 0) {
+            itemContext = `del género ${genresArray[0]}`;
+          }
+        }
       }
 
       const recommendedQueries = await this._getRecommendedQueries('artistas', itemName, itemContext);
@@ -322,19 +365,20 @@ class RecommendationService {
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
 
-      const searchPromises = recommendedQueries.map(query => this.searchService.searchSpotify(query));
+      const searchPromises = recommendedQueries.map(query => this.searchService.searchSpotify(query, 'artist')); // Buscar solo artists
       const searchResults = await Promise.allSettled(searchPromises);
 
       for (const result of searchResults) {
-        if (result.status === 'fulfilled' && result.value.artists.length > 0) {
-          const artist = result.value.artists[0];
-          if (artist.id && !addedExternalIds.has(`artist-${artist.id}`)) {
-            const mappedArtist = this._mapToItemSchema(artist, 'artist', 'Spotify');
-            allRecommendedItems.push(mappedArtist);
-            addedExternalIds.add(`artist-${artist.id}`);
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+          const artists = result.value.filter(item => item.type === 'artist');
+          for (const artist of artists) {
+            const uniqueKey = `${artist.type}-${artist.externalSource}-${artist.externalId}`;
+            if (artist.externalId && !addedExternalIds.has(uniqueKey)) {
+              allRecommendedItems.push(artist); // El item ya está en formato ItemSchema
+              addedExternalIds.add(uniqueKey);
+            }
           }
         }
-        // ELIMINADO: if (allRecommendedItems.length >= 10) break;
       }
       return allRecommendedItems;
     } catch (error) {
@@ -343,16 +387,20 @@ class RecommendationService {
     }
   }
 
+  // RECUERDA: Spotify ahora debe devolver un array plano de ítems unificados.
   async recommendAlbums(itemName) {
     try {
-      const initialSearchResult = await this.searchService.searchSpotify(itemName);
-      const baseAlbum = initialSearchResult.albums[0];
+      // Buscar álbumes específicamente con type 'album'
+      const initialSearchResult = await this.searchService.searchSpotify(itemName, 'album');
+      // initialSearchResult ya es un array de álbumes unificados, toma el primero.
+      const baseAlbum = initialSearchResult[0]; // ¡CORREGIDO! initialSearchResult es el array
 
       let itemContext = '';
-      if (baseAlbum && baseAlbum.artist_name) {
-        itemContext = `del artista ${baseAlbum.artist_name}`;
-      } else if (baseAlbum && baseAlbum.artists && baseAlbum.artists.length > 0) {
-          itemContext = `del artista ${baseAlbum.artists[0].name}`;
+      if (baseAlbum && baseAlbum.description) { // La descripción del álbum unificada contiene el artista
+        const artistMatch = baseAlbum.description.match(/Artista\(s\): ([^.]+\.)/);
+        if (artistMatch && artistMatch[1]) {
+            itemContext = `del artista ${artistMatch[1].replace(/\.$/, '')}`; // Eliminar punto final
+        }
       }
 
       const recommendedQueries = await this._getRecommendedQueries('álbumes', itemName, itemContext);
@@ -360,19 +408,20 @@ class RecommendationService {
       const allRecommendedItems = [];
       const addedExternalIds = new Set();
 
-      const searchPromises = recommendedQueries.map(query => this.searchService.searchSpotify(query));
+      const searchPromises = recommendedQueries.map(query => this.searchService.searchSpotify(query, 'album')); // Buscar solo albums
       const searchResults = await Promise.allSettled(searchPromises);
 
       for (const result of searchResults) {
-        if (result.status === 'fulfilled' && result.value.albums.length > 0) {
-          const album = result.value.albums[0];
-          if (album.id && !addedExternalIds.has(`album-${album.id}`)) {
-            const mappedAlbum = this._mapToItemSchema(album, 'album', 'Spotify');
-            allRecommendedItems.push(mappedAlbum);
-            addedExternalIds.add(`album-${album.id}`);
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+          const albums = result.value.filter(item => item.type === 'album');
+          for (const album of albums) {
+            const uniqueKey = `${album.type}-${album.externalSource}-${album.externalId}`;
+            if (album.externalId && !addedExternalIds.has(uniqueKey)) {
+              allRecommendedItems.push(album); // El item ya está en formato ItemSchema
+              addedExternalIds.add(uniqueKey);
+            }
           }
         }
-        // ELIMINADO: if (allRecommendedItems.length >= 10) break;
       }
       return allRecommendedItems;
     } catch (error) {
@@ -386,10 +435,8 @@ class RecommendationService {
     try {
       const recommendationPromises = [];
       const addedExternalIds = new Set();
-      let allMixedItems = []; // Cambiado a let para permitir reasignación si se desea, aunque push es suficiente
+      let allMixedItems = [];
 
-      // Al no tener los 'break' internos en las funciones recommendX,
-      // estas devolverán más ítems, lo que aumenta la probabilidad de variedad.
       recommendationPromises.push(this.recommendMovies(itemName));
       recommendationPromises.push(this.recommendTvShows(itemName));
       recommendationPromises.push(this.recommendSongs(itemName));
@@ -407,8 +454,6 @@ class RecommendationService {
             if (item.externalId && !addedExternalIds.has(uniqueKey)) {
               allMixedItems.push(item);
               addedExternalIds.add(uniqueKey);
-              // NOTA: No hacemos break aquí para que todas las categorías contribuyan,
-              // el límite final se aplica después del shuffle.
             }
           }
         }
