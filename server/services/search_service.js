@@ -114,6 +114,7 @@ class SearchService {
     async searchIgdb(query) {
         try {
             const result = await this.igdbApiService.search(query);
+            console.log('result', result);
             return result || []; // Asegurarse de que sea un array
         } catch (error) {
             console.error('Error in searchIgdb:', error);

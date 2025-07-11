@@ -22,11 +22,11 @@ router.get(
         switch (type) {
           case 'movie':
             results = await searchService.searchTmdb(q);
-            results = { movies: results.movies || [] };
+            results = { movies: results || [] };
             break;
           case 'tvshow':
             results = await searchService.searchTmdb(q);
-            results = { tvshows: results.tvshows || [] };
+            results = { tvshows: results || [] };
             break;
           case 'song':
             results = await searchService.searchSpotify(q, 'track');
