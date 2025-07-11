@@ -1,10 +1,10 @@
 // services/search_service.js
 const TmdbApiService = require('./api/tmdb_api_service');
 const SpotifyApiService = require('./api/spotify_api_service');
-const GoogleBooksApiService = require('./api/googlebooks_api_service'); // Asegúrate que este servicio también devuelve el formato unificado
-const IgdbApiService = require('./api/igdb_api_service'); // Asegúrate que este servicio también devuelve el formato unificado
-const UserService = require('./user_service');
-const { Op } = require('sequelize');
+const GoogleBooksApiService = require('./api/googlebooks_api_service');
+const IgdbApiService = require('./api/igdb_api_service');
+const UserService = require('./user_service'); // <-- ¡NUEVA IMPORTACIÓN!
+const { Op } = require('sequelize'); // Para usar operadores como LIKE
 
 class SearchService {
     constructor() {
