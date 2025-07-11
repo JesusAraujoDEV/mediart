@@ -70,7 +70,9 @@
               </div>
               <div class="text-sm font-semibold text-indigo-300 mb-2">PASO 2</div>
               <h3 class="text-xl font-bold mb-2">Define tus Intereses</h3>
-              <p class="text-sm text-indigo-200">Comparte un gusto y elige el tipo de arte para tus recomendaciones.</p>
+              <p class="text-sm text-indigo-200">
+                Busca y añade tus gustos (canciones, artistas, películas, etc.) como tags y elige qué tipo de arte quieres que te recomendemos.
+              </p>
             </div>
             
             <div class="space-y-4">
@@ -84,22 +86,63 @@
               <div class="text-xs text-indigo-200 text-left">Quiero recomendaciones de:</div>
               <div class="grid grid-cols-2 gap-2 text-sm">
                 <div class="bg-indigo-500/20 rounded-lg p-2 border border-indigo-500/30 flex items-center justify-center space-x-2 hover:bg-indigo-500/30 transition-colors duration-200 cursor-pointer">
-                  <Music class="w-4 h-4 text-indigo-300"/>
-                  <span>Música</span>
+                    <Music class="w-4 h-4 text-indigo-300"/>
+                    <span>Música</span>
                 </div>
                 <div class="bg-white/5 rounded-lg p-2 border border-white/10 flex items-center justify-center space-x-2 hover:bg-white/10 transition-colors duration-200 cursor-pointer">
-                  <Clapperboard class="w-4 h-4 text-indigo-300"/>
-                  <span>Películas</span>
+                    <Clapperboard class="w-4 h-4 text-indigo-300"/>
+                    <span>Películas</span>
                 </div>
                 <div class="bg-white/5 rounded-lg p-2 border border-white/10 flex items-center justify-center space-x-2 hover:bg-white/10 transition-colors duration-200 cursor-pointer">
                     <Gamepad2 class="w-4 h-4 text-indigo-300"/>
                     <span>Juegos</span>
                 </div>
                 <div class="bg-white/5 rounded-lg p-2 border border-white/10 flex items-center justify-center space-x-2 hover:bg-white/10 transition-colors duration-200 cursor-pointer">
-                  <BookText class="w-4 h-4 text-indigo-300"/>
-                  <span>Libros</span>
+                    <BookText class="w-4 h-4 text-indigo-300"/>
+                    <span>Libros</span>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!--Paso 3-->
+        <div class="relative group">
+          <div class="absolute inset-0 bg-gradient-to-r from-pink-600/20 to-purple-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+          <div class="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300">
+            <div class="text-center mb-6">
+              <div class="inline-flex items-center justify-center w-12 h-12 bg-pink-500/20 rounded-xl mb-4">
+                <Sparkles class="w-6 h-6 text-pink-300" />
+              </div>
+              <div class="text-sm font-semibold text-pink-300 mb-2">PASO 3</div>
+              <h3 class="text-xl font-bold mb-2">Organiza tu Colección de Arte</h3>
+              <p class="text-sm text-pink-200">
+                Recibe tus recomendaciones, guárdalas en playlists personalizadas en tu biblioteca y revísalas cuando quieras.
+              </p>
+            </div>
+            
+            <div class="space-y-3">
+                <div class="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <List className="w-4 h-4 text-pink-300" />
+                        <span class="text-sm text-pink-200">Recomendaciones en lista</span>
+                    </div>
+                    <Check className="w-4 h-4 text-green-400" />
+                </div>
+                <div class="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <Folder className="w-4 h-4 text-pink-300" />
+                        <span class="text-sm text-pink-200">Guarda en tus Playlists</span>
+                    </div>
+                    <Check className="w-4 h-4 text-green-400" />
+                </div>
+                <div class="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <SearchIcon className="w-4 h-4 text-pink-300" />
+                        <span class="text-sm text-pink-200">Busca en tu Biblioteca</span>
+                    </div>
+                    <Check className="w-4 h-4 text-green-400" />
+                </div>
             </div>
           </div>
         </div>
@@ -109,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { User, Mail, Lock, Search, Heart, Music, Gamepad2, BookText, Clapperboard } from 'lucide-vue-next'
+import { User, Mail, Lock, Search, Heart, Music, Gamepad2, BookText, Clapperboard, Sparkles, List, Folder, Search as SearchIcon, Check } from 'lucide-vue-next'
 </script>
 
 <style scoped>
