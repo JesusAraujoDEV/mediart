@@ -112,19 +112,39 @@ router.delete('/:id',
 
 // Rutas GET por ID o username (públicas por defecto o puedes proteger si lo necesitas)
 router.get('/by-username/:username',
-    validatorHandler(getUserByUsernameSchema, 'params'),
-    validatorHandler(getUserQuerySchema, 'query'),
-    // checkMasterApiKey, // Descomentar si quieres que solo API Key o JWT puedan acceder
-    // passport.authenticate('jwt', { session: false }), // Descomentar si quieres que solo API Key o JWT puedan acceder
-    async (req, res, next) => { /* ... */ }
+  validatorHandler(getUserByUsernameSchema, 'params'),
+  validatorHandler(getUserQuerySchema, 'query'),
+  async (req, res, next) => {
+    try {
+      const { username } = req.params;
+      const includeAssociationsParam = req.query.include;
+
+      let associationsToInclude = [];
+      if (includeAssociationsParam) {
+        associationsToInclude = includeAssociationsParam.split(',').map(assoc => assoc.trim());
+      }
+
+      const user = await service.findOneByUsername(username, associationsToInclude);
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
 );
 
 router.get('/:id',
-    validatorHandler(getUserSchema, 'params'),
-    // checkMasterApiKey, // Descomentar si quieres que solo API Key o JWT puedan acceder
-    // passport.authenticate('jwt', { session: false }), // Descomentar si quieres que solo API Key o JWT puedan acceder
-    async (req, res, next) => { /* ... */ }
+  validatorHandler(getUserSchema, 'params'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const user = await service.findOne(id);
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
 );
+
 
 
 module.exports = router;
