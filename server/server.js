@@ -11,6 +11,8 @@ const port = config.port || 3000;
 
 const setupSwagger = require('./swagger');
 
+// HOLA MUNDO
+
 // Sirve los archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
