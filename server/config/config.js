@@ -11,6 +11,7 @@ const config = {
   backendUrl: process.env.BACKEND_URL,
   noReplyEmail: process.env.NO_REPLY_EMAIL,
   emailAppPassword: process.env.EMAIL_APP_PASSWORD,
+  corsWhitelist: process.env.CORS_WHITELIST ? process.env.CORS_WHITELIST.split(',') : ['http://localhost:3000'],
 
   // PostgreSQL Configuration
   postgres: {
