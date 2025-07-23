@@ -453,7 +453,7 @@ class PlaylistService {
         if (error.name === 'SequelizeUniqueConstraintError') {
           console.warn(`Item ${itemId} already exists in playlist ${playlist.id} (caught unique constraint).`);
         } else {
-          console.error(`Error adding item ${itemId} to playlist ${playlist.id}:`, error);
+          console.error(`Error adding item ${String(itemId)} to playlist ${String(playlist.id)}:`, error);
           throw error;
         }
       }
