@@ -5,8 +5,8 @@ const rateLimit = require('express-rate-limit');
 const generalWriteLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
     max: 100, // Límite de 100 solicitudes por IP en el período
-    message: 'Demasiadas solicitudes desde esta IP, por favor, inténtalo de nuevo más tarde.',
-    headers: true, // Envía encabezados X-RateLimit-*
+    message: 'Demasiadas solicitudes de escritura desde esta IP, por favor, inténtalo de nuevo más tarde.',
+    headers: true,
 });
 
 // Limitador más estricto para operaciones de borrado sensibles
@@ -22,15 +22,16 @@ const loginAttempLimiter = rateLimit({
     windowMs: 5 * 60 * 1000, // 5 minutos
     max: 5, // Límite de 5 intentos por IP en el período
     message: 'Demasiados intentos de inicio de sesión fallidos desde esta IP, por favor, inténtalo de nuevo en unos minutos.',
-    statusCode: 429, // Too Many Requests
+    statusCode: 429,
     headers: true,
-    // Puedes añadir un `handler` para personalizar la respuesta cuando se excede el límite
-    handler: (req, res, next) => {
-        res.status(429).json({
-            statusCode: 429,
-            message: 'Has excedido el límite de intentos de inicio de sesión. Por favor, espera.',
-        });
-    },
+});
+
+// --- NUEVO Limitador para operaciones de lectura (GET) ---
+const generalReadLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 500, // Límite de 500 solicitudes por IP en el período (o el valor que consideres apropiado)
+    message: 'Demasiadas solicitudes de lectura desde esta IP, por favor, inténtalo de nuevo más tarde.',
+    headers: true,
 });
 
 
@@ -38,5 +39,5 @@ module.exports = {
     generalWriteLimiter,
     deleteUserLimiter,
     loginAttempLimiter,
-    // Exporta cualquier otro limitador que definas
+    generalReadLimiter, // Exporta el nuevo limitador
 };

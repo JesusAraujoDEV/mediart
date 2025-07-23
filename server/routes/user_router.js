@@ -7,7 +7,7 @@ const { uploadProfilePicture } = require('./../utils/multer_config');
 const passport = require('passport');
 const boom = require('@hapi/boom');
 const { checkMasterApiKey, authenticateIfNoApiKey } = require('./../middlewares/auth_handler');
-const {deleteUserLimiter, generalWriteLimiter, loginAttempLimiter} = require('./../middlewares/rate_limit_handler')
+const {deleteUserLimiter, generalWriteLimiter, generalReadLimiter} = require('./../middlewares/rate_limit_handler')
 const { generalWriteLimiter, deleteUserLimiter } = require('./../middlewares/rate_limit_handler');
 
 
@@ -16,6 +16,7 @@ const service = new UserService();
 
 // Ruta para obtener todos los usuarios (accesible con JWT o con Master API Key)
 router.get('/',
+    generalReadLimiter,
     checkMasterApiKey,
     authenticateIfNoApiKey,
     async (req, res, next) => {
@@ -120,6 +121,7 @@ router.delete('/:id',
 
 // Rutas GET por ID o username (públicas por defecto o puedes proteger si lo necesitas)
 router.get('/by-username/:username',
+    generalReadLimiter,
     validatorHandler(getUserByUsernameSchema, 'params'),
     validatorHandler(getUserQuerySchema, 'query'),
     async (req, res, next) => {
@@ -141,6 +143,7 @@ router.get('/by-username/:username',
 );
 
 router.get('/:id',
+    generalReadLimiter,
     validatorHandler(getUserSchema, 'params'),
     async (req, res, next) => {
         try {
