@@ -1,4 +1,4 @@
-// routes/user.router.js
+// routes/user_router.js
 const express = require('express');
 const UserService = require('./../services/user_service');
 const validatorHandler = require('./../middlewares/validator_handler');
@@ -6,7 +6,10 @@ const { updateUserSchema, createUserSchema, getUserSchema, getUserByUsernameSche
 const { uploadProfilePicture } = require('./../utils/multer_config');
 const passport = require('passport');
 const boom = require('@hapi/boom');
-const { checkMasterApiKey, authenticateIfNoApiKey } = require('./../middlewares/auth_handler'); // Importa SOLO checkMasterApiKey si no usas los otros aquí
+const { checkMasterApiKey, authenticateIfNoApiKey } = require('./../middlewares/auth_handler');
+const {deleteUserLimiter, generalWriteLimiter, loginAttempLimiter} = require('./../middlewares/rate_limit_handler')
+const { generalWriteLimiter, deleteUserLimiter } = require('./../middlewares/rate_limit_handler');
+
 
 const router = express.Router();
 const service = new UserService();
@@ -26,9 +29,11 @@ router.get('/',
     }
 );
 
+// Ruta para crear un nuevo usuario (opera en la base de datos, por lo que necesita limitador)
 router.post(
     '/',
-    checkMasterApiKey, // Si usas la API Key, esto permitirá el acceso
+    generalWriteLimiter, // <-- Aplicar limitador general de escritura aquí
+    checkMasterApiKey,
     uploadProfilePicture.single('profilePicture'),
     validatorHandler(createUserSchema, 'body'),
     async (req, res, next) => {
@@ -39,7 +44,7 @@ router.post(
             if (req.file) {
                 profilePictureBuffer = req.file.buffer;
             }
-            
+
             const newUser = await service.create(body, profilePictureBuffer);
             res.status(201).json(newUser);
         } catch (error) {
@@ -50,8 +55,10 @@ router.post(
 
 
 // Ruta para actualizar un usuario (Propio usuario o Master API Key)
+// Esta ruta también modifica datos y sube archivos, por lo que necesita limitador.
 router.patch(
     '/:id',
+    generalWriteLimiter,
     validatorHandler(getUserSchema, 'params'),
     checkMasterApiKey,
     authenticateIfNoApiKey,
@@ -66,8 +73,8 @@ router.patch(
             // Si req.user.sub es null, significa que estamos usando la Master API Key.
             // En ese caso, permitimos la operación sin verificar el ID.
             if (userIdFromToken !== null) { // Si NO es el usuario ficticio de la API Key
-                 if (parseInt(id, 10) !== parseInt(userIdFromToken, 10)) {
-                    throw boom.forbidden('You can only update your own profile.');
+                if (parseInt(id, 10) !== parseInt(userIdFromToken, 10)) {
+                    throw boom.forbidden('Solo puedes actualizar tu propio perfil.');
                 }
             }
 
@@ -85,19 +92,11 @@ router.patch(
 );
 
 // Ruta para eliminar un usuario (Propio usuario o Master API Key)
-const rateLimit = require('express-rate-limit');
-
-const deleteUserRateLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-    message: 'Too many delete requests from this IP, please try again later.',
-});
-
 router.delete('/:id',
-    deleteUserRateLimiter, // Apply rate limiting to this route
+    deleteUserLimiter, // <-- Aplicar el limitador ESPECÍFICO para borrado de usuarios aquí
     validatorHandler(getUserSchema, 'params'),
-    checkMasterApiKey, // Primero verifica si hay Master API Key
-    authenticateIfNoApiKey, // Si no hay Master API Key, autentica con JWT
+    checkMasterApiKey,
+    authenticateIfNoApiKey,
     async (req, res, next) => {
         try {
             const { id } = req.params;
@@ -107,12 +106,12 @@ router.delete('/:id',
             // En ese caso, permitimos la operación sin verificar el ID.
             if (userIdFromToken !== null) { // Si NO es el usuario ficticio de la API Key
                 if (parseInt(id, 10) !== parseInt(userIdFromToken, 10)) {
-                    throw boom.forbidden('You can only delete your own profile.');
+                    throw boom.forbidden('Solo puedes eliminar tu propio perfil.');
                 }
             }
 
             await service.delete(id);
-            res.status(200).json({id, message: 'User deleted successfully'});
+            res.status(200).json({id, message: 'Usuario eliminado exitosamente'});
         } catch (error) {
             next(error);
         }
@@ -121,39 +120,37 @@ router.delete('/:id',
 
 // Rutas GET por ID o username (públicas por defecto o puedes proteger si lo necesitas)
 router.get('/by-username/:username',
-  validatorHandler(getUserByUsernameSchema, 'params'),
-  validatorHandler(getUserQuerySchema, 'query'),
-  async (req, res, next) => {
-    try {
-      const { username } = req.params;
-      const includeAssociationsParam = req.query.include;
+    validatorHandler(getUserByUsernameSchema, 'params'),
+    validatorHandler(getUserQuerySchema, 'query'),
+    async (req, res, next) => {
+        try {
+            const { username } = req.params;
+            const includeAssociationsParam = req.query.include;
 
-      let associationsToInclude = [];
-      if (includeAssociationsParam) {
-        associationsToInclude = includeAssociationsParam.split(',').map(assoc => assoc.trim());
-      }
+            let associationsToInclude = [];
+            if (includeAssociationsParam) {
+                associationsToInclude = includeAssociationsParam.split(',').map(assoc => assoc.trim());
+            }
 
-      const user = await service.findOneByUsername(username, associationsToInclude);
-      res.json(user);
-    } catch (error) {
-      next(error);
+            const user = await service.findOneByUsername(username, associationsToInclude);
+            res.json(user);
+        } catch (error) {
+            next(error);
+        }
     }
-  }
 );
 
 router.get('/:id',
-  validatorHandler(getUserSchema, 'params'),
-  async (req, res, next) => {
-    try {
-      const { id } = req.params;
-      const user = await service.findOne(id);
-      res.json(user);
-    } catch (error) {
-      next(error);
+    validatorHandler(getUserSchema, 'params'),
+    async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const user = await service.findOne(id);
+            res.json(user);
+        } catch (error) {
+            next(error);
+        }
     }
-  }
 );
-
-
 
 module.exports = router;
