@@ -8,8 +8,6 @@ const passport = require('passport');
 const boom = require('@hapi/boom');
 const { checkMasterApiKey, authenticateIfNoApiKey } = require('./../middlewares/auth_handler');
 const {deleteUserLimiter, generalWriteLimiter, generalReadLimiter} = require('./../middlewares/rate_limit_handler')
-const { generalWriteLimiter, deleteUserLimiter } = require('./../middlewares/rate_limit_handler');
-
 
 const router = express.Router();
 const service = new UserService();
