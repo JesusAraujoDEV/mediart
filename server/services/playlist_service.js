@@ -327,7 +327,7 @@ class PlaylistService {
         await deleteImageFromImgBB(playlist.imgbbDeleteUrl);
         console.log(`ImgBB playlist cover deleted for playlist ${id} on playlist deletion.`);
       } catch (error) {
-        console.error(`Failed to delete ImgBB playlist cover for playlist ${id}:`, error);
+        console.error('Failed to delete ImgBB playlist cover for playlist %s:', id, error);
         // No impedimos la eliminación de la playlist si falla la eliminación de la imagen
       }
     }
