@@ -85,7 +85,16 @@ router.patch(
 );
 
 // Ruta para eliminar un usuario (Propio usuario o Master API Key)
+const rateLimit = require('express-rate-limit');
+
+const deleteUserRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Too many delete requests from this IP, please try again later.',
+});
+
 router.delete('/:id',
+    deleteUserRateLimiter, // Apply rate limiting to this route
     validatorHandler(getUserSchema, 'params'),
     checkMasterApiKey, // Primero verifica si hay Master API Key
     authenticateIfNoApiKey, // Si no hay Master API Key, autentica con JWT
