@@ -47,10 +47,15 @@ const ItemSchema = {
     type: DataTypes.DECIMAL,
     field: 'avg_rating',
   },
-  vibeTags: {
+  // vibeTags: { // <-- ELIMINAR O COMENTAR ESTA PROPIEDAD
+  //   allowNull: true,
+  //   type: DataTypes.JSONB,
+  //   field: 'vibe_tags',
+  // },
+  externalUrl: { // <-- AÑADIR ESTA PROPIEDAD
     allowNull: true,
-    type: DataTypes.JSONB,
-    field: 'vibe_tags',
+    type: DataTypes.TEXT, // Puedes usar TEXT para URLs largas si lo necesitas, o STRING(255)
+    field: 'external_url',
   },
   createdAt: {
     allowNull: false,

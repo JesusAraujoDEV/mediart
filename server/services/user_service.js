@@ -1,18 +1,37 @@
+// services/user_service.js
 const boom = require('@hapi/boom');
 const { models } = require('../libs/sequelize');
 const bcrypt = require('bcrypt');
+
+const { uploadImageToImgBB, deleteImageFromImgBB } = require('../utils/imgbb_uploader');
 
 class UserService {
 
   constructor(){
   }
 
-  async create(data) {
+
+  async create(data, profilePictureBuffer = null) {
     const hash = await bcrypt.hash(data.passwordHash, 10);
+
+    let profilePictureUrl = null;
+    let imgbbDeleteUrl = null;
+
+    if (profilePictureBuffer) {
+      // Usar la función importada de imgbb_uploader
+      const uploadResult = await uploadImageToImgBB(profilePictureBuffer, data.username ? `${data.username}-profile` : 'user-profile');
+      if (uploadResult) {
+        profilePictureUrl = uploadResult.url;
+        imgbbDeleteUrl = uploadResult.deleteUrl;
+      }
+    }
+
     const newUser = await models.User.create(
       {
         ...data,
-        passwordHash: hash
+        passwordHash: hash,
+        profilePictureUrl: profilePictureUrl,
+        imgbbDeleteUrl: imgbbDeleteUrl
       }
     );
     delete newUser.dataValues.passwordHash;
@@ -71,46 +90,14 @@ class UserService {
     return { message: 'Playlist unsaved successfully' };
   }
 
-  async find() {
-    const users = await models.User.findAll( // Renombrado 'client' a 'users' para mayor claridad
-      {
-        include: [
-          {
-            model: models.Playlist,
-            as: 'ownedPlaylists' // Incluye las playlists que este usuario posee
-          },
-          {
-            model: models.Playlist,
-            as: 'savedPlaylists', // Incluye las playlists que este usuario ha guardado
-            through: { attributes: ['savedAt'] } // Incluye el campo 'savedAt' de la tabla intermedia
-          },
-          {
-            model: models.User,
-            as: 'followersUsers' // Incluye los usuarios que siguen a este usuario
-          },
-          {
-            model: models.User,
-            as: 'followingUsers' // Incluye los usuarios a los que este usuario sigue
-          },
-          {
-            model: models.Library, // Acceso directo a las entradas de la tabla 'library'
-            as: 'libraryEntries',
-            foreignKey: 'user_id'
-          },
-          {
-            model: models.UserFollow, // Acceso directo a las relaciones de seguimiento iniciadas por este usuario
-            as: 'initiatedFollows',
-            foreignKey: 'follower_user_id'
-          },
-          {
-            model: models.UserFollow, // Acceso directo a las relaciones de seguimiento recibidas por este usuario
-            as: 'receivedFollows',
-            foreignKey: 'followed_user_id'
-          }
-        ]
+  async find(options = {}) {
+    const users = await models.User.findAll({
+      ...options,
+      attributes: {
+        exclude: ['passwordHash', 'recoveryToken', 'imgbbDeleteUrl']
       }
-    );
-    return users; // Renombrado 'client' a 'users'
+      });
+    return users;
   }
 
   async findOneByEmail(email) {
@@ -122,7 +109,74 @@ class UserService {
     return user;
   }
 
-  async findSavedPlaylistsByUserId(userId) { // Cambia el parámetro a userId
+  async findOneByUsername(username, associationsToInclude = []) {
+    const allowedAssociations = {
+      'ownedPlaylists': { model: models.Playlist, as: 'ownedPlaylists' },
+      'savedPlaylists': { model: models.Playlist, as: 'savedPlaylists', through: { attributes: ['savedAt'] } },
+      'followersUsers': {
+        model: models.User,
+        as: 'followersUsers',
+        attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+        through: { attributes: [] }
+      },
+      'followingUsers': {
+        model: models.User,
+        as: 'followingUsers',
+        attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+        through: { attributes: [] }
+      },
+      'libraryEntries': { model: models.Library, as: 'libraryEntries' },
+      'initiatedFollows': { model: models.UserFollow, as: 'initiatedFollows' },
+      'receivedFollows': { model: models.UserFollow, as: 'receivedFollows' },
+      'collaboratorPlaylists': {
+        model: models.Playlist,
+        as: 'collaboratorPlaylists',
+        through: { attributes: [] },
+      }
+    };
+
+    let findOptions = {
+        where: { username },
+        attributes: { exclude: ['passwordHash', 'recoveryToken'] },
+        include: []
+    };
+
+    if (Array.isArray(associationsToInclude) && associationsToInclude.length > 0) {
+      for (const associationName of associationsToInclude) {
+        if (allowedAssociations[associationName]) {
+          findOptions.include.push(allowedAssociations[associationName]);
+        } else {
+          console.warn(`Attempted to include unknown or disallowed association: ${associationName} for username.`);
+        }
+      }
+    }
+
+    if (findOptions.include.length === 0) {
+        findOptions.include.push(
+            {
+              model: models.User,
+              as: 'followersUsers',
+              attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+              through: { attributes: [] }
+            },
+            {
+              model: models.User,
+              as: 'followingUsers',
+              attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+              through: { attributes: [] }
+            }
+        );
+    }
+
+    const user = await models.User.findOne(findOptions);
+
+    if (!user) {
+      throw boom.notFound('User not found');
+    }
+    return user;
+  }
+
+  async findSavedPlaylistsByUserId(userId) {
     const user = await models.User.findByPk(userId, {
       include: [
         {
@@ -141,49 +195,79 @@ class UserService {
     });
 
     if (!user) {
-      throw boom.notFound('User not found'); // Si el usuario no existe
+      throw boom.notFound('User not found');
     }
 
-    return user.savedPlaylists; // Devuelve el array de playlists guardadas
+    return user.savedPlaylists;
   }
 
-  async findOne(id) {
-    const user = await models.User.findByPk(id, {
-      include: [
-        {
-          model: models.Playlist,
-          as: 'ownedPlaylists' // Incluye las playlists que este usuario posee
-        },
-        {
-          model: models.Playlist,
-          as: 'savedPlaylists', // Incluye las playlists que este usuario ha guardado
-          through: { attributes: ['savedAt'] }
-        },
-        {
-          model: models.User,
-          as: 'followersUsers' // Incluye los usuarios que siguen a este usuario
-        },
-        {
-          model: models.User,
-          as: 'followingUsers' // Incluye los usuarios a los que este usuario sigue
-        },
-        {
-          model: models.Library, // Acceso directo a las entradas de la tabla 'library'
-          as: 'libraryEntries',
-          foreignKey: 'user_id'
-        },
-        {
-          model: models.UserFollow, // Acceso directo a las relaciones de seguimiento iniciadas por este usuario
-          as: 'initiatedFollows',
-          foreignKey: 'follower_user_id'
-        },
-        {
-          model: models.UserFollow, // Acceso directo a las relaciones de seguimiento recibidas por este usuario
-          as: 'receivedFollows',
-          foreignKey: 'followed_user_id'
+  async findOne(id, associationsToInclude = [], includeRecoveryToken = false) {
+    const allowedAssociations = {
+      'ownedPlaylists': {
+        model: models.Playlist,
+        as: 'ownedPlaylists',
+        through: { attributes: [] }
+      },
+      'savedPlaylists': {
+        model: models.Playlist,
+        as: 'savedPlaylists',
+        through: { attributes: ['savedAt'] }
+      },
+      'followersUsers': {
+        model: models.User,
+        as: 'followersUsers',
+        attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+        through: { attributes: [] }
+      },
+      'followingUsers': {
+        model: models.User,
+        as: 'followingUsers',
+        attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+        through: { attributes: [] }
+      },
+      'libraryEntries': {
+        model: models.Library,
+        as: 'libraryEntries',
+        attributes: { exclude: ['createdAt', 'updatedAt'] }
+      },
+      'initiatedFollows': {
+        model: models.UserFollow,
+        as: 'initiatedFollows',
+        attributes: { exclude: ['createdAt', 'updatedAt'] }
+      },
+      'receivedFollows': {
+        model: models.UserFollow,
+        as: 'receivedFollows',
+        attributes: { exclude: ['createdAt', 'updatedAt'] }
+      },
+      'collaboratorPlaylists': {
+        model: models.Playlist,
+        as: 'collaboratorPlaylists',
+        through: { attributes: [] },
+      }
+    };
+
+    let findOptions = {
+      attributes: { exclude: ['passwordHash'] }
+    };
+    if (!includeRecoveryToken) {
+      findOptions.attributes.exclude.push('recoveryToken');
+    }
+
+    findOptions.include = [];
+
+    if (Array.isArray(associationsToInclude) && associationsToInclude.length > 0) {
+      for (const associationName of associationsToInclude) {
+        if (allowedAssociations[associationName]) {
+          findOptions.include.push(allowedAssociations[associationName]);
+        } else {
+          console.warn(`Attempted to include unknown or disallowed association: ${associationName}`);
         }
-      ]
-    });
+      }
+    }
+
+    const user = await models.User.findByPk(id, findOptions);
+
     if (!user) {
       throw boom.notFound('User not found');
     }
@@ -192,12 +276,13 @@ class UserService {
 
   async findMyFollowers(userId) {
     const userWithFollowers = await models.User.findByPk(userId, {
-      attributes: ['id'],
+      attributes: [],
       include: [
         {
           model: models.User,
           as: 'followersUsers',
-          attributes: ['id', 'username', 'email', 'profilePictureUrl']
+          attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+          through: { attributes: [] }
         }
       ]
     });
@@ -211,12 +296,13 @@ class UserService {
 
   async findMyFollowings(userId) {
     const userWithFollowings = await models.User.findByPk(userId, {
-      attributes: ['id'],
+      attributes: [],
       include: [
         {
           model: models.User,
           as: 'followingUsers',
-          attributes: ['id', 'username', 'email', 'profilePictureUrl']
+          attributes: ['id', 'username', 'email', 'profilePictureUrl'],
+          through: { attributes: [] }
         }
       ]
     });
@@ -284,14 +370,89 @@ class UserService {
     return { message: 'User unfollowed successfully' };
   }
 
-  async update(id, changes) {
-    const user = await this.findOne(id);
-    const rta = await user.update(changes);
+  async update(id, changes, profilePictureBuffer = null) {
+    const user = await models.User.findByPk(id);
+
+    if (!user) {
+        throw boom.notFound('User not found');
+    }
+
+    const updatedChanges = { ...changes };
+
+    // Si se envía un passwordHash en los cambios, hashearlo
+    if (updatedChanges.passwordHash) {
+      updatedChanges.passwordHash = await bcrypt.hash(updatedChanges.passwordHash, 10);
+    }
+
+    // Lógica para el manejo de la imagen de perfil
+    if (profilePictureBuffer) {
+      // Si se envió un nuevo archivo, primero intentar borrar el antiguo de ImgBB
+      if (user.imgbbDeleteUrl) {
+        try {
+          // Usar la función importada de imgbb_uploader
+          await deleteImageFromImgBB(user.imgbbDeleteUrl);
+          console.log(`Old profile picture deleted from ImgBB: ${user.imgbbDeleteUrl}`);
+        } catch (error) {
+          console.error(`Failed to delete old profile picture from ImgBB (might already be gone or URL expired):`, error.message);
+          // No lanzamos error Boom aquí para no detener la actualización del usuario
+        }
+      }
+
+      // Subir el nuevo archivo a ImgBB
+      // Usar la función importada de imgbb_uploader
+      const uploadResult = await uploadImageToImgBB(profilePictureBuffer, user.username ? `${user.username}-profile` : `user-${id}-profile`);
+      if (uploadResult) {
+        updatedChanges.profilePictureUrl = uploadResult.url;
+        updatedChanges.imgbbDeleteUrl = uploadResult.deleteUrl; // Guarda la nueva delete_url
+      }
+    } else if (updatedChanges.profilePictureUrl === '') {
+      // Si el frontend envió profilePictureUrl como cadena vacía, significa que se quiere eliminar la imagen
+      if (user.profilePictureUrl && user.imgbbDeleteUrl) { // Solo si hay una URL existente y su delete_url
+        try {
+          // Usar la función importada de imgbb_uploader
+          await deleteImageFromImgBB(user.imgbbDeleteUrl);
+          console.log(`Profile picture deleted from ImgBB upon explicit removal: ${user.imgbbDeleteUrl}`);
+        } catch (error) {
+          console.error(`Failed to delete profile picture from ImgBB (might already be gone or URL expired) upon explicit removal:`, error.message);
+        }
+      }
+      updatedChanges.profilePictureUrl = null; // Establecer a null en la BD
+      updatedChanges.imgbbDeleteUrl = null;    // También limpiar la delete_url en la DB
+    } else if (updatedChanges.profilePictureUrl === undefined) {
+        // Si no se envía ni archivo ni el campo profilePictureUrl en el body,
+        // significa que no se debe modificar la URL existente en la BD.
+        delete updatedChanges.profilePictureUrl;
+        // También aseguramos que imgbbDeleteUrl no se toque si no se cambia la imagen
+        delete updatedChanges.imgbbDeleteUrl;
+    }
+
+    const rta = await user.update(updatedChanges);
+    // Excluir passwordHash del objeto retornado después de la actualización
+    delete rta.dataValues.passwordHash;
     return rta;
   }
 
   async delete(id) {
-    const user = await this.findOne(id);
+    // Es CRUCIAL obtener la delete_url de la base de datos para poder eliminar la imagen
+    const user = await models.User.findByPk(id); // Traemos el usuario completo, incluyendo imgbbDeleteUrl
+
+    if (!user) {
+        throw boom.notFound('User not found');
+    }
+
+    // Si el usuario tiene una imagen de perfil y su delete_url, intentar eliminarla de ImgBB
+    if (user.profilePictureUrl && user.imgbbDeleteUrl) {
+      try {
+        // Usar la función importada de imgbb_uploader
+        await deleteImageFromImgBB(user.imgbbDeleteUrl);
+        console.log(`Profile picture deleted from ImgBB for user ${id}: ${user.imgbbDeleteUrl}`);
+      } catch (error) {
+        console.error(`Failed to delete profile picture from ImgBB for user ${id} (might already be gone or URL expired):`, error.message);
+        // Aquí decides si lanzas un error Boom o simplemente loggeas y continuas.
+        // Generalmente, no quieres que la eliminación del usuario falle solo porque la imagen no se borró de ImgBB.
+      }
+    }
+
     await user.destroy();
     return { id };
   }
