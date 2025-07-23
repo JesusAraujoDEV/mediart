@@ -383,7 +383,7 @@ class PlaylistService {
           });
           itemIdToAdd = newItem.id;
         } catch (error) {
-          console.error(`Error creating item ${itemData.title} (${itemData.externalId}):`, error);
+          console.error("Error creating item '%s' (ID: '%s'):", itemData.title, itemData.externalId, error);
           continue;
         }
       }
