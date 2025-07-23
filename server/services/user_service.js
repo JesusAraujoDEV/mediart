@@ -447,7 +447,7 @@ class UserService {
         await deleteImageFromImgBB(user.imgbbDeleteUrl);
         console.log(`Profile picture deleted from ImgBB for user ${id}: ${user.imgbbDeleteUrl}`);
       } catch (error) {
-        console.error(`Failed to delete profile picture from ImgBB for user ${id} (might already be gone or URL expired):`, error.message);
+        console.error('Failed to delete profile picture from ImgBB for user %s (might already be gone or URL expired): %s', id, error.message);
         // Aquí decides si lanzas un error Boom o simplemente loggeas y continuas.
         // Generalmente, no quieres que la eliminación del usuario falle solo porque la imagen no se borró de ImgBB.
       }
