@@ -301,6 +301,21 @@
             </div>
           </button>
         </div>
+
+        <!-- Categorías Mobile - Grid simple -->
+        <div class="grid grid-cols-2 gap-4">
+          <div v-for="category in mobileCategories" :key="category.name" class="relative h-32 rounded-xl overflow-hidden shadow-lg">
+            <img 
+              :src="category.image" 
+              :alt="category.name" 
+              class="absolute inset-0 w-full h-full object-cover"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-3">
+              <h3 class="text-white font-bold text-sm">{{ category.name }}</h3>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -352,5 +367,8 @@ p {
 .group:hover ~ .group {
   transform: translateX(0);
 }
+
+
+
 
 </style>
