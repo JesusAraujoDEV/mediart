@@ -103,6 +103,22 @@ Para una comprensión más profunda de la arquitectura y el comportamiento del s
 
 ## Tecnologías Utilizadas
 
+El desarrollo de la Landing Page de Mediart se apoya en las siguientes tecnologías y herramientas principales:
+
+- **[Nuxt 3](https://nuxt.com/):** Framework de desarrollo web basado en Vue 3, utilizado para construir aplicaciones modernas, rápidas y escalables.
+- **[Vue 3](https://vuejs.org/):** Framework progresivo de JavaScript para la construcción de interfaces de usuario reactivas y componentes reutilizables.
+- **[Tailwind CSS](https://tailwindcss.com/):** Framework de utilidades CSS para un diseño rápido y altamente personalizable.
+- **[PrimeIcons](https://www.primefaces.org/primeicons/):** Conjunto de iconos vectoriales para enriquecer la interfaz de usuario.
+- **[Lucide Vue Next](https://lucide.dev/):** Colección de iconos SVG open source, integrados fácilmente con Vue 3.
+- **[SweetAlert2](https://sweetalert2.github.io/):** Biblioteca para mostrar alertas y diálogos personalizados y atractivos.
+- **[Vue Toastification](https://vue-toastification.maronato.dev/):** Sistema de notificaciones toast para Vue 3.
+- **[Flashy JS](https://github.com/flashy-js/flashy):** Biblioteca para mostrar mensajes flash y notificaciones.
+- **[@nuxt/image](https://image.nuxt.com/):** Optimización y manipulación de imágenes en aplicaciones Nuxt.
+- **[@nuxt/icon](https://icon.nuxt.com/):** Integración sencilla de iconos en proyectos Nuxt.
+- **[Vue Router](https://router.vuejs.org/):** Enrutador oficial para Vue.js, utilizado para la navegación entre páginas y secciones.
+
+Estas tecnologías permiten crear una experiencia de usuario moderna, eficiente y visualmente atractiva, facilitando el desarrollo y mantenimiento del proyecto.
+
 
 ---
 
