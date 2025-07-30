@@ -15,8 +15,6 @@ const service = new UserService();
 // Ruta para obtener todos los usuarios (accesible con JWT o con Master API Key)
 router.get('/',
     generalReadLimiter,
-    checkMasterApiKey,
-    authenticateIfNoApiKey,
     async (req, res, next) => {
         try {
             console.log('req.user en la ruta GET /users:', req.user); // Verás { id: null, sub: null } si usas API Key
