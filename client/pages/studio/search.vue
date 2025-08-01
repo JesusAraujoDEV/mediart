@@ -10,36 +10,16 @@
         </h1>
 
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-          <!-- Select de tipo de búsqueda -->
-          <div class="flex items-center justify-center max-md:w-full">
-            <select
-              v-model="searchType"
-              class="p-3 px-6 rounded-lg bg-gray-700 w-fit text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md appearance-none"
-            >
-              <option value="users">Usuarios</option>
-              <option value="general">Todo</option>
-              <option value="song">Canciones</option>
-              <option value="artist">Artistas</option>
-              <option value="album">Álbumes</option>
-              <option value="movie">Películas</option>
-              <option value="tvshow">Series</option>
-              <option value="book">Libros</option>
-              <option value="videogame">Videojuegos</option>
-            </select>
-          </div>
-
-          <input
-            v-model="searchQuery"
-            @input="searchUsers" type="text"
+          <SearchBar
+            :modelValue="searchQuery"
+            :modelSearchType="searchType"
             :placeholder="getSearchPlaceholder()"
-            class="flex-grow p-3 w-full rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            :loading="isSearching"
+            @update:modelValue="(v) => (searchQuery = v)"
+            @update:modelSearchType="(v) => (searchType = v)"
+            @search="searchUsers"
+            @focus-input="() => {}"
           />
-          <button
-            @click="searchUsers" :disabled="isSearching"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{ isSearching ? 'Buscando...' : 'Buscar' }}
-          </button>
         </div>
 
         <p v-if="searchMessage" :class="{'text-red-400': searchError, 'text-green-400': !searchError}" class="mt-4 text-sm">
@@ -96,6 +76,8 @@
               v-if="item.coverUrl"
               :src="item.coverUrl"
               :alt="item.title"
+              loading="lazy"
+              referrerpolicy="no-referrer"
               class="w-16 h-16 object-cover rounded-lg flex-shrink-0 mr-4 shadow-sm border border-gray-500"
             />
             <div
@@ -129,6 +111,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
+import SearchBar from "~/components/ui/SearchBar.vue";
 import type { UserProfile } from "~/types/User";
 import { useSuggestions } from "~/composables/useSuggestions";
 
@@ -218,7 +201,6 @@ const internalSearchUsers = async () => {
         searchMessage.value = "No se encontraron usuarios con ese nombre.";
       }
     } else {
-      // Delegate non-user search to unified suggestions API
       await fetchSuggestions(q);
       if (!(searchResults as any).value?.length) {
         searchMessage.value = "No se encontraron resultados.";
@@ -233,7 +215,15 @@ const internalSearchUsers = async () => {
   }
 };
 
+const searchUsers = () => internalSearchUsers();
+
+// Debounce via watcher
+let debounceHandle: ReturnType<typeof setTimeout> | null = null;
 watch(searchQuery, (val) => {
+  if (debounceHandle) {
+    clearTimeout(debounceHandle);
+    debounceHandle = null;
+  }
   if (!val.trim()) {
     users.value = [];
     (searchResults as any).value = [];
@@ -241,10 +231,9 @@ watch(searchQuery, (val) => {
     searchError.value = false;
     isSearching.value = false;
     searchPerformed.value = false;
-  } else {
-    const handle = setTimeout(() => internalSearchUsers(), 300);
-    return () => clearTimeout(handle);
+    return;
   }
+  debounceHandle = setTimeout(() => internalSearchUsers(), 300);
 });
 
 watch(searchType, () => {
@@ -259,10 +248,8 @@ watch(searchType, () => {
   }
 });
 
-const searchUsers = () => internalSearchUsers();
-
 function getItemRedirectUrl(item: any) {
-  if (item.externalUrl) return item.externalUrl;
+  if ((item as any).externalUrl) return (item as any).externalUrl;
   if (!item.externalId) return `/studio/search?q=${encodeURIComponent(item.title)}&type=${item.type}`;
   switch (item.type) {
     case "song": return `/studio/item/${item.externalId}?type=song`;
