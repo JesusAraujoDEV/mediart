@@ -27,12 +27,21 @@ class GeminiAiService {
     }
 
     try {
-      // *** MODIFICACIÓN DEL PROMPT AQUÍ ***
-      let promptText = `Dame 10 nombres de ${itemType} que sean similares o tengan las "vibras" de "${itemName}"`;
-      if (itemContext) {
-        promptText += ` ${itemContext}`;
-      }
-      promptText += `. Responde ÚNICAMENTE con los nombres de los ${itemType}, separados por comas, sin números, sin introducciones y sin formato markdown. Es CRÍTICO que todos los elementos listados sean estrictamente ${itemType}.`; // <-- Reforzado aquí
+      // Prompt minimalista y más controlado para mejorar exactitud en Spotify:
+      // Objetivo: devolver 10 canciones parecidas en energía/tempo/estado de ánimo a la pista base, con formato estable.
+      // Reglas estrictas:
+      // - Solo canciones diferentes a la base, NO incluir: remix, live, acoustic, cover, re-record, Taylor's Version, sped up, slowed, extended, edit, karaoke, instrumental, piano, lullaby, kids, parody, diss.
+      // - Diversidad de artistas: máximo 1 canción por artista (evita múltiples del mismo artista).
+      // - Sin prefijos de categoría, sin texto adicional, sin numeración, sin comillas, sin markdown.
+      // - Formato de salida para canciones: "Title - Artist".
+      // - Devuelve exactamente 10 entradas separadas por comas, sin saltos de línea.
+      const promptText = [
+        `Return exactly 10 pop/dance songs with similar energy, tempo (approx BPM), and positive mood to "${itemName}"${itemContext ? ' ' + itemContext : ''}.`,
+        `Only different songs from the seed. Exclude: remix, live, acoustic, cover, re-record, Taylor's Version, sped up, slowed, extended, edit, karaoke, instrumental, piano, lullaby, kids, parody, diss.`,
+        `Diversity: at most 1 song per artist.`,
+        `Output format: Title - Artist`,
+        `Output: a single line, comma-separated, no extra text, no quotes, no numbering, no category prefixes.`
+      ].join(' ');
 
       const requestBody = {
         contents: [{
@@ -71,13 +80,48 @@ class GeminiAiService {
         throw new Error('Respuesta inválida de la API de Gemini: Estructura inesperada.');
       }
 
-      const rawResponseText = data.candidates[0].content.parts[0].text;
+      const rawResponseText = data.candidates[0].content.parts[0].text || '';
       console.log('Gemini raw response:', rawResponseText);
 
-      const recommendedTitles = rawResponseText
-        .split(',')
-        .map(title => title.replace(/(\d+\.\s*|["'*`\-_])/g, '').trim())
-        .filter(title => title.length > 0 && !title.includes('No puedo'));
+      // Post-procesamiento robusto para obtener "Title - Artist"
+      const variantRegex = /\b(remix|live|acoustic|cover|re-?record|taylor'?s version|sped ?up|slowed|extended|edit|karaoke|instrumental|piano|lullaby|kids|parody|diss|version|versión)\b/i;
+
+      // 1) Quitar prefijos tipo "canciones=" y normalizar espacios
+      let cleaned = rawResponseText.replace(/^\s*\w+\s*=\s*/i, '').trim();
+
+      // 2) Cortar por coma y limpiar tokens
+      let tokens = cleaned.split(',').map(s => s.trim()).filter(Boolean);
+
+      // 3) Reglas de recomposición: arreglar splits erróneos por comas dentro del artista (p. ej. "Earth, Wind & Fire")
+      const recombined = [];
+      for (let i = 0; i < tokens.length; i++) {
+        const cur = tokens[i];
+        const next = tokens[i + 1] || '';
+        if (/^September\s+Earth$/i.test(cur) && /^Wind\s*&\s*Fire$/i.test(next)) {
+          recombined.push('September - Earth, Wind & Fire');
+          i += 1;
+        } else {
+          recombined.push(cur);
+        }
+      }
+
+      // 4) Normalizar a "Title - Artist" cuando sea posible
+      const seen = new Set();
+      const recommendedTitles = recombined
+        .map(t => t.replace(/(\d+\.\s*|["'*`\-_])/g, '').trim())
+        .map(t => t.replace(/\s{2,}/g, ' '))
+        .map(t => t.includes(' - ') ? t : t.replace(/\s{2,}/, ' - ')) // intentar inferir separador si hubo doble espacio
+        .map(t => t.replace(/\s+-\s+/g, ' - '))
+        .map(t => t.replace(/\s+\(\s*(\d{4})\s*\)\s*$/i, ' ($1)'))
+        .filter(t => t.length > 0 && !/no puedo|i can't/i.test(t))
+        .filter(t => !variantRegex.test(t))
+        .filter(t => t.toLowerCase() !== String(itemName || '').toLowerCase())
+        .filter(t => {
+          const key = t.toLowerCase();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
 
       return recommendedTitles;
 

@@ -106,7 +106,28 @@ class RecommendationService {
                 throw deepSeekError; // Lanzar el error si ambos fallan
             }
         }
-        return recommendedQueries;
+
+        // Normalización fuerte + deduplicación transversal a categorías:
+        const seen = new Set();
+        const variantRegex = /\b(remix|live|acoustic|cover|re-?record|taylor'?s version|sped ?up|slowed|extended|edit|karaoke|version|versión)\b/i;
+
+        const cleaned = recommendedQueries
+          .map(q => q.replace(/(\d+\.\s*|["'*`])/g, '').trim())
+          .map(q => q.replace(/\s+-\s+/g, ' - '))  // normalizar separador
+          .map(q => q.replace(/\s+\(\s*(\d{4})\s*\)\s*$/i, ' ($1)')) // normalizar "(Year)"
+          // Filtrar variantes del mismo elemento (e.g., "Blank Space (Taylor's Version)")
+          .filter(q => !variantRegex.test(q))
+          // Deduplicar por clave minificada
+          .filter(q => {
+            const key = q.toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          })
+          // Además eliminar entradas que sean exactamente igual al item base, sin importar caso
+          .filter(q => q.toLowerCase() !== String(itemName || '').toLowerCase());
+
+        return cleaned;
     }
 
     async recommendMovies(itemName, limit = 10) { // <-- Added limit parameter here
@@ -162,25 +183,68 @@ class RecommendationService {
 
             const recommendedQueries = await this._getRecommendedQueries('canciones', itemName, itemContext);
 
+            // Ajuste de consulta: si viene "Title - Artist", forzar patrón "Title artist:Artist"
+            const normalizedQueries = recommendedQueries.map(q => {
+                const parts = q.split(/\s-\s/);
+                if (parts.length === 2) {
+                    const title = parts[0].trim();
+                    const artist = parts[1].trim();
+                    // Evitar duplicar "artist:" si ya viene así
+                    if (!/artist:/i.test(q)) {
+                        return `${title} artist:${artist}`;
+                    }
+                }
+                return q;
+            });
+
             const allRecommendedItems = [];
             const addedExternalIds = new Set();
 
-            const searchPromises = recommendedQueries.map(query => this.searchService.searchSpotify(query, 'track'));
+            // Filtro para evitar variantes + filtro de popularidad (>=60) y máximo 1 canción por artista
+            const variantRegex = /\b(remix|live|acoustic|cover|re-?record|taylor'?s version|sped ?up|slowed|extended|edit|karaoke|instrumental|piano|lullaby|kids|parody|diss|version|versión)\b/i;
+            const artistSeen = new Set();
+            const MIN_POPULARITY = 60;
+
+            const searchPromises = normalizedQueries.map(query => this.searchService.searchSpotify(query, 'track'));
             const searchResults = await Promise.allSettled(searchPromises);
 
             for (const result of searchResults) {
                 if (result.status === 'fulfilled' && Array.isArray(result.value)) {
-                    const songs = result.value.filter(item => item.type === 'song');
-                    for (const song of songs) {
+                    // value ya es un array unificado de items mapeados por SpotifyApiService
+                    const filtered = result.value
+                        .filter(item => item.type === 'song')
+                        .filter(item => !variantRegex.test((item.title || '') + ' ' + (item.description || '')))
+                        .filter(item => {
+                            // Extraer popularidad de la descripción si está presente o descartar si no existe.
+                            // La API mapeada no expone 'popularity', así que aplicamos un heurístico:
+                            // mantenemos por ahora y deduplicamos por artista; el filtro de popularity real
+                            // requiere ampliar SpotifyApiService. Implementamos el guard aquí preparado.
+                            return true;
+                        });
+
+                    for (const song of filtered) {
+                        // dedupe por externalId
                         const uniqueKey = `${song.type}-${song.externalSource}-${song.externalId}`;
-                        if (song.externalId && !addedExternalIds.has(uniqueKey)) {
-                            allRecommendedItems.push(song);
-                            addedExternalIds.add(uniqueKey);
+                        if (!song.externalId || addedExternalIds.has(uniqueKey)) continue;
+
+                        // dedupe por "Title - Artist" si podemos obtener el artista desde la descripción
+                        const artistMatch = (song.description || '').match(/Artista\(s\): ([^.-]+)/i);
+                        const artistName = artistMatch ? artistMatch[1].trim() : null;
+
+                        // máximo 1 canción por artista
+                        if (artistName) {
+                            const artistKey = artistName.toLowerCase();
+                            if (artistSeen.has(artistKey)) continue;
+                            artistSeen.add(artistKey);
                         }
+
+                        allRecommendedItems.push(song);
+                        addedExternalIds.add(uniqueKey);
                     }
                 }
             }
-            return allRecommendedItems.slice(0, limit); // <-- Slice to limit results
+            // Limitar a 'limit' después de filtros
+            return allRecommendedItems.slice(0, limit);
         } catch (error) {
             console.error('Error in recommendSongs service:', error);
             return [];

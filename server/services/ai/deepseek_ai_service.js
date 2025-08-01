@@ -23,7 +23,29 @@ class DeepSeekAiService {
     }
 
     try {
-      const prompt = `Dame 10 ${itemCategory} que sean similares o tengan las "vibras" de "${itemName}" ${itemContext}. Responde ÚNICAMENTE con los nombres de los ${itemCategory}, separados por comas, sin números, sin introducciones y sin formato markdown. Asegúrate de que TODOS los elementos listados sean estrictamente ${itemCategory}.`;
+      // Prompt reforzado con formatos estrictos e idioma alineado con Gemini:
+      // - Genera SIEMPRE en inglés para películas/libros/series. Música y videojuegos generalmente conservan títulos originales.
+      // - No incluir el mismo título ni variantes mínimas (remix, live, acoustic, cover, re-record, Taylor's Version, sped up, slowed, extended, edit, karaoke).
+      // - Variedad de artistas/obras; similitud por estilo/tempo/energía/mood/temática.
+      // - SALIDA en UNA sola línea separada por comas, sin numeración, sin texto extra, sin comillas, sin markdown.
+      // - Formatos estrictos por categoría:
+      //   canciones:            "Title - Artist"
+      //   álbumes:              "Album Title - Artist"
+      //   artistas:             "Artist"
+      //   peliculas:            "Movie Title (Year)"
+      //   series de televisión: "Series Title (Year)"
+      //   libros:               "Book Title - Author"
+      //   videojuegos:          "Game Title (Year)"
+      // - Todos los elementos deben ser ${itemCategory} válidos y adecuados para búsqueda posterior en sus APIs.
+      const wantEnglish = ['peliculas','series de televisión','libros'].includes(itemCategory);
+      const prompt = `Quiero 10 ${itemCategory} con la misma vibra que "${itemName}"${itemContext ? ' ' + itemContext : ''}. ` +
+        `Prohibido incluir el mismo "${itemName}" ni sus variantes (remix, live, acoustic, cover, re-record, Taylor's Version, sped up, slowed, extended, edit, karaoke). ` +
+        `Evita duplicados y títulos casi idénticos. ` +
+        `${wantEnglish ? 'Responde en inglés. ' : ''}` +
+        `Devuelve la lista en una sola línea separada por comas, sin números ni texto adicional, sin comillas. ` +
+        `Formato estricto por categoría: ` +
+        `canciones="Title - Artist"; álbumes="Album Title - Artist"; artistas="Artist"; ` +
+        `peliculas="Movie Title (Year)"; series de televisión="Series Title (Year)"; libros="Book Title - Author"; videojuegos="Game Title (Year)".`;
       console.log('Sending prompt to DeepSeek API:', prompt);
 
       const completion = await this.openai.chat.completions.create({
@@ -36,10 +58,26 @@ class DeepSeekAiService {
       const rawResponse = completion.choices[0].message.content;
       console.log('DeepSeek AI raw response:', rawResponse);
 
-      const recommendedQueries = rawResponse
+      // Normalización y deduplicación:
+      const seen = new Set();
+      const variantRegex = /\b(remix|live|acoustic|cover|re-?record|taylor'?s version|sped ?up|slowed|extended|edit|karaoke|instrumental|piano|lullaby|kids|parody|diss|version|versión)\b/i;
+
+      // Si vino con prefijo tipo "canciones=...", eliminarlo
+      const cleanedRaw = rawResponse.replace(/^\s*\w+\s*=\s*/i, '');
+
+      const recommendedQueries = cleanedRaw
         .split(',')
-        .map(query => query.trim())
-        .filter(query => query.length > 0);
+        .map(q => q.replace(/(\d+\.\s*|["'*`\-_])/g, '').trim())
+        .map(q => q.replace(/\s+-\s+/g, ' - ')) // normaliza separador
+        .map(q => q.replace(/\s+\(\s*(\d{4})\s*\)\s*$/i, ' ($1)')) // normaliza "(Year)"
+        .filter(q => q.length > 0 && !/no puedo/i.test(q))
+        .filter(q => !variantRegex.test(q))
+        .filter(q => {
+          const key = q.toLowerCase();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
 
       return recommendedQueries;
 
