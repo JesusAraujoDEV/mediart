@@ -8,17 +8,96 @@ class GeminiAiService {
       console.error('Google Gemini API Key not configured.');
       throw new Error('Google Gemini API Key is missing.');
     }
-    // Usamos el modelo que vimos disponible en tu captura
-    this.modelName = 'gemini-2.0-flash'; // <-- ¡CAMBIO AQUÍ!
+    this.modelName = 'gemini-2.0-flash';
     this.apiUrl = `https://generativelanguage.googleapis.com/v1/models/${this.modelName}:generateContent?key=${this.apiKey}`;
   }
 
   /**
-   * Genera una lista de nombres de ítems (películas, canciones, etc.) usando el LLM de Gemini.
-   * @param {string} itemType El tipo de ítem (e.g., 'peliculas', 'canciones').
-   * @param {string} itemName El nombre del ítem base (e.g., "Misión Imposible", "Daylight").
-   * @param {string} [itemContext=''] Contexto adicional del ítem base (ej. "Taylor Swift" para canciones).
-   * @returns {Promise<string[]>} Un array de strings con los nombres/títulos recomendados.
+   * Build a domain-specific strict JSON prompt for Gemini to reduce song-only bias.
+   * We only update prompt construction here; downstream routing remains unchanged.
+   */
+  _buildDomainPrompt(itemCategory, itemName, itemContext = '') {
+    // Map our Spanish categories to a domain and format rules
+    const category = String(itemCategory || '').toLowerCase();
+    const ctx = itemContext ? ` ${itemContext}` : '';
+
+    if (category === 'canciones') {
+      return [
+        `You are a music recommender. Return exactly 10 pop/dance songs similar in energy, approximate BPM, and positive mood to "${itemName}"${ctx}.`,
+        `Hard rules: Exclude remix, live, acoustic, cover, re-record, Taylor's Version, sped up, slowed, extended, edit, karaoke, instrumental, piano, lullaby, kids, parody, diss.`,
+        `Diversity: at most 1 song per artist.`,
+        `Output format per entry: Title - Artist.`,
+        `Output: single line, comma-separated, no extra text, no quotes, no numbering, no category prefixes.`
+      ].join(' ');
+    }
+
+    if (category === 'álbumes' || category === 'albums') {
+      return [
+        `You are a music recommender. Return exactly 10 albums related in mood, style, or artistic voice to "${itemName}"${ctx}.`,
+        `Hard rules: Exclude deluxe/remaster/live/re-record/extended editions and compilations unless they are canonical.`,
+        `Diversity: at most 1 album per primary artist.`,
+        `Output format per entry: Album Title - Artist.`,
+        `Output: single line, comma-separated, no extra text, no quotes, no numbering.`
+      ].join(' ');
+    }
+
+    if (category === 'artistas' || category === 'artists') {
+      return [
+        `You are a music recommender. Return exactly 10 artists similar in style, audience, and mood to "${itemName}"${ctx}.`,
+        `Hard rules: Avoid near-duplicates and tribute/cover-only acts.`,
+        `Output format per entry: Artist.`,
+        `Output: single line, comma-separated, no extra text, no quotes, no numbering.`
+      ].join(' ');
+    }
+
+    if (category === 'peliculas' || category === 'películas' || category === 'movies') {
+      return [
+        `You are a movie recommender. Return exactly 10 movies similar to "${itemName}"${ctx} by theme, tone, character arcs, cultural context, and emotional resonance.`,
+        `Hard rules: Recommend full feature films, avoid episodes/trailers. Prefer original titles; include year when known as "(Year)".`,
+        `Diversity: at most 1 per franchise.`,
+        `Output format per entry: Movie Title (Year).`,
+        `Output: single line, comma-separated, no extra text, no quotes, no numbering.`
+      ].join(' ');
+    }
+
+    if (category === 'series de televisión' || category === 'series' || category === 'tv') {
+      return [
+        `You are a TV recommender. Return exactly 10 TV series similar to "${itemName}"${ctx} by tone, themes, character growth, and audience.`,
+        `Hard rules: Recommend full series, not episodes. Prefer original titles; include start year when known as "(Year)".`,
+        `Diversity: at most 1 per franchise.`,
+        `Output format per entry: Series Title (Year).`,
+        `Output: single line, comma-separated, no extra text, no quotes, no numbering.`
+      ].join(' ');
+    }
+
+    if (category === 'libros' || category === 'books') {
+      return [
+        `You are a book recommender. Return exactly 10 books related to "${itemName}"${ctx} by coming-of-age motifs, family dynamics, identity, place versus ambition, or bittersweet tone (adapt to the seed).`,
+        `Hard rules: Avoid study guides/summaries/compilations. Prefer original works or acclaimed translations.`,
+        `Output format per entry: Book Title - Author.`,
+        `Output: single line, comma-separated, no extra text, no quotes, no numbering.`
+      ].join(' ');
+    }
+
+   if (category === 'videojuegos' || category === 'videojuego' || category === 'videogames' || category === 'videogame') {
+     return [
+       `You are a game recommender. Return exactly 10 video games analogous to "${itemName}"${ctx} in vibe, narrative arcs, indie/dramedy feel, or slice-of-life/coming-of-age parallels when applicable.`,
+       `Hard rules: Avoid DLC-only/expansions-only. Prefer base games. Do NOT include years in the output.`,
+       `Output format per entry: Game Title.`,
+       `Output: single line, comma-separated, no extra text, no quotes, no numbering.`
+     ].join(' ');
+   }
+
+    // Fallback: generic simple list to avoid failure
+    return [
+      `Return exactly 10 items related to "${itemName}"${ctx}.`,
+      `Output: single line, comma-separated, no extra text, no quotes, no numbering.`
+    ].join(' ');
+  }
+
+  /**
+   * Generates a list of recommended queries (strings) for a given category.
+   * Keeps existing return type (string[]). Only prompt changed to reduce bias.
    */
   async generateRecommendations(itemType, itemName, itemContext = '') {
     if (!this.apiKey) {
@@ -27,33 +106,17 @@ class GeminiAiService {
     }
 
     try {
-      // Prompt minimalista y más controlado para mejorar exactitud en Spotify:
-      // Objetivo: devolver 10 canciones parecidas en energía/tempo/estado de ánimo a la pista base, con formato estable.
-      // Reglas estrictas:
-      // - Solo canciones diferentes a la base, NO incluir: remix, live, acoustic, cover, re-record, Taylor's Version, sped up, slowed, extended, edit, karaoke, instrumental, piano, lullaby, kids, parody, diss.
-      // - Diversidad de artistas: máximo 1 canción por artista (evita múltiples del mismo artista).
-      // - Sin prefijos de categoría, sin texto adicional, sin numeración, sin comillas, sin markdown.
-      // - Formato de salida para canciones: "Title - Artist".
-      // - Devuelve exactamente 10 entradas separadas por comas, sin saltos de línea.
-      const promptText = [
-        `Return exactly 10 pop/dance songs with similar energy, tempo (approx BPM), and positive mood to "${itemName}"${itemContext ? ' ' + itemContext : ''}.`,
-        `Only different songs from the seed. Exclude: remix, live, acoustic, cover, re-record, Taylor's Version, sped up, slowed, extended, edit, karaoke, instrumental, piano, lullaby, kids, parody, diss.`,
-        `Diversity: at most 1 song per artist.`,
-        `Output format: Title - Artist`,
-        `Output: a single line, comma-separated, no extra text, no quotes, no numbering, no category prefixes.`
-      ].join(' ');
+      const promptText = this._buildDomainPrompt(itemType, itemName, itemContext);
 
       const requestBody = {
         contents: [{
-          parts: [{
-            text: promptText
-          }]
+          parts: [{ text: promptText }]
         }],
         generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 200,
-            topP: 1,
-            topK: 1,
+          temperature: 0.3,
+          maxOutputTokens: 220,
+          topP: 0.9,
+          topK: 40
         }
       };
 
@@ -61,61 +124,38 @@ class GeminiAiService {
 
       const response = await fetch(this.apiUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         console.error('Gemini API Error Response:', errorData);
         throw new Error(errorData.error?.message || `Error en la API de Gemini: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
-
-      if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+      const rawResponseText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (!rawResponseText) {
         console.error('Invalid response from Gemini API:', JSON.stringify(data, null, 2));
         throw new Error('Respuesta inválida de la API de Gemini: Estructura inesperada.');
       }
 
-      const rawResponseText = data.candidates[0].content.parts[0].text || '';
       console.log('Gemini raw response:', rawResponseText);
 
-      // Post-procesamiento robusto para obtener "Title - Artist"
+      // Normalize single-line comma-separated output into array of strings
       const variantRegex = /\b(remix|live|acoustic|cover|re-?record|taylor'?s version|sped ?up|slowed|extended|edit|karaoke|instrumental|piano|lullaby|kids|parody|diss|version|versión)\b/i;
+      const cleanedLine = rawResponseText.replace(/\r?\n/g, ' ').replace(/\s{2,}/g, ' ').trim();
+      const tokens = cleanedLine.split(',').map(s => s.trim()).filter(Boolean);
 
-      // 1) Quitar prefijos tipo "canciones=" y normalizar espacios
-      let cleaned = rawResponseText.replace(/^\s*\w+\s*=\s*/i, '').trim();
-
-      // 2) Cortar por coma y limpiar tokens
-      let tokens = cleaned.split(',').map(s => s.trim()).filter(Boolean);
-
-      // 3) Reglas de recomposición: arreglar splits erróneos por comas dentro del artista (p. ej. "Earth, Wind & Fire")
-      const recombined = [];
-      for (let i = 0; i < tokens.length; i++) {
-        const cur = tokens[i];
-        const next = tokens[i + 1] || '';
-        if (/^September\s+Earth$/i.test(cur) && /^Wind\s*&\s*Fire$/i.test(next)) {
-          recombined.push('September - Earth, Wind & Fire');
-          i += 1;
-        } else {
-          recombined.push(cur);
-        }
-      }
-
-      // 4) Normalizar a "Title - Artist" cuando sea posible
       const seen = new Set();
-      const recommendedTitles = recombined
-        .map(t => t.replace(/(\d+\.\s*|["'*`\-_])/g, '').trim())
-        .map(t => t.replace(/\s{2,}/g, ' '))
-        .map(t => t.includes(' - ') ? t : t.replace(/\s{2,}/, ' - ')) // intentar inferir separador si hubo doble espacio
+      const results = tokens
+        .map(t => t.replace(/(\d+\.\s*|["'*`_])/g, '').trim())
         .map(t => t.replace(/\s+-\s+/g, ' - '))
         .map(t => t.replace(/\s+\(\s*(\d{4})\s*\)\s*$/i, ' ($1)'))
-        .filter(t => t.length > 0 && !/no puedo|i can't/i.test(t))
-        .filter(t => !variantRegex.test(t))
+        .filter(t => t.length > 0)
         .filter(t => t.toLowerCase() !== String(itemName || '').toLowerCase())
+        .filter(t => !variantRegex.test(t))
         .filter(t => {
           const key = t.toLowerCase();
           if (seen.has(key)) return false;
@@ -123,14 +163,13 @@ class GeminiAiService {
           return true;
         });
 
-      return recommendedTitles;
-
+      return results;
     } catch (error) {
       console.error('Error generating recommendations with Gemini AI:', error.message);
-      if (error.message.includes('429 Too Many Requests')) {
+      if (String(error.message || '').includes('429')) {
         console.warn('Gemini API quota exceeded. Please wait or check your plan.');
       }
-      throw error; // Es importante relanzar el error para que el fallback funcione
+      throw error;
     }
   }
 }
