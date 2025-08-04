@@ -6,7 +6,7 @@
       class="w-screen h-fit md:h-dvh flex gap-4 justify-center items-center p-10 max-md:my-20 max-md:p-5 max-md:flex-col"
     >
       <NavigationStudio />
-      <Profile />
+      <ProfileComponents />
       <Library />
     </main>
   </NuxtLayout>
@@ -21,6 +21,6 @@ definePageMeta({
 });
 
 import Library from "~/components/sections/Library.vue";
-import Profile from "~/components/sections/Profile.vue";
+import ProfileComponents from "~/components/profile/ProfileComponents.vue";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 </script>
