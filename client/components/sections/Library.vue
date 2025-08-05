@@ -20,7 +20,7 @@
         <button
           v-if="searchQuery"
           @click="clearSearch"
-          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors cursor-pointer"
           aria-label="Limpiar búsqueda"
         >
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,7 +46,7 @@
       <p class="text-xl mb-4">{{ errorPlaylists }}</p>
       <button 
         @click="fetchSavedPlaylists" 
-        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="mt-4 glassEffect text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer"
       >
         Reintentar
       </button>
@@ -99,9 +99,9 @@
                 @click.stop="toggleSavePlaylist(playlist)"
                 :disabled="isSavingPlaylist.has(playlist.id.toString())"
                 :class="[
-                  'px-4 py-2 rounded-full shadow-md transition-all duration-200 text-lg flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-75 disabled:cursor-not-allowed',
-                  isSavingPlaylist.has(playlist.id.toString()) ? 'bg-gray-600 text-white' :
-                  'bg-red-600 hover:bg-red-700 text-white'
+                  'px-4 py-2 rounded-lg shadow-md transition-all duration-200 text-lg flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-75 disabled:cursor-not-allowed cursor-pointer',
+                  isSavingPlaylist.has(playlist.id.toString()) ? 'glassEffect text-white' :
+                  'glassEffect text-white hover:bg-white/20 border border-white/20 hover:border-white/40'
                 ]"
                 :title="isSavingPlaylist.has(playlist.id.toString()) ? 'Procesando...' : 'Quitar de mi biblioteca'"
               >
@@ -120,7 +120,7 @@
               <button
                 @click.stop="viewPlaylistDetails(playlist)"
                 :disabled="loadingPlaylistDetails.has(playlist.id.toString())"
-                class="bg-purple-600 cursor-pointer hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-all duration-200 text-lg flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-75 disabled:cursor-not-allowed"
+                class="glassEffect text-white font-bold py-2 px-6 rounded-lg shadow-md transition-all duration-200 text-lg flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-75 disabled:cursor-not-allowed border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer"
               >
                 <template v-if="loadingPlaylistDetails.has(playlist.id.toString())">
                   <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -142,7 +142,7 @@
       <div v-if="hasMorePlaylists" class="flex justify-center mt-6">
         <button
           @click="loadMorePlaylists"
-          class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+          class="glassEffect text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer"
         >
           Cargar más
         </button>
@@ -154,7 +154,7 @@
       <p class="mb-4">No se encontraron playlists que coincidan con "{{ searchQuery }}"</p>
       <button 
         @click="clearSearch" 
-        class="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+        class="mt-4 glassEffect text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-all duration-300 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer"
       >
         Limpiar búsqueda
       </button>
