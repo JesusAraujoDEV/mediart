@@ -109,15 +109,16 @@
         </select>
         <button
           @click="sendData"
-          class="ml-3 p-2 rounded-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg flex items-center justify-center text-white"
+          class="ml-3 p-2 rounded-full cursor-pointer glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm"
           aria-label="Generar recomendaciones"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
-            width="24"
-            height="24"
+            width="28"
+            height="28"
             fill="currentColor"
+            class="drop-shadow-sm"
           >
             <path d="M3 20v-6l8-2l-8-2V4l19 8z" />
           </svg>
