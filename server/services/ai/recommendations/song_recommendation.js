@@ -1,57 +1,62 @@
+// services/ai/recommendations/artist_recommendation.js
 'use strict';
 
 const BaseRecommendation = require('./base_recommendation');
 
-class SongRecommendation extends BaseRecommendation {
+class ArtistRecommendation extends BaseRecommendation {
   constructor(searchService) {
     super(searchService);
-    // Variants we want to avoid for tracks
-    this.variantRegex = /\b(remix|live|acoustic|cover|re-?record|taylor'?s version|sped ?up|slowed|extended|edit|karaoke|instrumental|piano|lullaby|kids|parody|diss|version|versión)\b/i;
-  }
-
-  // Normalize "Title - Artist" => "Title artist:Artist" if not already using artist:
-  normalizeQueryForSpotifyTracks(q) {
-    const parts = q.split(/\s-\s/);
-    if (parts.length === 2) {
-      const title = parts[0].trim();
-      const artist = parts[1].trim();
-      if (!/artist:/i.test(q)) return `${title} artist:${artist}`;
-    }
-    return q;
   }
 
   async searchOneQuery(query) {
-    const normalized = this.normalizeQueryForSpotifyTracks(query);
-    const res = await this.searchService.searchSpotify(normalized, 'track');
-    // SpotifyApiService already unifies; filter here for extra rules
-    const filtered = (res || [])
-      .filter(item => item.type === 'song')
-      .filter(item => !this.variantRegex.test((item.title || '') + ' ' + (item.description || '')));
-    return filtered;
+    const res = await this.searchService.searchSpotify(query, 'artist');
+    
+    // Si no hay resultados, sal de la función.
+    if (!res || res.length === 0) {
+      return [];
+    }
+
+    const filtered = res.filter(item => {
+      // Normaliza los nombres a minúsculas y elimina espacios extra para una comparación más robusta.
+      const normalizedItemTitle = (item.title || '').toLowerCase().trim();
+      const normalizedQuery = query.toLowerCase().trim();
+
+      // Implementa un filtro estricto.
+      // Revisa si el título del resultado es una coincidencia exacta o casi exacta.
+      // Usa una lista de palabras clave a evitar para ser aún más preciso.
+      const forbiddenWords = ['tribute', 'karaoke', 'band', 'version', 'tributo', 'acústico'];
+      const hasForbiddenWord = forbiddenWords.some(word => normalizedItemTitle.includes(word));
+
+      // Compara el nombre del artista del resultado con la query original.
+      // Usa un método de coincidencia más flexible, como `startsWith`, para manejar nombres parciales.
+      const isExactMatch = normalizedItemTitle === normalizedQuery;
+      const isCloseMatch = normalizedItemTitle.startsWith(normalizedQuery) || normalizedQuery.startsWith(normalizedItemTitle);
+
+      // Si es un "close match" y no tiene palabras prohibidas, acéptalo.
+      if ((isExactMatch || isCloseMatch) && !hasForbiddenWord) {
+        return true;
+      }
+
+      // Si no pasa los filtros anteriores, no lo incluyas.
+      return false;
+    });
+
+    // Devuelve solo el mejor resultado si hay varios (el más relevante).
+    return filtered.slice(0, 1);
   }
 
   async recommend(itemName, queries, limit = 10) {
-    // run searches
+    // Run searches for each AI query
     const candidates = await this.searchMany(queries);
+
+    // Filter out duplicates and ensure variety
     const addedExternalIds = new Set();
-    const artistSeen = new Set();
-
     const out = [];
-    for (const song of candidates) {
-      const uniqueKey = `${song.type}-${song.externalSource}-${song.externalId}`;
-      if (!song.externalId || addedExternalIds.has(uniqueKey)) continue;
+    for (const artist of candidates) {
+      const uniqueKey = `${artist.type}-${artist.externalSource}-${artist.externalId}`;
+      if (!artist.externalId || addedExternalIds.has(uniqueKey)) continue;
 
-      // Try extract artist from description "Artista(s): X"
-      const artistMatch = (song.description || '').match(/Artista\(s\): ([^.-]+)/i);
-      const artistName = artistMatch ? artistMatch[1].trim() : null;
-
-      if (artistName) {
-        const artistKey = artistName.toLowerCase();
-        if (artistSeen.has(artistKey)) continue;
-        artistSeen.add(artistKey);
-      }
-
-      out.push(song);
+      out.push(artist);
       addedExternalIds.add(uniqueKey);
       if (out.length >= limit) break;
     }
@@ -60,4 +65,4 @@ class SongRecommendation extends BaseRecommendation {
   }
 }
 
-module.exports = SongRecommendation;
+module.exports = ArtistRecommendation;
