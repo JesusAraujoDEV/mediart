@@ -1,4 +1,5 @@
 <template>
+  <title>Mediart - Restablecer Contraseña</title>
   <NuxtLayout>
     <main class="w-screen h-dvh flex justify-center items-center">
       <div
@@ -7,7 +8,7 @@
 
         <template v-if="!token">
           <p class="text-center text-red-500 mb-4">
-            Token de restablecimiento no encontrado en la URL. Por favor, usa el enlace completo de tu correo.
+            El enlace de restablecimiento es inválido o ha caducado.
           </p>
           <NuxtLink to="/forgot" class="hover:underline text-center m-3 text-sm">
             <p>Solicitar un nuevo enlace</p>
@@ -62,101 +63,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { usePasswordReset } from '~/composables/usePasswordReset';
 
-// Page-specific configurations for Nuxt.
 definePageMeta({
-  layout: "default",
-  title: "Mediart - Restablecer Contraseña",
+  layout: 'default',
+  title: 'Mediart - Restablecer Contraseña',
 });
 
-const config = useRuntimeConfig();
-const route = useRoute(); // Access route parameters
-const router = useRouter(); // For redirection
-
-// State variables
-const tokenWeb = localStorage.getItem('token');
-const token = ref<string | null>(null);
-const newPassword = ref('');
-const confirmPassword = ref('');
-const loading = ref(false);
-const error = ref<string | null>(null);
-const message = ref<string | null>(null);
-
-// On component mount, extract the token from the URL
-onMounted(() => {
-  token.value = route.query.token as string | null;
-  if (!token.value) {
-    error.value = 'El enlace de restablecimiento de contraseña es inválido o ha caducado.';
-  }
-});
-
-// --- Function to reset password ---
-const resetPassword = async () => {
-  loading.value = true;
-  error.value = null;
-  message.value = null;
-
-  if (!token.value) {
-    error.value = 'No se encontró el token de restablecimiento. Por favor, solicita un nuevo enlace.';
-    loading.value = false;
-    return;
-  }
-
-  if (!newPassword.value || !confirmPassword.value) {
-    error.value = 'Por favor, ingresa y confirma tu nueva contraseña.';
-    loading.value = false;
-    return;
-  }
-
-  if (newPassword.value !== confirmPassword.value) {
-    error.value = 'Las contraseñas no coinciden.';
-    loading.value = false;
-    return;
-  }
-
-  // Basic password strength check (optional, but recommended)
-  if (newPassword.value.length < 8) { // Increased minimum length for better security
-    error.value = 'La contraseña debe tener al menos 8 caracteres.';
-    loading.value = false;
-    return;
-  }
-
-  try {
-    const changePasswordUrl = `${config.public.backend}/api/auth/change-password`;
-
-    const response = await fetch(changePasswordUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${tokenWeb}`, // Include token in the header
-      },
-      body: JSON.stringify({
-        token: token.value,
-        newPassword: newPassword.value,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Error al restablecer la contraseña. El enlace podría ser inválido o haber caducado.');
-    }
-
-    message.value = '¡Contraseña restablecida exitosamente! Serás redirigido al inicio de sesión.';
-    newPassword.value = ''; // Clear fields
-    confirmPassword.value = '';
-
-    // Redirect to login page after successful password reset
-    setTimeout(() => {
-      router.push('/login');
-    }, 3000); // Redirect after 3 seconds
-
-  } catch (err: any) {
-    error.value = err.message || 'Ocurrió un error inesperado al restablecer la contraseña. Intenta de nuevo.';
-    console.error('Reset password error:', err);
-  } finally {
-    loading.value = false;
-  }
-};
+// Extraemos la lógica del composable
+const { token, newPassword, confirmPassword, loading, error, message, resetPassword } = usePasswordReset();
 </script>

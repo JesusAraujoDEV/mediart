@@ -1,13 +1,13 @@
 <template>
   <title>Mediart - Registro</title>
   <NuxtLayout>
-    <NuxtPage />
     <main class="w-screen h-dvh flex justify-center items-center">
       <div
         class="md:w-1/3 max-md:w-full h-fit gap-6 flex flex-col relative items-center justify-center glassEffect p-8 py-16 rounded-lg">
         <h2 class="text-3xl text-center">Registro de Nueva Cuenta</h2>
         <form class="flex flex-col w-2/3 h-3/4 max-md:w-5/6 justify-center items-center" id="registerForm"
           @submit.prevent="handleRegister">
+
           <label class="w-full mb-0" for="Email">Correo Electrónico</label>
           <div class="flex flex-row w-full relative h-12 mb-6">
             <Icon name="material-symbols:mail-outline" size="1.2rem"
@@ -57,77 +57,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import Swal from "sweetalert2";
+import { useAuthRegister } from '~/composables/useAuthRegister';
 
 definePageMeta({
-  layout: "default",
+  layout: 'default',
 });
 
-const config = useRuntimeConfig();
-const router = useRouter();
-
-const email = ref("");
-const username = ref(""); // New ref for username
-const password = ref("");
-const loading = ref(false);
-const error = ref<string | null>(null);
-
-const handleRegister = async () => {
-  loading.value = true;
-  error.value = null; // Clear previous errors
-
-  try {
-    // Assuming your backend register endpoint is /api/auth/register
-    const registerUrl = `${config.public.backend}/api/users`;
-
-    const response = await fetch(registerUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        // Data sent in the request body
-        email: email.value,
-        username: username.value, // Include username in the body
-        passwordHash: password.value,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      // Use a more specific error message if available from the backend
-      throw new Error(errorData.message || "Error al registrar la cuenta.");
-    }
-
-    const data = await response.json();
-
-    // Optionally, if your register endpoint returns user and token, store them.
-    // However, it's common for register to just confirm success,
-    // and then the user would manually login, or be automatically logged in.
-    // For this example, I'll keep the storage logic, assuming your backend sends them.
-    if (data.user && data.token) {
-      localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("token", data.token);
-    } else {
-      router.push("/login");
-    }
-  } catch (err: any) {
-    error.value =
-      err.message ||
-      "Ocurrió un error inesperado durante el registro. Intenta de nuevo.";
-    Swal.fire({
-      title: "Error!",
-      heightAuto: false,
-      text: "Do you want to continue",
-      icon: "error",
-      toast: true,
-      position: "top-end",
-      timerProgressBar: true,
-    });
-  } finally {
-    loading.value = false;
-  }
-};
+// Extraemos la lógica de registro desde el composable
+const { email, username, password, loading, error, handleRegister } = useAuthRegister();
 </script>

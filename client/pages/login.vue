@@ -95,8 +95,6 @@ const handleLogin = async () => {
     const data = await response.json();
 
     if (data.user && data.token) {
-      // Use Nuxt's built-in state management or a more robust solution for auth (e.g., nuxt-auth)
-      // For now, localStorage is kept as per original code.
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem('token', data.token);
 
