@@ -48,7 +48,7 @@
         v-if="!isFriend"
         @click="addFriend"
         :disabled="isFriendActionLoading"
-        class="bg-blue-500 text-white px-4 cursor-pointer py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        class="glassEffect text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 hover:border-white/40"
       >
         {{ isFriendActionLoading ? 'Agregando...' : 'Agregar amigo' }}
       </button>
@@ -56,15 +56,19 @@
         v-else
         @click="removeFriend"
         :disabled="isFriendActionLoading"
-        class="bg-red-500 text-white px-4 cursor-pointer py-2 rounded hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        class="glassEffect text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 hover:border-white/40"
       >
         {{ isFriendActionLoading ? 'Eliminando...' : 'Eliminar de amigos' }}
       </button>
     </div>
 
-    <NuxtLink v-else to="/profile/edit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
-      >Editar Perfil</NuxtLink
+    <NuxtLink 
+      v-else 
+      to="/profile/edit" 
+      class="glassEffect text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-105 transform"
     >
+      Editar Perfil
+    </NuxtLink>
 
     <div v-if="createdPlaylists.length > 0" class="w-full mt-8">
       <h2 class="text-xl font-bold mb-2 text-center">Playlists creadas</h2>
@@ -79,7 +83,7 @@
               v-if="!isOwner && !savedPlaylistsIds.includes(playlist.id)"
               :disabled="isSavingPlaylist[playlist.id]"
               @click="savePlaylist(playlist.id)"
-              class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              class="glassEffect text-white px-4 py-2 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 hover:border-white/40 hover:scale-105 transform"
             >
               <span v-if="!isSavingPlaylist[playlist.id]">Guardar en mi biblioteca</span>
               <span v-else>Guardando...</span>
