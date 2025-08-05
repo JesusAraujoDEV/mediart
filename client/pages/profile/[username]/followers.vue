@@ -82,7 +82,7 @@
               class="bg-gray-800/70 rounded-xl p-4 shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:bg-gray-700/80 border border-gray-600 flex items-center"
             >
               <img
-                :src="(follower.profilePictureUrl ? (follower.profilePictureUrl.startsWith('http') ? follower.profilePictureUrl : config.public.backend + follower.profilePictureUrl) : '/resources/studio/previewProfile.webp')"
+                :src="(follower.profilePictureUrl ? (follower.profilePictureUrl.startsWith('http') ? follower.profilePictureUrl : config.public.backend + follower.profilePictureUrl) : '/avatar-default.svg')"
                 :alt="follower.username"
                 @error="handleImageError"
                 class="w-12 h-12 rounded-full object-cover"
@@ -193,7 +193,7 @@ const handleSearchInput = () => {
 
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement;
-  img.src = '/resources/studio/previewProfile.webp';
+  img.src = '/avatar-default.svg';
 };
 
 const clearSearch = () => {

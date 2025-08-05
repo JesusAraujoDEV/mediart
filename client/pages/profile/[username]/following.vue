@@ -82,7 +82,7 @@
               class="bg-gray-800/70 rounded-xl p-4 shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:bg-gray-700/80 border border-gray-600 flex items-center"
             >
               <img
-                :src="(friend.profilePictureUrl ? (friend.profilePictureUrl.startsWith('http') ? friend.profilePictureUrl : config.public.backend + friend.profilePictureUrl) : '/resources/studio/previewProfile.webp')"
+                :src="(friend.profilePictureUrl ? (friend.profilePictureUrl.startsWith('http') ? friend.profilePictureUrl : config.public.backend + friend.profilePictureUrl) : '/avatar-default.svg')"
                 :alt="friend.username"
                 @error="handleImageError"
                 class="w-12 h-12 rounded-full object-cover"
@@ -193,7 +193,7 @@ const handleSearchInput = () => {
 
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement;
-  img.src = '/resources/studio/previewProfile.webp';
+  img.src = '/avatar-default.svg';
 };
 
 const clearSearch = () => {
