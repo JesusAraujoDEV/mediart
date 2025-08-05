@@ -34,10 +34,12 @@ class RecommendationService {
     let queries = [];
     try {
       queries = await this.geminiAiService.generateRecommendations(itemCategory, itemName, itemContext);
+      console.log(`[Gemini] Raw recommendations for ${itemCategory} ("${itemName}") ctx="${itemContext || ''}":`, queries);
     } catch (geminiError) {
       console.warn(`Gemini LLM failed for ${itemCategory}. Falling back to DeepSeek.`, geminiError?.message || geminiError);
       try {
         queries = await this.deepSeekAiService.generateRecommendations(itemCategory, itemName, itemContext);
+        console.log(`[DeepSeek] Fallback recommendations for ${itemCategory} ("${itemName}") ctx="${itemContext || ''}":`, queries);
       } catch (deepSeekError) {
         console.error(`DeepSeek also failed for ${itemCategory}.`, deepSeekError?.message || deepSeekError);
         throw deepSeekError;
@@ -45,8 +47,7 @@ class RecommendationService {
     }
 
     const cleaned = cleanAndDedupeQueries(queries, itemName);
-    const debug = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
-    if (debug) console.log('[LLM] Final normalized queries:', cleaned);
+    console.log(`[LLM] Final normalized queries for ${itemCategory} ("${itemName}") ctx="${itemContext || ''}":`, cleaned);
     return cleaned;
   }
 
@@ -54,6 +55,7 @@ class RecommendationService {
     try {
       const queries = await this._getRecommendedQueries('peliculas', itemName, '');
       const items = await this.movieStrategy.recommend(itemName, queries, limit);
+      console.log('[recommendMovies] Final items:', items.map(i => i.title));
       return items;
     } catch (error) {
       console.error('Error in recommendMovies service:', error);
@@ -65,6 +67,7 @@ class RecommendationService {
     try {
       const queries = await this._getRecommendedQueries('series de televisión', itemName, '');
       const items = await this.tvStrategy.recommend(itemName, queries, limit);
+      console.log('[recommendTvShows] Final items:', items.map(i => i.title));
       return items;
     } catch (error) {
       console.error('Error in recommendTvShows service:', error);
@@ -76,6 +79,7 @@ class RecommendationService {
     try {
       const queries = await this._getRecommendedQueries('libros', itemName, '');
       const items = await this.bookStrategy.recommend(itemName, queries, limit);
+      console.log('[recommendBooks] Final items:', items.map(i => i.title));
       return items;
     } catch (error) {
       console.error('Error in recommendBooks service:', error);
@@ -96,7 +100,9 @@ class RecommendationService {
 
       const queries = await this._getRecommendedQueries('canciones', itemName, itemContext);
       const items = await this.songStrategy.recommend(itemName, queries, limit);
-      return items.slice(0, limit);
+      const finalItems = items.slice(0, limit);
+      console.log('[recommendSongs] Final items:', finalItems.map(i => i.title));
+      return finalItems;
     } catch (error) {
       console.error('Error in recommendSongs service:', error);
       return [];
@@ -118,7 +124,9 @@ class RecommendationService {
 
       const queries = await this._getRecommendedQueries('artistas', itemName, itemContext);
       const items = await this.artistStrategy.recommend(itemName, queries, limit);
-      return items.slice(0, limit);
+      const finalItems = items.slice(0, limit);
+      console.log('[recommendArtists] Final items:', finalItems.map(i => i.title));
+      return finalItems;
     } catch (error) {
       console.error('Error in recommendArtists service:', error);
       return [];
@@ -137,7 +145,9 @@ class RecommendationService {
 
       const queries = await this._getRecommendedQueries('álbumes', itemName, itemContext);
       const items = await this.albumStrategy.recommend(itemName, queries, limit);
-      return items.slice(0, limit);
+      const finalItems = items.slice(0, limit);
+      console.log('[recommendAlbums] Final items:', finalItems.map(i => i.title));
+      return finalItems;
     } catch (error) {
       console.error('Error in recommendAlbums service:', error);
       return [];
@@ -163,7 +173,9 @@ class RecommendationService {
 
       const queries = await this._getRecommendedQueries('videojuegos', itemName, itemContext);
       const items = await this.videogameStrategy.recommend(itemName, queries, limit);
-      return items.slice(0, limit);
+      const finalItems = items.slice(0, limit);
+      console.log('[recommendVideogames] Final items:', finalItems.map(i => i.title));
+      return finalItems;
     } catch (error) {
       console.error('Error in recommendVideogames service:', error);
       return [];
@@ -203,7 +215,9 @@ class RecommendationService {
         [allMixedItems[i], allMixedItems[j]] = [allMixedItems[j], allMixedItems[i]];
       }
 
-      return allMixedItems.slice(0, limit);
+      const finalSlice = allMixedItems.slice(0, limit);
+      console.log('[recommendMix] Final items:', finalSlice.map(i => `${i.type}:${i.title}`));
+      return finalSlice;
     } catch (error) {
       console.error('Error in recommendMix service:', error);
       return [];

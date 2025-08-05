@@ -81,10 +81,9 @@ class GeminiAiService {
 
    if (category === 'videojuegos' || category === 'videojuego' || category === 'videogames' || category === 'videogame') {
      return [
-       `You are a game recommender. Task: suggest exactly 10 video games with "Fantastic Four vibes" when users imply it (e.g., they ask for FF vibes or ensemble/science/cosmic themes) relative to "${itemName}"${ctx}.`,
-       `Definition of "Fantastic Four vibes": ensemble superhero team (prefer 4–5 core members), science-driven problem solving, cosmic/space exploration, family/team dynamics, cooperative or team-synergy gameplay, big-brain antagonists or science catastrophes.`,
-       `Constraints: Exclude DLC, expansions, episodes, character packs, and bundles. Avoid one-hero-centric games (like Spider-Man/Batman) unless the story/gameplay is genuinely ensemble/team-focused.`,
-       `Prefer games whose descriptions mention team, squad, co-op, ensemble, family, cosmic, space, galaxy, interstellar, science, scientist, exploration.`,
+       `You are a game recommender. Return exactly 10 video games similar to "${itemName}"${ctx} considering gameplay loop, core mechanics, subgenre, difficulty curve, camera perspective, setting, tone, and narrative themes.`,
+       `Hard rules: Exclude DLC, expansions, episodes, remasters-only, character packs, and bundles.`,
+       `Diversity: Prefer variety across subgenres and publishers; avoid near-duplicates.`,
        `Output format per entry: Game Title.`,
        `Output: single line, comma-separated, no extra text, no quotes, no numbering.`
      ].join(' ');
@@ -127,6 +126,7 @@ class GeminiAiService {
       if (debug) {
         console.log('Sending prompt to Gemini API:', promptText);
       }
+      console.log('[Gemini] Prompt category:', itemType, 'name:', itemName, 'ctx:', itemContext || '');
 
       const response = await fetch(this.apiUrl, {
         method: 'POST',
@@ -151,6 +151,7 @@ class GeminiAiService {
       if (debug2) {
         console.log('Gemini raw response:', rawResponseText);
       }
+      console.log('[Gemini] Parsed response (raw line):', rawResponseText.replace(/\s+/g, ' ').trim());
 
       // Normalize single-line comma-separated output into array of strings
       const variantRegex = /\b(remix|live|acoustic|cover|re-?record|taylor'?s version|sped ?up|slowed|extended|edit|karaoke|instrumental|piano|lullaby|kids|parody|diss|version|versión)\b/i;
