@@ -89,79 +89,128 @@ class RecommendationService {
     }
 
     async _getRecommendedQueries(itemCategory, itemName, itemContext) {
-        let recommendedQueries = [];
-        let usedApi = 'Gemini';
-
+        // Strictly use Gemini as source of truth. Only fallback to DeepSeek if Gemini fails completely.
+        let queries = [];
         try {
-            recommendedQueries = await this.geminiAiService.generateRecommendations(itemCategory, itemName, itemContext);
-            console.log('Gemini LLM recommended queries:', recommendedQueries);
+            queries = await this.geminiAiService.generateRecommendations(itemCategory, itemName, itemContext);
         } catch (geminiError) {
-            console.warn(`Gemini LLM failed for ${itemCategory} recommendation, attempting with DeepSeek. Error:`, geminiError.message);
-            usedApi = 'DeepSeek';
+            console.warn(`Gemini LLM failed for ${itemCategory}. Falling back to DeepSeek.`, geminiError?.message || geminiError);
             try {
-                recommendedQueries = await this.deepSeekAiService.generateRecommendations(itemCategory, itemName, itemContext);
-                console.log('DeepSeek LLM recommended queries:', recommendedQueries);
+                queries = await this.deepSeekAiService.generateRecommendations(itemCategory, itemName, itemContext);
             } catch (deepSeekError) {
-                console.error(`DeepSeek LLM also failed for ${itemCategory} recommendation. Error:`, deepSeekError.message);
-                throw deepSeekError; // Lanzar el error si ambos fallan
+                console.error(`DeepSeek also failed for ${itemCategory}.`, deepSeekError?.message || deepSeekError);
+                throw deepSeekError;
             }
         }
 
-        // Normalización fuerte + deduplicación transversal a categorías:
+        // Normalize + dedupe while preserving Gemini intent as-is (no expansion here).
         const seen = new Set();
-        const variantRegex = /\b(remix|live|acoustic|cover|re-?record|taylor'?s version|sped ?up|slowed|extended|edit|karaoke|version|versión)\b/i;
+        const cleaned = (queries || [])
+            .map(q => q.replace(/(\d+\.\s*|["'*`_])/g, '').trim())
+            .map(q => q.replace(/\s+-\s+/g, ' - '))
+            .filter(q => q.length > 0)
+            .filter(q => {
+                const key = q.toLowerCase();
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            })
+            .filter(q => q.toLowerCase() !== String(itemName || '').toLowerCase());
 
-        const cleaned = recommendedQueries
-          .map(q => q.replace(/(\d+\.\s*|["'*`])/g, '').trim())
-          .map(q => q.replace(/\s+-\s+/g, ' - '))  // normalizar separador
-          .map(q => q.replace(/\s+\(\s*(\d{4})\s*\)\s*$/i, ' ($1)')) // normalizar "(Year)"
-          // Filtrar variantes del mismo elemento (e.g., "Blank Space (Taylor's Version)")
-          .filter(q => !variantRegex.test(q))
-          // Deduplicar por clave minificada
-          .filter(q => {
-            const key = q.toLowerCase();
-            if (seen.has(key)) return false;
-            seen.add(key);
-            return true;
-          })
-          // Además eliminar entradas que sean exactamente igual al item base, sin importar caso
-          .filter(q => q.toLowerCase() !== String(itemName || '').toLowerCase());
+        // Debug (gated)
+        const debug = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
+        if (debug) console.log('[LLM] Final normalized Gemini queries:', cleaned);
 
         return cleaned;
     }
 
-    async recommendMovies(itemName, limit = 10) { // <-- Added limit parameter here
+    async recommendMovies(itemName, limit = 10) {
         try {
-            const initialSearchResult = await this.searchService.searchTmdb(itemName);
-            const baseMovie = initialSearchResult.find(item => item.type === 'movie');
+            // Strict Gemini alignment for movies too
+            const recommendedQueries = await this._getRecommendedQueries('peliculas', itemName, '');
 
-            let itemContext = '';
-            if (baseMovie && baseMovie.genres && Array.isArray(baseMovie.genres) && baseMovie.genres.length > 0) {
-                itemContext = `del género ${baseMovie.genres[0].name || baseMovie.genres[0]}`;
-            }
+            const finalItems = [];
+            const usedFranchises = new Set();
+            const usedCanonicalTitles = new Set();
+            const droppedPattern = /\b(Season|Episode|Trailer|Featurette|Bundle|Collection|Pack)\b/i;
+            const normalize = (s) => String(s || '').toLowerCase()
+                .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[’‘`]/g, "'").replace(/&/g, 'and')
+                .replace(/\s+/g, ' ').trim();
 
-            const recommendedQueries = await this._getRecommendedQueries('peliculas', itemName, itemContext);
+            const preferYear = (title) => {
+                // prefer entries with year in the item data; handled via rating in absence
+                return 0;
+            };
 
-            const allRecommendedItems = [];
-            const addedExternalIds = new Set();
+            for (const q of recommendedQueries) {
+                const results = await this.searchService.searchTmdb(q);
+                const candidates = (results || [])
+                    .filter(x => x.type === 'movie')
+                    .filter(x => !droppedPattern.test(x.title || ''));
 
-            const searchPromises = recommendedQueries.map(query => this.searchService.searchTmdb(query));
-            const searchResults = await Promise.allSettled(searchPromises);
+                const ranked = candidates
+                    .map(x => {
+                        const titleNorm = normalize(x.title);
+                        const qNorm = normalize(q);
+                        let sim = 0;
+                        if (titleNorm === qNorm) sim += 3;
+                        if (titleNorm.startsWith(qNorm)) sim += 2;
+                        if (titleNorm.includes(qNorm)) sim += 1;
+                        const rating = x.avgRating || 0;
+                        return { x, score: sim * 10 + preferYear(x.title || '') + rating };
+                    })
+                    .sort((a, b) => b.score - a.score)
+                    .map(r => r.x);
 
-            for (const result of searchResults) {
-                if (result.status === 'fulfilled' && Array.isArray(result.value)) {
-                    const movies = result.value.filter(item => item.type === 'movie');
-                    for (const movie of movies) {
-                        const uniqueKey = `${movie.type}-${movie.externalSource}-${movie.externalId}`;
-                        if (movie.externalId && !addedExternalIds.has(uniqueKey)) {
-                            allRecommendedItems.push(movie);
-                            addedExternalIds.add(uniqueKey);
-                        }
+                let picked = null;
+                for (const cand of ranked) {
+                    const title = cand.title || '';
+                    const canonicalKey = normalize(title).replace(/[:\-–—(].*$/, '').trim();
+                    const franchiseKey = canonicalKey.split(' ').slice(0, 4).join(' ');
+                    if (usedCanonicalTitles.has(canonicalKey)) continue;
+                    if (usedFranchises.has(franchiseKey)) continue;
+                    picked = cand;
+                    usedCanonicalTitles.add(canonicalKey);
+                    usedFranchises.add(franchiseKey);
+                    break;
+                }
+                if (!picked && ranked.length > 0) {
+                    for (const cand of ranked) {
+                        const canonicalKey = normalize(cand.title).replace(/[:\-–—(].*$/, '').trim();
+                        if (usedCanonicalTitles.has(canonicalKey)) continue;
+                        picked = cand; break;
                     }
                 }
+                if (picked) {
+                    finalItems.push(picked);
+                } else {
+                    finalItems.push({
+                        type: 'movie',
+                        title: q,
+                        description: `No se encontró un mapeo canónico inequívoco para la consulta "${q}".`,
+                        coverUrl: null,
+                        releaseDate: null,
+                        externalId: null,
+                        externalSource: 'TMDB',
+                        avgRating: null,
+                        externalUrl: null,
+                        _unmapped: true
+                    });
+                }
             }
-            // --- Apply limit here for individual category recommendations ---
-            return allRecommendedItems.slice(0, limit); // <-- Slice to limit results
+
+            const mapped = finalItems.filter(i => !i._unmapped);
+            const unmapped = finalItems.filter(i => i._unmapped);
+            const sliced = mapped.slice(0, limit);
+            const finalList = sliced.length < limit ? sliced.concat(unmapped.slice(0, limit - sliced.length)) : sliced;
+
+            try {
+                const titles = finalList.map(v => v.title);
+                console.log('[recommendMovies] Curated final (Gemini-aligned):', titles);
+            } catch {}
+
+            return finalList;
         } catch (error) {
             console.error('Error in recommendMovies service:', error);
             return [];
@@ -251,127 +300,275 @@ class RecommendationService {
         }
     }
 
-    async recommendTvShows(itemName, limit = 10) { // <-- Added limit parameter
+    async recommendTvShows(itemName, limit = 10) {
         try {
-            const initialSearchResult = await this.searchService.searchTmdb(itemName);
-            const baseTvShow = initialSearchResult.find(item => item.type === 'tvshow');
+            const recommendedQueries = await this._getRecommendedQueries('series de televisión', itemName, '');
 
-            let itemContext = '';
-            if (baseTvShow && baseTvShow.genres && Array.isArray(baseTvShow.genres) && baseTvShow.genres.length > 0) {
-                itemContext = `del género ${baseTvShow.genres[0].name || baseTvShow.genres[0]}`;
-            }
+            const finalItems = [];
+            const usedFranchises = new Set();
+            const usedCanonicalTitles = new Set();
+            const droppedPattern = /\b(Season|Episode|Trailer|Featurette|Bundle|Collection|Pack)\b/i;
+            const normalize = (s) => String(s || '').toLowerCase()
+                .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[’‘`]/g, "'").replace(/&/g, 'and')
+                .replace(/\s+/g, ' ').trim();
 
-            const recommendedQueries = await this._getRecommendedQueries('series de televisión', itemName, itemContext);
+            for (const q of recommendedQueries) {
+                const results = await this.searchService.searchTmdb(q);
+                const candidates = (results || [])
+                    .filter(x => x.type === 'tvshow')
+                    .filter(x => !droppedPattern.test(x.title || ''));
 
-            const allRecommendedItems = [];
-            const addedExternalIds = new Set();
+                const ranked = candidates
+                    .map(x => {
+                        const titleNorm = normalize(x.title);
+                        const qNorm = normalize(q);
+                        let sim = 0;
+                        if (titleNorm === qNorm) sim += 3;
+                        if (titleNorm.startsWith(qNorm)) sim += 2;
+                        if (titleNorm.includes(qNorm)) sim += 1;
+                        const rating = x.avgRating || 0;
+                        return { x, score: sim * 10 + rating };
+                    })
+                    .sort((a, b) => b.score - a.score)
+                    .map(r => r.x);
 
-            const searchPromises = recommendedQueries.map(query => this.searchService.searchTmdb(query));
-            const searchResults = await Promise.allSettled(searchPromises);
-
-            for (const result of searchResults) {
-                if (result.status === 'fulfilled' && Array.isArray(result.value)) {
-                    const tvShows = result.value.filter(item => item.type === 'tvshow');
-                    for (const tvShow of tvShows) {
-                        const uniqueKey = `${tvShow.type}-${tvShow.externalSource}-${tvShow.externalId}`;
-                        if (tvShow.externalId && !addedExternalIds.has(uniqueKey)) {
-                            allRecommendedItems.push(tvShow);
-                            addedExternalIds.add(uniqueKey);
-                        }
+                let picked = null;
+                for (const cand of ranked) {
+                    const title = cand.title || '';
+                    const canonicalKey = normalize(title).replace(/[:\-–—(].*$/, '').trim();
+                    const franchiseKey = canonicalKey.split(' ').slice(0, 4).join(' ');
+                    if (usedCanonicalTitles.has(canonicalKey)) continue;
+                    if (usedFranchises.has(franchiseKey)) continue;
+                    picked = cand;
+                    usedCanonicalTitles.add(canonicalKey);
+                    usedFranchises.add(franchiseKey);
+                    break;
+                }
+                if (!picked && ranked.length > 0) {
+                    for (const cand of ranked) {
+                        const canonicalKey = normalize(cand.title).replace(/[:\-–—(].*$/, '').trim();
+                        if (usedCanonicalTitles.has(canonicalKey)) continue;
+                        picked = cand; break;
                     }
                 }
+                if (picked) {
+                    finalItems.push(picked);
+                } else {
+                    finalItems.push({
+                        type: 'tvshow',
+                        title: q,
+                        description: `No se encontró un mapeo canónico inequívoco para la consulta "${q}".`,
+                        coverUrl: null,
+                        releaseDate: null,
+                        externalId: null,
+                        externalSource: 'TMDB',
+                        avgRating: null,
+                        externalUrl: null,
+                        _unmapped: true
+                    });
+                }
             }
-            return allRecommendedItems.slice(0, limit); // <-- Slice to limit results
+
+            const mapped = finalItems.filter(i => !i._unmapped);
+            const unmapped = finalItems.filter(i => i._unmapped);
+            const sliced = mapped.slice(0, limit);
+            const finalList = sliced.length < limit ? sliced.concat(unmapped.slice(0, limit - sliced.length)) : sliced;
+
+            try {
+                const titles = finalList.map(v => v.title);
+                console.log('[recommendTvShows] Curated final (Gemini-aligned):', titles);
+            } catch {}
+
+            return finalList;
         } catch (error) {
             console.error('Error in recommendTvShows service:', error);
             return [];
         }
     }
 
-    async recommendBooks(itemName, limit = 10) { // <-- Added limit parameter
+    async recommendBooks(itemName, limit = 10) {
         try {
-            const initialSearchResult = await this.searchService.searchGoogleBooks(itemName);
-            const baseBook = initialSearchResult[0];
+            const recommendedQueries = await this._getRecommendedQueries('libros', itemName, '');
 
-            let itemContext = '';
-            if (baseBook && baseBook.description) {
-                const authorMatch = baseBook.description.match(/Autor\(es\): ([^.]+\.)/);
-                if (authorMatch && authorMatch[1]) {
-                    itemContext = `del autor ${authorMatch[1].replace(/\.$/, '')}`;
-                } else if (baseBook.genres && Array.isArray(baseBook.genres) && baseBook.genres.length > 0) {
-                    itemContext = `del género ${baseBook.genres[0]}`;
+            const finalItems = [];
+            const usedAuthors = new Set();
+            const usedCanonicalTitles = new Set();
+            const droppedPattern = /\b(Study Guide|Summary|Workbook|Collection|Bundle|Pack)\b/i;
+            const normalize = (s) => String(s || '').toLowerCase()
+                .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[’‘`]/g, "'").replace(/&/g, 'and')
+                .replace(/\s+/g, ' ').trim();
+
+            for (const q of recommendedQueries) {
+                const results = await this.searchService.searchGoogleBooks(q);
+                const candidates = (results || [])
+                    .filter(x => x.type === 'book')
+                    .filter(x => !droppedPattern.test(x.title || ''));
+
+                const ranked = candidates
+                    .map(x => {
+                        const titleNorm = normalize(x.title);
+                        const qNorm = normalize(q);
+                        let sim = 0;
+                        if (titleNorm === qNorm) sim += 3;
+                        if (titleNorm.startsWith(qNorm)) sim += 2;
+                        if (titleNorm.includes(qNorm)) sim += 1;
+                        const rating = x.avgRating || 0;
+                        return { x, score: sim * 10 + rating };
+                    })
+                    .sort((a, b) => b.score - a.score)
+                    .map(r => r.x);
+
+                let picked = null;
+                for (const cand of ranked) {
+                    const title = cand.title || '';
+                    const canonicalKey = normalize(title).replace(/[:\-–—(].*$/, '').trim();
+                    if (usedCanonicalTitles.has(canonicalKey)) continue;
+                    picked = cand;
+                    usedCanonicalTitles.add(canonicalKey);
+                    break;
                 }
-            }
-
-            const recommendedQueries = await this._getRecommendedQueries('libros', itemName, itemContext);
-
-            const allRecommendedItems = [];
-            const addedExternalIds = new Set();
-
-            const searchPromises = recommendedQueries.map(query => this.searchService.searchGoogleBooks(query));
-            const searchResults = await Promise.allSettled(searchPromises);
-
-            for (const result of searchResults) {
-                if (result.status === 'fulfilled' && Array.isArray(result.value)) {
-                    const books = result.value.filter(item => item.type === 'book');
-                    for (const book of books) {
-                        const uniqueKey = `${book.type}-${book.externalSource}-${book.externalId}`;
-                        if (book.externalId && !addedExternalIds.has(uniqueKey)) {
-                            allRecommendedItems.push(book);
-                            addedExternalIds.add(uniqueKey);
-                        }
+                if (!picked && ranked.length > 0) {
+                    for (const cand of ranked) {
+                        const canonicalKey = normalize(cand.title).replace(/[:\-–—(].*$/, '').trim();
+                        if (usedCanonicalTitles.has(canonicalKey)) continue;
+                        picked = cand; break;
                     }
                 }
+                if (picked) {
+                    finalItems.push(picked);
+                } else {
+                    finalItems.push({
+                        type: 'book',
+                        title: q,
+                        description: `No se encontró un mapeo canónico inequívoco para la consulta "${q}".`,
+                        coverUrl: null,
+                        releaseDate: null,
+                        externalId: null,
+                        externalSource: 'GOOGLE_BOOKS',
+                        avgRating: null,
+                        externalUrl: null,
+                        _unmapped: true
+                    });
+                }
             }
-            return allRecommendedItems.slice(0, limit); // <-- Slice to limit results
+
+            const mapped = finalItems.filter(i => !i._unmapped);
+            const unmapped = finalItems.filter(i => i._unmapped);
+            const sliced = mapped.slice(0, limit);
+            const finalList = sliced.length < limit ? sliced.concat(unmapped.slice(0, limit - sliced.length)) : sliced;
+
+            try {
+                const titles = finalList.map(v => v.title);
+                console.log('[recommendBooks] Curated final (Gemini-aligned):', titles);
+            } catch {}
+
+            return finalList;
         } catch (error) {
             console.error('Error in recommendBooks service:', error);
             return [];
         }
     }
 
-    async recommendVideogames(itemName, limit = 10) { // <-- Added limit parameter here
+    async recommendVideogames(itemName, limit = 10) {
         try {
-            const initialSearchResult = await this.searchService.searchIgdb(itemName);
-            const baseVideogame = initialSearchResult[0];
+            // Strictly align to Gemini queries. One canonical pick per query. No fillers/duplicates.
+            const recommendedQueries = await this._getRecommendedQueries('videojuegos', itemName, '');
 
-            let itemContext = '';
-            if (baseVideogame) {
-                if (baseVideogame.genres && Array.isArray(baseVideogame.genres) && baseVideogame.genres.length > 0) {
-                    itemContext = `del género ${baseVideogame.genres[0]}`;
-                } else if (baseVideogame.description) {
-                    const genresMatch = baseVideogame.description.match(/Géneros: ([^.]+)/);
-                    if (genresMatch && genresMatch[1]) {
-                        const genresArray = genresMatch[1].split(',').map(g => g.trim());
-                        if (genresArray.length > 0) {
-                            itemContext = `del género ${genresArray[0]}`;
-                        }
-                    }
+            const finalItems = [];
+            const usedCanonicalRoots = new Set();
+
+            const normalize = (s) => String(s || '').toLowerCase()
+                .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[’‘`]/g, "'")
+                .replace(/&/g, 'and')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            // Filter out irrelevant variants
+            const dropVariant = (title) => /\b(DLC|Pack|Episode|Bundle|Season Pass|Character Pack|Pinball|Mobile|Royale)\b/i.test(title || '');
+
+            // Edition preference score
+            const editionScore = (title) => {
+                const t = (title || '').toLowerCase();
+                if (t.includes('legendary edition')) return 6;
+                if (t.includes('definitive edition')) return 6;
+                if (t.includes('remastered') || t.includes('remaster')) return 5;
+                if (t.includes('game of the year') || t.includes('goty')) return 4;
+                return 3; // base/unknown
+            };
+
+            for (const q of recommendedQueries) {
+                const qNorm = normalize(q).replace(/\(\s*\d{4}\s*\)/g, '').trim();
+
+                // Query IGDB with the Gemini query as-is
+                const results = await this.searchService.searchIgdb(q);
+
+                // Candidates: videogames only, drop obvious variants
+                const candidates = (results || [])
+                    .filter(x => x.type === 'videogame')
+                    .filter(x => !dropVariant(x.title));
+
+                // Rank by similarity + edition preference + rating/pop count (if present)
+                const ranked = candidates
+                    .map(x => {
+                        const tNorm = normalize(x.title);
+                        let sim = 0;
+                        if (tNorm === qNorm) sim += 6;            // exact
+                        if (tNorm.startsWith(qNorm)) sim += 3;    // prefix
+                        if (tNorm.includes(qNorm)) sim += 2;      // substring
+                        if (qNorm === 'knights of the old republic' && tNorm.includes('star wars')) sim += 2;
+
+                        const ed = editionScore(x.title);
+                        const rating = x.avgRating || 0;
+                        const pop = (x.totalRatingCount || 0) * 0.01;
+
+                        // canonical root before punctuation; used for dedupe/diversity
+                        const root = tNorm.replace(/[:\-–—(].*$/, '').trim();
+
+                        return { x, score: sim * 10 + ed * 2 + rating + pop, root };
+                    })
+                    .sort((a, b) => b.score - a.score);
+
+                // Pick first not-yet-used canonical root
+                let picked = null;
+                for (const r of ranked) {
+                    if (usedCanonicalRoots.has(r.root)) continue;
+                    picked = r.x;
+                    usedCanonicalRoots.add(r.root);
+                    break;
+                }
+
+                if (picked) {
+                    finalItems.push(picked);
+                } else {
+                    // If cannot map clearly, include placeholder entry to be surfaced to user with reason
+                    finalItems.push({
+                        type: 'videogame',
+                        title: q,
+                        description: `No se encontró un mapeo canónico inequívoco para la consulta "${q}".`,
+                        coverUrl: null,
+                        releaseDate: null,
+                        externalId: null,
+                        externalSource: 'IGDB',
+                        avgRating: null,
+                        externalUrl: null,
+                        _unmapped: true
+                    });
                 }
             }
 
-            const recommendedQueries = await this._getRecommendedQueries('videojuegos', itemName, itemContext);
+            // Prefer mapped items; cap to limit
+            const mapped = finalItems.filter(i => !i._unmapped);
+            const unmapped = finalItems.filter(i => i._unmapped);
+            const curated = mapped.slice(0, limit);
+            const finalList = curated.length < limit ? curated.concat(unmapped.slice(0, limit - curated.length)) : curated;
 
-            const allRecommendedItems = [];
-            const addedExternalIds = new Set();
+            const debug = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
+            if (debug) console.log('[recommendVideogames] Curated final (Gemini-aligned):', finalList.map(v => v.title));
 
-            const searchPromises = recommendedQueries.map(query => this.searchService.searchIgdb(query));
-            const searchResults = await Promise.allSettled(searchPromises);
-
-            for (const result of searchResults) {
-                if (result.status === 'fulfilled' && Array.isArray(result.value)) {
-                    const videogames = result.value.filter(item => item.type === 'videogame');
-                    for (const videogame of videogames) {
-                        const uniqueKey = `${videogame.type}-${videogame.externalSource}-${videogame.externalId}`;
-                        if (videogame.externalId && !addedExternalIds.has(uniqueKey)) {
-                            allRecommendedItems.push(videogame);
-                            addedExternalIds.add(uniqueKey);
-                        }
-                    }
-                }
-            }
-            // --- Apply limit here for individual category recommendations ---
-            return allRecommendedItems.slice(0, limit); // <-- Slice to limit results
+            return finalList;
         } catch (error) {
             console.error('Error in recommendVideogames service:', error);
             return [];

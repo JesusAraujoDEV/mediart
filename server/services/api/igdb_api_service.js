@@ -48,29 +48,54 @@ class IgdbApiService {
                 throw new Error('IGDB access token not available. Authentication failed.');
             }
 
-            const response = await axios.post(`${this.baseUrl}/games`,
-                `search "${query}"; fields name, summary, cover.url, first_release_date, genres.name, platforms.name, slug, aggregated_rating, total_rating_count, url; limit 50;`, // Increased limit to 50
-                {
-                    headers: {
-                        'Client-ID': this.clientId,
-                        'Authorization': `Bearer ${this.accessToken}`,
-                        'Content-Type': 'text/plain'
-                    }
+            // Build a stricter IGDB query:
+            // - Prefer base/standalone games (category 0 main_game, 8 remaster allowed?, 9 expanded_game, 10 port, 11 fork, 5 standalone_expansion)
+            // - Exclude DLC/expansion/episode/bundle
+            // - Fetch useful fields
+            // Note: IGDB categories reference:
+            // 0 Main game, 1 DLC/addon, 2 Expansion, 3 Bundle, 4 Standalone expansion (old), 5 Mod, 6 Episode, 8 Remaster, 9 Expanded Game, 10 Port, 11 Fork
+            // We'll include [0,8,9,10,11] and exclude 1,2,3,6.
+            const igdbQuery = [
+                `search "${query}";`,
+                'fields name, summary, cover.url, first_release_date, genres.name, platforms.name, slug, aggregated_rating, total_rating_count, url, category, version_title, version_parent;',
+                'where (category = 0 | category = 8 | category = 9 | category = 10 | category = 11)',
+                ' & version_parent = null',
+                ' & (version_title = null | version_title = "");',
+                'limit 50;'
+            ].join(' ');
+            const response = await axios.post(`${this.baseUrl}/games`, igdbQuery, {
+                headers: {
+                    'Client-ID': this.clientId,
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    'Content-Type': 'text/plain'
                 }
-            );
+            });
 
             const gamesData = response.data;
 
-            // Log raw data from IGDB for debugging purposes
-            if (gamesData.length === 0) {
-                console.log(`No results found from IGDB for query: "${query}"`);
-            } else {
-                console.log(`Received ${gamesData.length} results from IGDB for query: "${query}"`);
-                // console.log('Raw IGDB data for first item:', gamesData[0]); // Uncomment for detailed debugging
+            // Debug logs gated by env flag
+            const debug = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
+            if (debug) {
+                if (gamesData.length === 0) {
+                    console.log(`IGDB: 0 results for "${query}"`);
+                } else {
+                    const sample = gamesData.slice(0, 3).map(g => g.name);
+                    console.log(`IGDB: ${gamesData.length} results for "${query}" (sample: ${sample.join(', ')})`);
+                }
             }
 
 
-            const videogames = gamesData.map(game => {
+            // Post-filter to drop noisy entries (DLC, bundles, episodes, character packs)
+            const droppedPattern = /\b(DLC|Pack|Episode|Bundle|Season Pass|Character Pack)\b/i;
+            const legoPattern = /\blego\b/i; // optionally de-prioritize LEGO noise
+            const filteredData = gamesData.filter(g => {
+                const title = String(g.name || '');
+                if (droppedPattern.test(title)) return false;
+                // Keep LEGO but allow ranking to push them down later; do not drop here.
+                return true;
+            });
+
+            const videogames = filteredData.map(game => {
                 let coverUrl = null;
                 if (game.cover && game.cover.url) {
                     coverUrl = `https:${game.cover.url.replace('t_thumb', 't_cover_big')}`;
@@ -92,11 +117,39 @@ class IgdbApiService {
                 };
             });
 
+            // Relevance score: popularity + rating + keyword boosts for team/cosmic/science vibes
+            const boostKeywords = [
+                'team','squad','co-op','cooperative','ensemble','family',
+                'cosmic','space','galaxy','interstellar','science','scientist','exploration'
+            ];
+            function score(item) {
+                const count = item.totalRatingCount || 0;
+                const rating = item.avgRating || 0;
+                const desc = `${item.title || ''} ${item.description || ''}`.toLowerCase();
+                let boost = 0;
+                for (const kw of boostKeywords) {
+                    if (desc.includes(kw)) boost += 1.5;
+                }
+                // Slight penalty to LEGO to reduce DLC/noise prominence while still allowing
+                if ((item.title || '').toLowerCase().includes('lego')) boost -= 1.0;
+                return (count * 0.02) + (rating * 1.0) + boost;
+            }
+
             videogames.sort((a, b) => {
-                const countA = a.totalRatingCount || 0;
-                const countB = b.totalRatingCount || 0;
-                const ratingA = a.avgRating || 0;
-                const ratingB = b.avgRating || 0;
+                const sa = score(a);
+                const sb = score(b);
+                if (sb === sa) {
+                    // tie-breaker: higher rating then higher count
+                    const ratingA = a.avgRating || 0;
+                    const ratingB = b.avgRating || 0;
+                    if (ratingB === ratingA) {
+                        const countA = a.totalRatingCount || 0;
+                        const countB = b.totalRatingCount || 0;
+                        return countB - countA;
+                    }
+                    return ratingB - ratingA;
+                }
+                return sb - sa;
 
                 if (countB === countA) {
                     return ratingB - ratingA;
@@ -106,7 +159,10 @@ class IgdbApiService {
 
             const cleanedVideogames = videogames.map(({ genres, platforms, totalRatingCount, ...rest }) => rest);
 
-            console.log('Processed and sorted videogames (cleaned):', cleanedVideogames);
+            if (debug) {
+                const sample = cleanedVideogames.slice(0, 5).map(v => v.title);
+                console.log('IGDB cleaned top:', sample);
+            }
             return cleanedVideogames;
 
         } catch (error) {

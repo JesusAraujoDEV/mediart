@@ -53,9 +53,9 @@ class GeminiAiService {
     if (category === 'peliculas' || category === 'películas' || category === 'movies') {
       return [
         `You are a movie recommender. Return exactly 10 movies similar to "${itemName}"${ctx} by theme, tone, character arcs, cultural context, and emotional resonance.`,
-        `Hard rules: Recommend full feature films, avoid episodes/trailers. Prefer original titles; include year when known as "(Year)".`,
+        `Hard rules: Recommend full feature films, avoid episodes/trailers. Do NOT include years in the output.`,
         `Diversity: at most 1 per franchise.`,
-        `Output format per entry: Movie Title (Year).`,
+        `Output format per entry: Movie Title.`,
         `Output: single line, comma-separated, no extra text, no quotes, no numbering.`
       ].join(' ');
     }
@@ -63,9 +63,9 @@ class GeminiAiService {
     if (category === 'series de televisión' || category === 'series' || category === 'tv') {
       return [
         `You are a TV recommender. Return exactly 10 TV series similar to "${itemName}"${ctx} by tone, themes, character growth, and audience.`,
-        `Hard rules: Recommend full series, not episodes. Prefer original titles; include start year when known as "(Year)".`,
+        `Hard rules: Recommend full series, not episodes. Do NOT include years in the output.`,
         `Diversity: at most 1 per franchise.`,
-        `Output format per entry: Series Title (Year).`,
+        `Output format per entry: Series Title.`,
         `Output: single line, comma-separated, no extra text, no quotes, no numbering.`
       ].join(' ');
     }
@@ -81,8 +81,10 @@ class GeminiAiService {
 
    if (category === 'videojuegos' || category === 'videojuego' || category === 'videogames' || category === 'videogame') {
      return [
-       `You are a game recommender. Return exactly 10 video games analogous to "${itemName}"${ctx} in vibe, narrative arcs, indie/dramedy feel, or slice-of-life/coming-of-age parallels when applicable.`,
-       `Hard rules: Avoid DLC-only/expansions-only. Prefer base games. Do NOT include years in the output.`,
+       `You are a game recommender. Task: suggest exactly 10 video games with "Fantastic Four vibes" when users imply it (e.g., they ask for FF vibes or ensemble/science/cosmic themes) relative to "${itemName}"${ctx}.`,
+       `Definition of "Fantastic Four vibes": ensemble superhero team (prefer 4–5 core members), science-driven problem solving, cosmic/space exploration, family/team dynamics, cooperative or team-synergy gameplay, big-brain antagonists or science catastrophes.`,
+       `Constraints: Exclude DLC, expansions, episodes, character packs, and bundles. Avoid one-hero-centric games (like Spider-Man/Batman) unless the story/gameplay is genuinely ensemble/team-focused.`,
+       `Prefer games whose descriptions mention team, squad, co-op, ensemble, family, cosmic, space, galaxy, interstellar, science, scientist, exploration.`,
        `Output format per entry: Game Title.`,
        `Output: single line, comma-separated, no extra text, no quotes, no numbering.`
      ].join(' ');
@@ -120,7 +122,11 @@ class GeminiAiService {
         }
       };
 
-      console.log('Sending prompt to Gemini API:', promptText);
+      // Gate noisy logs by env flag
+      const debug = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
+      if (debug) {
+        console.log('Sending prompt to Gemini API:', promptText);
+      }
 
       const response = await fetch(this.apiUrl, {
         method: 'POST',
@@ -141,11 +147,19 @@ class GeminiAiService {
         throw new Error('Respuesta inválida de la API de Gemini: Estructura inesperada.');
       }
 
-      console.log('Gemini raw response:', rawResponseText);
+      const debug2 = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
+      if (debug2) {
+        console.log('Gemini raw response:', rawResponseText);
+      }
 
       // Normalize single-line comma-separated output into array of strings
       const variantRegex = /\b(remix|live|acoustic|cover|re-?record|taylor'?s version|sped ?up|slowed|extended|edit|karaoke|instrumental|piano|lullaby|kids|parody|diss|version|versión)\b/i;
-      const cleanedLine = rawResponseText.replace(/\r?\n/g, ' ').replace(/\s{2,}/g, ' ').trim();
+      // Strip any years like "(2015)" that the model may still include
+      const cleanedLine = rawResponseText
+        .replace(/\r?\n/g, ' ')
+        .replace(/\s{2,}/g, ' ')
+        .replace(/\(\s*\d{4}\s*\)/g, '')
+        .trim();
       const tokens = cleanedLine.split(',').map(s => s.trim()).filter(Boolean);
 
       const seen = new Set();

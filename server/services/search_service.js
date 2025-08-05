@@ -114,7 +114,11 @@ class SearchService {
     async searchIgdb(query) {
         try {
             const result = await this.igdbApiService.search(query);
-            console.log('result', result);
+            const debug = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
+            if (debug) {
+                const titles = Array.isArray(result) ? result.slice(0, 5).map(r => r.title) : [];
+                console.log(`searchIgdb("${query}") -> ${Array.isArray(result) ? result.length : 0} items (sample: ${titles.join(', ')})`);
+            }
             return result || []; // Asegurarse de que sea un array
         } catch (error) {
             console.error('Error in searchIgdb:', error);
