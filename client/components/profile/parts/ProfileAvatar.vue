@@ -1,11 +1,7 @@
 <template>
   <div class="flex flex-col items-center gap-2 w-full">
-    <img
-      :src="resolvedSrc"
-      @error="handleImageError"
-      :alt="loading ? 'Cargando perfil...' : 'Profile'"
-      class="size-36 rounded-full object-cover"
-    />
+    <img :src="resolvedSrc" @error="handleImageError" :alt="loading ? 'Cargando perfil...' : 'Profile'"
+      class="size-36 rounded-full object-cover" />
   </div>
 </template>
 

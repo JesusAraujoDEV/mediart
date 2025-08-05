@@ -1,46 +1,26 @@
 <template>
-  <section class="w-1/3 glassEffect h-full rounded-lg max-md:h-fit p-4 max-md:w-full flex justify-center items-center flex-col gap-4">
+  <section
+    class="w-1/3 glassEffect h-full rounded-lg max-md:h-fit p-4 max-md:w-full flex justify-center items-center flex-col gap-4">
     <!-- Avatar -->
-    <ProfileAvatar
-      :avatar-url="userProfile.profilePictureUrl"
-      :backend-base="runtimeConfig.public.backend"
-      :loading="isLoading"
-    />
+    <ProfileAvatar :avatar-url="userProfile.profilePictureUrl" :backend-base="runtimeConfig.public.backend"
+      :loading="isLoading" />
     <!-- Info -->
-    <ProfileInfo
-      :username="userProfile.username"
-      :bio="userProfile.bio"
-      :email="userProfile.email"
-      :created-at="(userProfile as any).createdAt"
-    />
+    <ProfileInfo :username="userProfile.username" :bio="userProfile.bio" :email="userProfile.email"
+      :created-at="(userProfile as any).createdAt" />
     <!-- Counters -->
-    <ProfileCounters
-      :following-count="userProfile.followingUsers?.length || 0"
-      :followers-count="userProfile.followersUsers?.length || 0"
-      :disabled="isLoading"
-      @go-following="goToFollowing"
-      @go-followers="goToFollowers"
-    />
+    <ProfileCounters :following-count="userProfile.followingUsers?.length || 0"
+      :followers-count="userProfile.followersUsers?.length || 0" :disabled="isLoading" @go-following="goToFollowing"
+      @go-followers="goToFollowers" />
     <!-- Actions -->
-    <ProfileActions
-      :is-owner="isOwner"
-      :is-friend="isFriend"
-      :loading="isFriendActionLoading"
-      @add-friend="() => sendFriendAction('add')"
-      @remove-friend="() => sendFriendAction('remove')"
-      @edit-profile="() => router.push('/profile/edit')"
-    />
+    <ProfileActions :is-owner="isOwner" :is-friend="isFriend" :loading="isFriendActionLoading"
+      @add-friend="() => sendFriendAction('add')" @remove-friend="() => sendFriendAction('remove')"
+      @edit-profile="() => router.push('/profile/edit')" />
 
     <!-- Mis playlists guardadas + botón Crear (solo dueño) -->
     <div class="w-full mt-2">
-      <ProfilePlaylists
-        :created-playlists="createdPlaylists?.map(p => ({ id: p.id, name: p.name })) || []"
-        :saved-playlists-ids="savedPlaylistsIds"
-        :saving-map="isSavingPlaylist"
-        :is-owner="isOwner"
-        @save-playlist="(id) => savePlaylist(Number(id))"
-        @create-playlist="handleCreatePlaylist"
-      />
+      <ProfilePlaylists :created-playlists="createdPlaylists?.map(p => ({ id: p.id, name: p.name })) || []"
+        :saved-playlists-ids="savedPlaylistsIds" :saving-map="isSavingPlaylist" :is-owner="isOwner"
+        @save-playlist="(id) => savePlaylist(Number(id))" @create-playlist="handleCreatePlaylist" />
     </div>
   </section>
 </template>
@@ -90,7 +70,7 @@ function goToFollowers() {
   router.push(`/profile/${userProfile.value.username}/followers`);
 }
 
-async function handleCreatePlaylist(payload: { name: string; description?: string; visibility: 'PUBLIC'|'PRIVATE'; items: any[] }) {
+async function handleCreatePlaylist(payload: { name: string; description?: string; visibility: 'PUBLIC' | 'PRIVATE'; items: any[] }) {
   // Guard: only owner can create
   if (!isOwner.value) return;
   try {
@@ -129,7 +109,7 @@ async function handleCreatePlaylist(payload: { name: string; description?: strin
         body: JSON.stringify({
           trackIds: payload.items.map((it: any) => it.id),
         })
-      }).catch(() => {});
+      }).catch(() => { });
     }
 
     // Navigate to playlist editor/management view

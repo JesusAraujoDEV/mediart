@@ -1,28 +1,23 @@
 <template>
-  <section class="w-2/3 glassEffect overflow-y-scroll h-full rounded-lg max-md:min-h-screen max-md:w-full p-6 custom-main-scroll">
+  <section
+    class="w-2/3 glassEffect overflow-y-scroll h-full rounded-lg max-md:min-h-screen max-md:w-full p-6 custom-main-scroll">
     <h2 class="text-4xl font-extrabold mb-8 text-center">Mis Playlists Guardadas</h2>
 
     <!-- Buscador optimizado -->
     <div class="mb-6">
       <div class="relative">
-        <input
-          v-model.trim="searchQuery"
-          type="text"
-          placeholder="Buscar playlist por nombre..."
+        <input v-model.trim="searchQuery" type="text" placeholder="Buscar playlist por nombre..."
           class="w-full bg-gray-800/70 border border-gray-600 rounded-lg px-4 py-3 pl-12 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-          @input="handleSearchInput"
-        />
+          @input="handleSearchInput" />
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
         </div>
-        <button
-          v-if="searchQuery"
-          @click="clearSearch"
+        <button v-if="searchQuery" @click="clearSearch"
           class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors cursor-pointer"
-          aria-label="Limpiar búsqueda"
-        >
+          aria-label="Limpiar búsqueda">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
@@ -34,9 +29,12 @@
     <div v-if="loadingPlaylists" class="flex flex-col items-center text-center">
       <p class="text-xl mb-4 text-gray-300">Cargando tus playlists guardadas...</p>
       <div class="relative">
-        <svg class="animate-spin h-10 w-10 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin h-10 w-10 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
         </svg>
       </div>
     </div>
@@ -44,43 +42,29 @@
     <!-- Error state optimizado -->
     <div v-else-if="errorPlaylists" class="text-red-400 text-center flex flex-col items-center">
       <p class="text-xl mb-4">{{ errorPlaylists }}</p>
-      <button 
-        @click="fetchSavedPlaylists" 
-        class="mt-4 glassEffect text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer"
-      >
+      <button @click="fetchSavedPlaylists"
+        class="mt-4 glassEffect text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer">
         Reintentar
       </button>
     </div>
 
     <!-- Playlists list optimizada con virtualización -->
     <div v-else-if="filteredPlaylists.length > 0" class="w-full flex flex-col gap-6 pb-4 px-2">
-      <TransitionGroup 
-        name="playlist-list" 
-        tag="div" 
-        class="flex flex-col gap-6"
-      >
-        <div
-          v-for="playlist in visiblePlaylists"
-          :key="playlist.id"
-          @click="viewPlaylistDetails(playlist)"
+      <TransitionGroup name="playlist-list" tag="div" class="flex flex-col gap-6">
+        <div v-for="playlist in visiblePlaylists" :key="playlist.id" @click="viewPlaylistDetails(playlist)"
           :class="{ 'cursor-pointer': !loadingPlaylistDetails.has(playlist.id.toString()) }"
-          class="bg-gray-800/70 rounded-xl p-0 shadow-lg transform transition-all duration-300 hover:scale-[1.01] hover:bg-gray-700/80 border border-gray-600 flex flex-col md:flex-row items-stretch overflow-hidden"
-        >
+          class="bg-gray-800/70 rounded-xl p-0 shadow-lg transform transition-all duration-300 hover:scale-[1.01] hover:bg-gray-700/80 border border-gray-600 flex flex-col md:flex-row items-stretch overflow-hidden">
           <!-- Imagen optimizada con lazy loading - Contenedor independiente -->
           <div class="w-full h-48 md:w-48 md:h-auto flex-shrink-0 bg-gray-900/60 overflow-hidden">
-            <img
-              v-if="getPlaylistImage(playlist)"
-              :src="getPlaylistImage(playlist)"
-              :alt="playlist.name"
+            <img v-if="getPlaylistImage(playlist)" :src="getPlaylistImage(playlist)" :alt="playlist.name"
               class="w-full h-full object-cover rounded-t-xl md:rounded-l-xl md:rounded-t-none border border-gray-700 shadow-md"
-              loading="lazy"
-              @error="handleImageError"
-            />
-            <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-4xl bg-gray-700 rounded-t-xl md:rounded-l-xl md:rounded-t-none border border-gray-700">
+              loading="lazy" @error="handleImageError" />
+            <div v-else
+              class="w-full h-full flex items-center justify-center text-gray-400 text-4xl bg-gray-700 rounded-t-xl md:rounded-l-xl md:rounded-t-none border border-gray-700">
               <span>🎵</span>
             </div>
           </div>
-          
+
           <!-- Contenido de la playlist - Contenedor separado -->
           <div class="flex flex-col flex-grow p-6 justify-between">
             <div>
@@ -88,27 +72,27 @@
                 <h3 class="text-2xl font-bold text-white truncate">{{ playlist.name }}</h3>
                 <span class="text-sm text-gray-400 max-md:hidden flex-shrink-0 ml-2">ID: {{ playlist.id }}</span>
               </div>
-              <p v-if="playlist.description" class="text-gray-300 text-md mb-2 flex-grow line-clamp-2">{{ playlist.description }}</p>
+              <p v-if="playlist.description" class="text-gray-300 text-md mb-2 flex-grow line-clamp-2">{{
+                playlist.description }}</p>
               <p class="text-sm text-gray-400 mb-2">
                 <span class="font-semibold">Colaborativa:</span> {{ playlist.isCollaborative ? 'Sí' : 'No' }}
               </p>
             </div>
             <div class="mt-4 flex justify-end gap-2">
-              <button
-                v-if="isOwnLibrary || playlist.ownerUserId === currentUserId"
-                @click.stop="toggleSavePlaylist(playlist)"
-                :disabled="isSavingPlaylist.has(playlist.id.toString())"
+              <button v-if="isOwnLibrary || playlist.ownerUserId === currentUserId"
+                @click.stop="toggleSavePlaylist(playlist)" :disabled="isSavingPlaylist.has(playlist.id.toString())"
                 :class="[
                   'px-4 py-2 rounded-lg shadow-md transition-all duration-200 text-lg flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-75 disabled:cursor-not-allowed cursor-pointer',
                   isSavingPlaylist.has(playlist.id.toString()) ? 'glassEffect text-white' :
-                  'glassEffect text-white hover:bg-white/20 border border-white/20 hover:border-white/40'
-                ]"
-                :title="isSavingPlaylist.has(playlist.id.toString()) ? 'Procesando...' : 'Quitar de mi biblioteca'"
-              >
+                    'glassEffect text-white hover:bg-white/20 border border-white/20 hover:border-white/40'
+                ]" :title="isSavingPlaylist.has(playlist.id.toString()) ? 'Procesando...' : 'Quitar de mi biblioteca'">
                 <template v-if="isSavingPlaylist.has(playlist.id.toString())">
-                  <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
                   </svg>
                   Procesando...
                 </template>
@@ -117,15 +101,16 @@
                   Quitar
                 </template>
               </button>
-              <button
-                @click.stop="viewPlaylistDetails(playlist)"
+              <button @click.stop="viewPlaylistDetails(playlist)"
                 :disabled="loadingPlaylistDetails.has(playlist.id.toString())"
-                class="glassEffect text-white font-bold py-2 px-6 rounded-lg shadow-md transition-all duration-200 text-lg flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-75 disabled:cursor-not-allowed border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer"
-              >
+                class="glassEffect text-white font-bold py-2 px-6 rounded-lg shadow-md transition-all duration-200 text-lg flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-75 disabled:cursor-not-allowed border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer">
                 <template v-if="loadingPlaylistDetails.has(playlist.id.toString())">
-                  <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
                   </svg>
                   Cargando...
                 </template>
@@ -137,25 +122,22 @@
           </div>
         </div>
       </TransitionGroup>
-      
+
       <!-- Load more button para virtualización -->
       <div v-if="hasMorePlaylists" class="flex justify-center mt-6">
-        <button
-          @click="loadMorePlaylists"
-          class="glassEffect text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer"
-        >
+        <button @click="loadMorePlaylists"
+          class="glassEffect text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer">
           Cargar más
         </button>
       </div>
     </div>
 
     <!-- Empty states optimizados -->
-    <div v-else-if="searchQuery && savedPlaylists.length > 0" class="text-center text-gray-400 text-2xl flex flex-col items-center">
+    <div v-else-if="searchQuery && savedPlaylists.length > 0"
+      class="text-center text-gray-400 text-2xl flex flex-col items-center">
       <p class="mb-4">No se encontraron playlists que coincidan con "{{ searchQuery }}"</p>
-      <button 
-        @click="clearSearch" 
-        class="mt-4 glassEffect text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-all duration-300 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer"
-      >
+      <button @click="clearSearch"
+        class="mt-4 glassEffect text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-all duration-300 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer">
         Limpiar búsqueda
       </button>
     </div>
@@ -203,9 +185,9 @@ const filteredPlaylists = computed(() => {
   if (!searchQuery.value.trim()) {
     return savedPlaylists.value;
   }
-  
+
   const query = searchQuery.value.toLowerCase().trim();
-  return savedPlaylists.value.filter(playlist => 
+  return savedPlaylists.value.filter(playlist =>
     playlist.name.toLowerCase().includes(query)
   );
 });
@@ -230,7 +212,7 @@ const handleSearchInput = () => {
   if (searchDebounceTimeout.value) {
     clearTimeout(searchDebounceTimeout.value);
   }
-  
+
   searchDebounceTimeout.value = setTimeout(() => {
     currentPage.value = 1; // Reset pagination on search
   }, 300);
@@ -270,10 +252,10 @@ const getCurrentUserId = (): number | null => {
 // API functions optimizadas
 const fetchSavedPlaylists = async () => {
   if (loadingPlaylists.value) return; // Prevent multiple requests
-  
+
   loadingPlaylists.value = true;
   errorPlaylists.value = null;
-  
+
   try {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -296,11 +278,11 @@ const fetchSavedPlaylists = async () => {
 
     const data = await response.json();
     savedPlaylists.value = data.savedPlaylists || [];
-    
+
     // Verificar si es la biblioteca propia
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     isOwnLibrary.value = currentUser.username === username.value;
-    
+
     if (savedPlaylists.value.length === 0) {
       errorPlaylists.value = "Aún no tiene playlists guardadas en la biblioteca.";
     }
@@ -344,11 +326,11 @@ const getUsername = async (userId: number): Promise<string> => {
 
 const viewPlaylistDetails = async (playlist: Playlist) => {
   const playlistId = playlist.id.toString();
-  
+
   if (loadingPlaylistDetails.value.has(playlistId)) return; // Prevent multiple clicks
-  
+
   loadingPlaylistDetails.value.add(playlistId);
-  
+
   try {
     const username = await getUsername(playlist.ownerUserId);
     await router.push(`/studio/playlists/${playlist.id}`);
@@ -361,11 +343,11 @@ const viewPlaylistDetails = async (playlist: Playlist) => {
 
 const toggleSavePlaylist = async (playlist: Playlist) => {
   const playlistId = playlist.id.toString();
-  
+
   if (isSavingPlaylist.value.has(playlistId)) return;
-  
+
   isSavingPlaylist.value.add(playlistId);
-  
+
   try {
     // Confirmar antes de quitar
     const result = await Swal.fire({
@@ -378,7 +360,7 @@ const toggleSavePlaylist = async (playlist: Playlist) => {
       confirmButtonText: 'Sí, quitar',
       cancelButtonText: 'Cancelar',
     });
-    
+
     if (!result.isConfirmed) {
       isSavingPlaylist.value.delete(playlistId);
       return;
@@ -402,7 +384,7 @@ const toggleSavePlaylist = async (playlist: Playlist) => {
 
     // Remover de la lista local
     savedPlaylists.value = savedPlaylists.value.filter(p => p.id !== playlist.id);
-    
+
     Swal.fire({
       icon: 'success',
       title: 'Playlist removida',

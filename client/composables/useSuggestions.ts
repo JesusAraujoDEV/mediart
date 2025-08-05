@@ -1,15 +1,15 @@
-import { ref, computed } from 'vue';
-import type { SearchSuggestion } from '~/types/Recommendations';
+import { ref, computed } from "vue";
+import type { SearchSuggestion } from "~/types/Recommendations";
 
 type AbortOrNull = AbortController | null;
 
 export function useSuggestions(config = useRuntimeConfig()) {
   // State
-  const inputValue = ref('');
+  const inputValue = ref("");
   const selectedTags = ref<SearchSuggestion[]>([]);
   const suggestions = ref<SearchSuggestion[]>([]);
   const showDatalist = ref(false);
-  const searchType = ref<string>('general');
+  const searchType = ref<string>("general");
 
   let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
   let abortController: AbortOrNull = null;
@@ -31,7 +31,9 @@ export function useSuggestions(config = useRuntimeConfig()) {
         const titleMatches = s.title.toLowerCase().includes(q);
         const descriptionMatches =
           s.description && s.description.toLowerCase().includes(q);
-        const notSelected = !selectedTags.value.some((t) => t.title === s.title);
+        const notSelected = !selectedTags.value.some(
+          (t) => t.title === s.title
+        );
         return (titleMatches || descriptionMatches) && notSelected;
       })
       .slice(0, 10);
@@ -40,23 +42,23 @@ export function useSuggestions(config = useRuntimeConfig()) {
   // Helpers
   const getSearchPlaceholder = () => {
     switch (searchType.value) {
-      case 'song':
-        return 'Escribe el nombre de una canción...';
-      case 'artist':
-        return 'Escribe el nombre de un artista...';
-      case 'album':
-        return 'Escribe el nombre de un álbum...';
-      case 'movie':
-        return 'Escribe el nombre de una película...';
-      case 'tvshow':
-        return 'Escribe el nombre de una serie...';
-      case 'book':
-        return 'Escribe el nombre de un libro...';
-      case 'videogame':
-        return 'Escribe el nombre de un videojuego...';
-      case 'general':
+      case "song":
+        return "Escribe el nombre de una canción...";
+      case "artist":
+        return "Escribe el nombre de un artista...";
+      case "album":
+        return "Escribe el nombre de un álbum...";
+      case "movie":
+        return "Escribe el nombre de una película...";
+      case "tvshow":
+        return "Escribe el nombre de una serie...";
+      case "book":
+        return "Escribe el nombre de un libro...";
+      case "videogame":
+        return "Escribe el nombre de un videojuego...";
+      case "general":
       default:
-        return 'Escribe tu consulta aquí...';
+        return "Escribe tu consulta aquí...";
     }
   };
 
@@ -79,10 +81,10 @@ export function useSuggestions(config = useRuntimeConfig()) {
 
     try {
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         signal,
       });
@@ -95,13 +97,13 @@ export function useSuggestions(config = useRuntimeConfig()) {
       const list: SearchSuggestion[] = [];
 
       switch (searchType.value) {
-        case 'song':
+        case "song":
           if (Array.isArray(data.songs)) {
             list.push(
               ...data.songs.map((item: any) => ({
                 title: item.title,
                 coverUrl: item.coverUrl ?? item.thumbnail_url ?? null,
-                type: item.type ?? 'song',
+                type: item.type ?? "song",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description:
                   item.description ??
@@ -113,13 +115,13 @@ export function useSuggestions(config = useRuntimeConfig()) {
           }
           break;
 
-        case 'movie':
+        case "movie":
           if (Array.isArray(data.movies)) {
             list.push(
               ...data.movies.map((item: any) => ({
                 title: item.title,
                 coverUrl: item.coverUrl ?? item.poster_url ?? null,
-                type: item.type ?? 'movie',
+                type: item.type ?? "movie",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description: item.description ?? item.overview ?? null,
               }))
@@ -127,13 +129,13 @@ export function useSuggestions(config = useRuntimeConfig()) {
           }
           break;
 
-        case 'tvshow':
+        case "tvshow":
           if (Array.isArray(data.tvshows)) {
             list.push(
               ...data.tvshows.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.poster_url ?? null,
-                type: item.type ?? 'tvshow',
+                type: item.type ?? "tvshow",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description: item.description ?? item.overview ?? null,
               }))
@@ -141,13 +143,13 @@ export function useSuggestions(config = useRuntimeConfig()) {
           }
           break;
 
-        case 'artist':
+        case "artist":
           if (Array.isArray(data.artists)) {
             list.push(
               ...data.artists.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.image_url ?? null,
-                type: item.type ?? 'artist',
+                type: item.type ?? "artist",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description: item.description ?? null,
               }))
@@ -155,13 +157,13 @@ export function useSuggestions(config = useRuntimeConfig()) {
           }
           break;
 
-        case 'album':
+        case "album":
           if (Array.isArray(data.albums)) {
             list.push(
               ...data.albums.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.thumbnail_url ?? null,
-                type: item.type ?? 'album',
+                type: item.type ?? "album",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description: item.description ?? item.artist_name ?? null,
               }))
@@ -169,13 +171,13 @@ export function useSuggestions(config = useRuntimeConfig()) {
           }
           break;
 
-        case 'book':
+        case "book":
           if (Array.isArray(data.books)) {
             list.push(
               ...data.books.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.thumbnail_url ?? null,
-                type: item.type ?? 'book',
+                type: item.type ?? "book",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description: item.description ?? null,
               }))
@@ -183,13 +185,13 @@ export function useSuggestions(config = useRuntimeConfig()) {
           }
           break;
 
-        case 'videogame':
+        case "videogame":
           if (Array.isArray(data.videogames)) {
             list.push(
               ...data.videogames.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.cover_url ?? null,
-                type: item.type ?? 'videogame',
+                type: item.type ?? "videogame",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description: item.description ?? null,
               }))
@@ -197,14 +199,14 @@ export function useSuggestions(config = useRuntimeConfig()) {
           }
           break;
 
-        case 'general':
+        case "general":
         default:
           if (Array.isArray(data.movies)) {
             list.push(
               ...data.movies.map((item: any) => ({
                 title: item.title,
                 coverUrl: item.coverUrl ?? item.poster_url ?? null,
-                type: item.type ?? 'movie',
+                type: item.type ?? "movie",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description: item.description ?? item.overview ?? null,
               }))
@@ -215,7 +217,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
               ...data.tvshows.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.poster_url ?? null,
-                type: item.type ?? 'tvshow',
+                type: item.type ?? "tvshow",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description: item.description ?? item.overview ?? null,
               }))
@@ -226,7 +228,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
               ...data.songs.map((item: any) => ({
                 title: item.title,
                 coverUrl: item.coverUrl ?? item.thumbnail_url ?? null,
-                type: item.type ?? 'song',
+                type: item.type ?? "song",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description:
                   item.description ??
@@ -241,7 +243,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
               ...data.artists.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.image_url ?? null,
-                type: item.type ?? 'artist',
+                type: item.type ?? "artist",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description: item.description ?? null,
               }))
@@ -252,7 +254,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
               ...data.albums.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.thumbnail_url ?? null,
-                type: item.type ?? 'album',
+                type: item.type ?? "album",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description: item.description ?? item.artist_name ?? null,
               }))
@@ -263,7 +265,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
               ...data.books.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.thumbnail_url ?? null,
-                type: item.type ?? 'book',
+                type: item.type ?? "book",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description: item.description ?? null,
               }))
@@ -274,7 +276,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
               ...data.videogames.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.cover_url ?? null,
-                type: item.type ?? 'videogame',
+                type: item.type ?? "videogame",
                 externalId: (item.externalId ?? item.id)?.toString(),
                 description: item.description ?? null,
               }))
@@ -293,8 +295,8 @@ export function useSuggestions(config = useRuntimeConfig()) {
       }
       suggestions.value = Array.from(unique.values());
     } catch (err: any) {
-      if (err.name === 'AbortError') return;
-      console.error('Error al obtener sugerencias:', err);
+      if (err.name === "AbortError") return;
+      console.error("Error al obtener sugerencias:", err);
       suggestions.value = [];
     } finally {
       abortController = null;
@@ -314,7 +316,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
     if (!selectedTags.value.some((t) => t.title === suggestion.title)) {
       selectedTags.value.push(suggestion);
     }
-    inputValue.value = '';
+    inputValue.value = "";
     showDatalist.value = false;
     suggestions.value = [];
   };
@@ -333,17 +335,19 @@ export function useSuggestions(config = useRuntimeConfig()) {
       selectedTags.value.push({
         title: inputValue.value.trim(),
         coverUrl: null,
-        type: 'custom',
+        type: "custom",
         externalId: undefined,
       });
     }
-    inputValue.value = '';
+    inputValue.value = "";
     showDatalist.value = false;
     suggestions.value = [];
   };
 
   const removeTag = (tag: SearchSuggestion) => {
-    selectedTags.value = selectedTags.value.filter((t) => t.title !== tag.title);
+    selectedTags.value = selectedTags.value.filter(
+      (t) => t.title !== tag.title
+    );
   };
 
   const focusInput = (el?: HTMLInputElement | null) => {

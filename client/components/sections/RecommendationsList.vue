@@ -75,12 +75,9 @@ function openExternal(item: RecommendationItem) {
     <div v-if="error" class="mb-4 rounded-md border border-red-500/40 bg-red-500/10 p-4 text-red-200">
       <div class="flex items-start justify-between gap-4">
         <p class="text-sm">{{ error }}</p>
-        <button
-          type="button"
+        <button type="button"
           class="rounded-md bg-red-500/20 px-3 py-1.5 text-sm font-medium text-red-100 hover:bg-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-400/50"
-          aria-label="Retry fetching recommendations"
-          @click="onRetry"
-        >
+          aria-label="Retry fetching recommendations" @click="onRetry">
           Retry
         </button>
       </div>
@@ -97,41 +94,29 @@ function openExternal(item: RecommendationItem) {
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="!error && !loading && items.length === 0" class="rounded-lg border border-white/10 bg-white/5 p-8 text-center text-white/70">
+    <div v-else-if="!error && !loading && items.length === 0"
+      class="rounded-lg border border-white/10 bg-white/5 p-8 text-center text-white/70">
       No recommendations yet. Choose a category and submit a search.
     </div>
 
     <!-- Results -->
     <ul v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <li
-        v-for="(item, index) in items"
-        :key="item.id ?? item.externalId ?? index"
-        class="group relative overflow-hidden rounded-lg border border-white/10 bg-white/5 shadow-sm transition hover:border-white/20"
-      >
+      <li v-for="(item, index) in items" :key="item.id ?? item.externalId ?? index"
+        class="group relative overflow-hidden rounded-lg border border-white/10 bg-white/5 shadow-sm transition hover:border-white/20">
         <div class="flex h-full flex-col">
           <div class="relative">
-            <button
-              type="button"
-              class="block w-full overflow-hidden"
+            <button type="button" class="block w-full overflow-hidden"
               :aria-label="item.externalUrl ? 'Open ' + (item.title || 'item') + ' in new tab' : 'No external link available'"
-              @click="openExternal(item)"
-            >
-              <img
-                :src="getImage(item)"
-                :alt="item.title || 'Cover'"
+              @click="openExternal(item)">
+              <img :src="getImage(item)" :alt="item.title || 'Cover'"
                 class="h-44 w-full object-cover transition duration-300 group-hover:scale-[1.02]"
-                @error="(e: Event) => ((e.target as HTMLImageElement).src = '/placeholder.svg')"
-              />
+                @error="(e: Event) => ((e.target as HTMLImageElement).src = '/placeholder.svg')" />
             </button>
 
             <div class="absolute right-2 top-2">
-              <button
-                type="button"
+              <button type="button"
                 class="rounded-md bg-black/50 px-2 py-1 text-xs text-white opacity-80 shadow hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-white/40"
-                @click="onRemove(index)"
-                :aria-label="`Remove ${item.title || 'item'}`"
-                title="Remove"
-              >
+                @click="onRemove(index)" :aria-label="`Remove ${item.title || 'item'}`" title="Remove">
                 Remove
               </button>
             </div>
@@ -140,12 +125,8 @@ function openExternal(item: RecommendationItem) {
           <div class="flex flex-1 flex-col p-4">
             <h3 class="mb-1 line-clamp-2 text-base font-semibold text-white">
               <template v-if="item.externalUrl">
-                <a
-                  :href="item.externalUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="hover:underline"
-                >{{ item.title }}</a>
+                <a :href="item.externalUrl" target="_blank" rel="noopener noreferrer" class="hover:underline">{{
+                  item.title }}</a>
               </template>
               <template v-else>{{ item.title }}</template>
             </h3>
