@@ -4,7 +4,7 @@
   >
     <!-- Logo y perfil en móvil -->
     <div class="flex items-center gap-3 md:gap-4">
-      <NuxtLink class="flex items-center justify-center" to="/studio">
+      <NuxtLink class="flex items-center justify-center hover:scale-110 transition-transform duration-200 ease-in-out" to="/studio">
         <img
           id="logoNavbar"
           class="w-8 h-8 md:w-10 md:h-10"
@@ -12,7 +12,7 @@
           alt="Logo"
         />
       </NuxtLink>
-      <NuxtLink class="flex items-center justify-center" :to="`/profile/${actualUser ? actualUser : 'anonymous'}`">
+      <NuxtLink class="flex items-center justify-center hover:scale-110 transition-transform duration-200 ease-in-out" :to="`/profile/${actualUser ? actualUser : 'anonymous'}`">
         <img
           v-if="isLoading"
           class="w-8 h-8 md:w-10 md:h-10 rounded-full animate-pulse object-cover"
@@ -31,13 +31,13 @@
 
     <!-- Acciones en móvil -->
     <div class="flex items-center gap-3 md:gap-4">
-      <NuxtLink class="flex items-center cursor-pointer p-2 rounded-full hover:bg-white/10 transition-colors" :to="`/studio/help`">
+      <NuxtLink class="flex items-center cursor-pointer p-2 rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out" :to="`/studio/help`">
         <Icon name="material-symbols:help" size="1.5em" class="md:text-2xl" />
       </NuxtLink>
-      <NuxtLink class="flex items-center cursor-pointer p-2 rounded-full hover:bg-white/10 transition-colors" :to="`/studio/search`">
+      <NuxtLink class="flex items-center cursor-pointer p-2 rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out" :to="`/studio/search`">
         <Icon name="material-symbols:search" size="1.5em" class="md:text-2xl" />
       </NuxtLink>
-      <div @click="logout" class="flex items-center cursor-pointer p-2 rounded-full hover:bg-white/10 transition-colors">
+      <div @click="logout" class="flex items-center cursor-pointer p-2 rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out">
         <Icon name="material-symbols:logout" size="1.5em" class="md:text-2xl" />
       </div>
     </div>

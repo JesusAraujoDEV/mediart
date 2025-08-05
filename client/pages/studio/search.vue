@@ -19,7 +19,36 @@
             @update:modelSearchType="(v) => (searchType = v)"
             @search="searchUsers"
             @focus-input="() => {}"
-          />
+          >
+            <template #search-type-select>
+              <div class="flex items-center justify-center max-md:w-full">
+                <select
+                  v-model="searchType"
+                  class="p-3 px-6 rounded-lg bg-gray-700/80 w-fit text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer"
+                >
+                  <option value="users">Usuarios</option>
+                  <option value="general">Todo</option>
+                  <option value="song">Canciones</option>
+                  <option value="artist">Artistas</option>
+                  <option value="album">Álbumes</option>
+                  <option value="movie">Películas</option>
+                  <option value="tvshow">Series</option>
+                  <option value="book">Libros</option>
+                  <option value="videogame">Videojuegos</option>
+                </select>
+              </div>
+            </template>
+
+            <template #search-button>
+              <button
+                @click="searchUsers"
+                :disabled="isSearching"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-300 text-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:scale-105 transform"
+              >
+                {{ isSearching ? 'Buscando...' : 'Buscar' }}
+              </button>
+            </template>
+          </SearchBar>
         </div>
 
         <p v-if="searchMessage" :class="{'text-red-400': searchError, 'text-green-400': !searchError}" class="mt-4 text-sm">
@@ -35,7 +64,6 @@
         </svg>
       </div>
 
-      <!-- Results for users -->
       <div v-if="searchType === 'users' && users.length > 0" class="glassEffect bg-gray-800/50 rounded-lg p-6 shadow-xl flex-grow overflow-y-auto custom-scroll">
         <h2 class="text-2xl font-bold mb-5 text-gray-200">Resultados de Búsqueda de Usuarios ({{ users.length }})</h2>
         <div class="grid grid-cols-1 gap-4">
@@ -60,7 +88,6 @@
         </div>
       </div>
 
-      <!-- Results for other categories -->
       <div v-else-if="searchType !== 'users' && searchResults.length > 0" class="glassEffect bg-gray-800/50 rounded-lg p-6 shadow-xl flex-grow overflow-y-auto custom-scroll">
         <h2 class="text-2xl font-bold mb-5 text-gray-200">Resultados de Búsqueda ({{ searchResults.length }})</h2>
         <div class="grid grid-cols-1 gap-4">

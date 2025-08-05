@@ -8,11 +8,10 @@
     <div
       class="flex max-md:flex-col gap-4 items-center justify-center w-full mb-4 px-4 max-w-4xl max-md:mt-20"
     >
-      <!-- Select de tipo de búsqueda -->
       <div class="flex items-center justify-center max-md:w-full">
         <select
           v-model="searchType"
-          class="p-2 px-6 rounded-full bg-gray-700 w-fit text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none"
+          class="p-2 px-6 rounded-full bg-gray-700/80 w-fit text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer"
         >
           <option value="general">Todo</option>
           <option value="song">Canciones</option>
@@ -96,7 +95,7 @@
       <div class="flex items-center justify-center max-md:w-full max-md:max-w-4xl">
         <select
           v-model="selectedCategory"
-          class="p-2 px-6 rounded-full bg-gray-700 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none"
+          class="p-2 px-6 rounded-full bg-gray-700/80 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer"
         >
           <option value="mix">Tipo de lista: Mezcla</option>
           <option value="songs">Tipo de lista: Canciones</option>
@@ -109,15 +108,16 @@
         </select>
         <button
           @click="handleSendClick"
-          class="ml-3 p-2 rounded-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300 shadow-lg flex items-center justify-center text-white"
+          class="ml-3 p-2 rounded-full cursor-pointer glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm"
           aria-label="Generar recomendaciones"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
-            width="24"
-            height="24"
+            width="28"
+            height="28"
             fill="currentColor"
+            class="drop-shadow-sm"
           >
             <path d="M3 20v-6l8-2l-8-2V4l19 8z" />
           </svg>
@@ -181,7 +181,6 @@
               :key="item.externalId || item.title"
               class="bg-gray-700/60 rounded-xl p-4 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-lg transform transition-transform duration-300 hover:scale-105 hover:bg-gray-600/70 border border-gray-600 relative group"
             >
-              <!-- Botón de eliminar -->
               <button
                 @click="removeRecommendation(index)"
                 class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 z-10"
