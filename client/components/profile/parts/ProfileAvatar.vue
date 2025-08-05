@@ -18,9 +18,9 @@ const props = defineProps<{
 }>()
 
 // Only crop circularly; no pulse. Compute src per your snippet rules.
-const PLACEHOLDER = '/resources/studio/previewProfile.webp'
+const PLACEHOLDER = '/avatar-default.svg'
 const resolvedSrc = computed(() => {
-  const url = (props.avatarUrl ?? '').toString()
+  const url = (props.avatarUrl ?? '').toString().trim()
   if (url) {
     return url.startsWith('http') ? url : `${props.backendBase ?? ''}${url}`
   }

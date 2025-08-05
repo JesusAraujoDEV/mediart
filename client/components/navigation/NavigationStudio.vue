@@ -22,7 +22,7 @@
         <img
           v-else
           class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover"
-          :src="(userProfile.profilePictureUrl ? (userProfile.profilePictureUrl.startsWith('http') ? userProfile.profilePictureUrl : config.public.backend + userProfile.profilePictureUrl) : '/resources/studio/previewProfile.webp')"
+          :src="(userProfile.profilePictureUrl ? (userProfile.profilePictureUrl.startsWith('http') ? userProfile.profilePictureUrl : config.public.backend + userProfile.profilePictureUrl) : '/avatar-default.svg')"
           @error="handleImageError"
           alt="Profile Preview"
         />
@@ -59,7 +59,7 @@ const config = useRuntimeConfig();
 const userProfile = ref<UserProfile>({
   username: "",
   email: "",
-  profilePictureUrl: "/resources/studio/previewProfile.webp",
+  profilePictureUrl: "/avatar-default.svg",
   bio: "",
   id: -1,
 });
@@ -92,7 +92,7 @@ const loadUserProfile = async () => {
     if (data.value) {
       userProfile.value = {
         ...data.value,
-        profilePictureUrl: data.value.profilePictureUrl || "/resources/studio/previewProfile.webp",
+        profilePictureUrl: data.value.profilePictureUrl || "/avatar-default.svg",
       };
     }
   } catch (err) {
@@ -114,7 +114,7 @@ const logout = () => {
 // Función para manejar el error de carga de imagen
 function handleImageError(event: Event) {
   const img = event.target as HTMLImageElement;
-  img.src = '/resources/studio/previewProfile.webp';
+  img.src = '/avatar-default.svg';
 }
 
 onMounted(() => {
