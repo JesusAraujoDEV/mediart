@@ -24,19 +24,19 @@
     <!-- Contadores de amigos y seguidores clickeables -->
     <div class="flex gap-6 my-2">
       <button
-        class="flex flex-col items-center focus:outline-none hover:text-purple-500 transition-colors"
+        class="flex flex-col items-center focus:outline-none hover:text-purple-500 transition-colors cursor-pointer"
         @click="goToFollowing"
         :disabled="isLoading"
-        style="background: none; border: none; cursor: pointer;"
+        style="background: none; border: none;"
       >
         <span class="text-lg font-bold">{{ userProfile.followingUsers?.length || 0 }}</span>
         <span class="text-xs text-gray-400">Amigos</span>
       </button>
       <button
-        class="flex flex-col items-center focus:outline-none hover:text-purple-500 transition-colors"
+        class="flex flex-col items-center focus:outline-none hover:text-purple-500 transition-colors cursor-pointer"
         @click="goToFollowers"
         :disabled="isLoading"
-        style="background: none; border: none; cursor: pointer;"
+        style="background: none; border: none;"
       >
         <span class="text-lg font-bold">{{ userProfile.followersUsers?.length || 0 }}</span>
         <span class="text-xs text-gray-400">Seguidores</span>
@@ -48,7 +48,7 @@
         v-if="!isFriend"
         @click="addFriend"
         :disabled="isFriendActionLoading"
-        class="glassEffect text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 hover:border-white/40"
+        class="glassEffect text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 hover:border-white/40 cursor-pointer"
       >
         {{ isFriendActionLoading ? 'Agregando...' : 'Agregar amigo' }}
       </button>
@@ -56,7 +56,7 @@
         v-else
         @click="removeFriend"
         :disabled="isFriendActionLoading"
-        class="glassEffect text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 hover:border-white/40"
+        class="glassEffect text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 hover:border-white/40 cursor-pointer"
       >
         {{ isFriendActionLoading ? 'Eliminando...' : 'Eliminar de amigos' }}
       </button>
@@ -65,7 +65,7 @@
     <NuxtLink 
       v-else 
       to="/profile/edit" 
-      class="glassEffect text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-105 transform"
+      class="glassEffect text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer"
     >
       Editar Perfil
     </NuxtLink>
@@ -83,7 +83,7 @@
               v-if="!isOwner && !savedPlaylistsIds.includes(playlist.id)"
               :disabled="isSavingPlaylist[playlist.id]"
               @click="savePlaylist(playlist.id)"
-              class="glassEffect text-white px-4 py-2 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 hover:border-white/40 hover:scale-105 transform"
+              class="glassEffect text-white px-4 py-2 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer"
             >
               <span v-if="!isSavingPlaylist[playlist.id]">Guardar en mi biblioteca</span>
               <span v-else>Guardando...</span>
