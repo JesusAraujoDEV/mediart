@@ -5,36 +5,33 @@
 
     <div v-if="isLoading" class="flex flex-col items-center justify-center h-full">
       <p class="text-xl mb-4 text-gray-300">Cargando playlist...</p>
-      <svg class="animate-spin h-10 w-10 text-purple-400 mt-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <svg class="animate-spin h-10 w-10 text-purple-400 mt-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+        viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
       </svg>
     </div>
 
     <div v-else-if="errorMessage" class="flex flex-col items-center justify-center h-full text-red-400 text-center">
       <p class="text-xl mb-4">{{ errorMessage }}</p>
-      <button @click="fetchPlaylist" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg">
+      <button @click="fetchPlaylist"
+        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg">
         Reintentar
       </button>
     </div>
 
     <div v-else class="flex flex-col flex-grow w-full max-w-6xl mt-20 md:mt-24 pb-4">
-      <div class="glassEffect bg-gray-800/50 rounded-lg p-6 mb-6 shadow-xl flex flex-col md:flex-row items-center md:items-start text-center md:text-left relative">
-        <div class="w-40 h-40 rounded-lg mb-4 md:mb-0 md:mr-6 flex-shrink-0 shadow-md border border-gray-600 overflow-hidden">
-          <img
-            v-if="playlist.playlistCoverUrl"
-            :src="playlist.playlistCoverUrl"
-            alt="Playlist Cover"
-            class="w-full h-full object-cover"
-          />
+      <div
+        class="glassEffect bg-gray-800/50 rounded-lg p-6 mb-6 shadow-xl flex flex-col md:flex-row items-center md:items-start text-center md:text-left relative">
+        <div
+          class="w-40 h-40 rounded-lg mb-4 md:mb-0 md:mr-6 flex-shrink-0 shadow-md border border-gray-600 overflow-hidden">
+          <img v-if="playlist.playlistCoverUrl" :src="playlist.playlistCoverUrl" alt="Playlist Cover"
+            class="w-full h-full object-cover" />
           <div v-else class="w-full h-full grid grid-cols-2 grid-rows-2 gap-0 bg-gray-700">
-            <img
-              v-for="i in 4"
-              :key="i"
-              :src="playlist.items?.[i - 1]?.coverUrl || '/resources/item-placeholder.webp'"
-              :alt="playlist.items?.[i - 1]?.title || 'Item Cover'"
-              class="w-full h-full object-cover"
-            />
+            <img v-for="i in 4" :key="i" :src="playlist.items?.[i - 1]?.coverUrl || '/resources/item-placeholder.webp'"
+              :alt="playlist.items?.[i - 1]?.title || 'Item Cover'" class="w-full h-full object-cover" />
           </div>
         </div>
 
@@ -51,7 +48,9 @@
           </p>
           <div v-if="playlist.isCollaborative" class="mt-2 flex items-center text-green-400 text-sm font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+              <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                clip-rule="evenodd" />
             </svg>
             Colaborativa
           </div>
@@ -61,24 +60,23 @@
             <span class="text-purple-300 font-semibold text-base">Modo edición activo: puedes eliminar elementos</span>
           </div>
           <!-- Botón de editar -->
-          <button @click="toggleEditMode" :class="['absolute cursor-pointer top-4 right-4 rounded-full p-2 shadow-md transition-colors', editMode ? 'bg-purple-600 text-white' : 'bg-gray-700 hover:bg-purple-600 text-white']" title="Editar playlist">
+          <button @click="toggleEditMode"
+            :class="['absolute cursor-pointer top-4 right-4 rounded-full p-2 shadow-md transition-colors', editMode ? 'bg-purple-600 text-white' : 'bg-gray-700 hover:bg-purple-600 text-white']"
+            title="Editar playlist">
             <Icon name="material-symbols:edit" size="1.5em" />
           </button>
           <!-- Botón de configuraciones -->
-          <button @click="openSettingsModal" class="absolute cursor-pointer top-4 right-16 rounded-full p-2 shadow-md transition-colors bg-gray-700 hover:bg-purple-600 text-white" title="Configuraciones de la playlist">
+          <button @click="openSettingsModal"
+            class="absolute cursor-pointer top-4 right-16 rounded-full p-2 shadow-md transition-colors bg-gray-700 hover:bg-purple-600 text-white"
+            title="Configuraciones de la playlist">
             <Icon name="material-symbols:settings" size="1.5em" />
           </button>
           <!-- Botón de guardar playlist -->
-          <button 
-            @click="toggleSavePlaylist" 
-            :disabled="isSavingPlaylist"
-            :class="[
-              'absolute cursor-pointer top-4 right-28 rounded-full p-2 shadow-md transition-colors',
-              isSavingPlaylist ? 'bg-gray-600 text-gray-400' : 
+          <button @click="toggleSavePlaylist" :disabled="isSavingPlaylist" :class="[
+            'absolute cursor-pointer top-4 right-28 rounded-full p-2 shadow-md transition-colors',
+            isSavingPlaylist ? 'bg-gray-600 text-gray-400' :
               isPlaylistSaved ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-700 hover:bg-purple-600 text-white'
-            ]" 
-            :title="isPlaylistSaved ? 'Quitar de mi biblioteca' : 'Guardar en mi biblioteca'"
-          >
+          ]" :title="isPlaylistSaved ? 'Quitar de mi biblioteca' : 'Guardar en mi biblioteca'">
             <Icon v-if="isSavingPlaylist" name="material-symbols:sync" size="1.5em" class="animate-spin" />
             <Icon v-else-if="isPlaylistSaved" name="material-symbols:bookmark" size="1.5em" />
             <Icon v-else name="material-symbols:bookmark-add" size="1.5em" />
@@ -87,28 +85,22 @@
       </div>
 
       <div class="glassEffect bg-gray-800/50 rounded-lg p-6 shadow-xl flex-grow overflow-y-auto custom-scroll">
-        <h2 class="text-2xl font-bold mb-5 text-gray-200">Contenido de la Playlist ({{ playlist.items?.length || 0 }})</h2>
+        <h2 class="text-2xl font-bold mb-5 text-gray-200">Contenido de la Playlist ({{ playlist.items?.length || 0 }})
+        </h2>
 
         <!-- Buscador de ítems para agregar a la playlist (solo en modo edición) -->
         <div v-if="editMode" class="mb-8 p-4 bg-gray-700/40 rounded-lg border border-gray-600">
           <div class="flex flex-col md:flex-row md:items-end gap-4 mb-4">
             <div class="flex flex-col flex-1">
               <label class="text-sm text-gray-300 mb-1">Buscar ítems</label>
-              <input
-                v-model="itemSearchQuery"
-                @input="debouncedSearchItems"
-                type="text"
+              <input v-model="itemSearchQuery" @input="debouncedSearchItems" type="text"
                 :placeholder="getItemSearchPlaceholder()"
-                class="p-3 w-full rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-              />
+                class="p-3 w-full rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all" />
             </div>
             <div class="flex flex-col w-40">
               <label class="text-sm text-gray-300 mb-1">Tipo</label>
-              <select
-                v-model="itemSearchType"
-                @change="debouncedSearchItems"
-                class="p-3 rounded-lg bg-gray-700/80 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 shadow-md appearance-none"
-              >
+              <select v-model="itemSearchType" @change="debouncedSearchItems"
+                class="p-3 rounded-lg bg-gray-700/80 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 shadow-md appearance-none">
                 <option value="general">Todo</option>
                 <option value="song">Canciones</option>
                 <option value="artist">Artistas</option>
@@ -123,59 +115,49 @@
           <div v-if="isItemSearching" class="flex items-center gap-2 text-gray-400 mb-2">
             <Icon name="material-symbols:sync" size="1.2em" class="animate-spin" /> Buscando...
           </div>
-          <div v-if="itemSearchResults.length > 0" class="mb-2 max-h-64 overflow-y-auto custom-scroll divide-y divide-gray-700">
-            <div
-              v-for="item in itemSearchResults"
-              :key="item.type + '-' + item.externalId"
-              class="flex items-center gap-3 p-2 hover:bg-gray-600/40 rounded transition-colors"
-            >
-              <img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title" class="w-12 h-12 object-cover rounded border border-gray-500" />
-              <div v-else class="w-12 h-12 bg-gray-600 rounded flex items-center justify-center text-gray-400 text-xs border border-gray-500">Sin portada</div>
+          <div v-if="itemSearchResults.length > 0"
+            class="mb-2 max-h-64 overflow-y-auto custom-scroll divide-y divide-gray-700">
+            <div v-for="item in itemSearchResults" :key="item.type + '-' + item.externalId"
+              class="flex items-center gap-3 p-2 hover:bg-gray-600/40 rounded transition-colors">
+              <img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title"
+                class="w-12 h-12 object-cover rounded border border-gray-500" />
+              <div v-else
+                class="w-12 h-12 bg-gray-600 rounded flex items-center justify-center text-gray-400 text-xs border border-gray-500">
+                Sin portada</div>
               <div class="flex-grow">
                 <div class="font-semibold text-white">{{ item.title }}</div>
                 <div class="text-xs text-gray-300 capitalize">{{ item.type }}</div>
                 <div v-if="item.description" class="text-xs text-gray-400 line-clamp-1">{{ item.description }}</div>
               </div>
-              <button
-                @click="addSingleItemToPlaylist(item)"
+              <button @click="addSingleItemToPlaylist(item)"
                 :disabled="isAddingItemsMap[item.externalId] || isItemInPlaylist(item.externalId)"
                 class="ml-2 px-3 py-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-                :title="isItemInPlaylist(item.externalId) ? 'Ya está en la playlist' : 'Agregar a la playlist'"
-              >
-                <Icon v-if="isAddingItemsMap[item.externalId]" name="material-symbols:sync" size="1.2em" class="animate-spin" />
+                :title="isItemInPlaylist(item.externalId) ? 'Ya está en la playlist' : 'Agregar a la playlist'">
+                <Icon v-if="isAddingItemsMap[item.externalId]" name="material-symbols:sync" size="1.2em"
+                  class="animate-spin" />
                 <Icon v-else name="material-symbols:add" size="1.2em" />
               </button>
             </div>
           </div>
-          <div v-if="itemSearchResults.length === 0 && itemSearchQuery.trim() && !isItemSearching" class="text-gray-400 text-sm mb-2">No se encontraron resultados.</div>
+          <div v-if="itemSearchResults.length === 0 && itemSearchQuery.trim() && !isItemSearching"
+            class="text-gray-400 text-sm mb-2">No se encontraron resultados.</div>
           <div v-if="addItemsSuccessMessage" class="text-green-400 text-sm mt-2">{{ addItemsSuccessMessage }}</div>
           <div v-if="addItemsErrorMessage" class="text-red-400 text-sm mt-2">{{ addItemsErrorMessage }}</div>
         </div>
         <!-- Fin buscador de ítems -->
         <div v-if="playlist.items && playlist.items.length > 0" class="grid grid-cols-1 gap-4">
-          <div
-            v-for="(item, idx) in playlist.items"
-            :key="item.id"
-            class="bg-gray-700/60 rounded-lg p-3 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white relative group"
-          >
+          <div v-for="(item, idx) in playlist.items" :key="item.id"
+            class="bg-gray-700/60 rounded-lg p-3 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white relative group">
             <!-- Botón de eliminar en modo edición -->
-            <button
-              v-if="editMode"
-              @click="confirmDeleteItem(item.id, idx)"
+            <button v-if="editMode" @click="confirmDeleteItem(item.id, idx)"
               class="absolute cursor-pointer top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors z-10"
-              title="Eliminar este elemento de la playlist"
-            >
+              title="Eliminar este elemento de la playlist">
               <Icon name="material-symbols:close" size="1.2em" />
             </button>
-            <NuxtLink
-              :to="`/studio/item/${item.id}`"
-              class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left flex-grow"
-            >
-              <img
-                :src="item.coverUrl || '/resources/item-placeholder.webp'"
-                :alt="item.title || 'Item Cover'"
-                class="w-24 h-24 object-cover rounded-md mb-3 sm:mb-0 sm:mr-4 flex-shrink-0 shadow-sm border border-gray-500"
-              />
+            <NuxtLink :to="`/studio/item/${item.id}`"
+              class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left flex-grow">
+              <img :src="item.coverUrl || '/resources/item-placeholder.webp'" :alt="item.title || 'Item Cover'"
+                class="w-24 h-24 object-cover rounded-md mb-3 sm:mb-0 sm:mr-4 flex-shrink-0 shadow-sm border border-gray-500" />
               <div class="flex-grow flex flex-col justify-center items-center sm:items-start">
                 <h3 class="font-bold text-lg text-white mb-1">{{ item.title }}</h3>
                 <p class="text-sm text-gray-300 capitalize mb-1">
@@ -190,10 +172,7 @@
                 <p v-if="item.avgRating !== null && item.avgRating !== undefined" class="text-xs text-gray-400 mb-2">
                   Valoración: {{ parseFloat(item.avgRating.toString()).toFixed(1) }} / 10
                 </p>
-                <span
-                  v-if="item.externalUrl"
-                  class="text-blue-400 text-sm font-semibold mt-1"
-                >
+                <span v-if="item.externalUrl" class="text-blue-400 text-sm font-semibold mt-1">
                   Ver más en {{ item.externalSource }}
                 </span>
               </div>
@@ -207,11 +186,14 @@
     </div>
 
     <!-- Modal de Configuraciones -->
-    <div v-if="showSettingsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-gray-800 rounded-xl p-8 w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl border border-gray-600">
+    <div v-if="showSettingsModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div
+        class="bg-gray-800 rounded-xl p-8 w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl border border-gray-600">
         <div class="flex justify-between items-center mb-8 border-b border-gray-600 pb-4">
           <h2 class="text-3xl font-bold text-white">Configuraciones de la Playlist</h2>
-          <button @click="closeSettingsModal" class="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-700">
+          <button @click="closeSettingsModal"
+            class="text-gray-400 hover:text-white transition-colors p-2 rounded-full hover:bg-gray-700">
             <Icon name="material-symbols:close" size="1.8em" />
           </button>
         </div>
@@ -220,29 +202,23 @@
           <!-- Nombre -->
           <div>
             <label class="block text-sm font-semibold text-gray-300 mb-3">Nombre de la Playlist</label>
-            <input
-              v-model="settingsForm.name"
-              type="text"
+            <input v-model="settingsForm.name" type="text"
               class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-              required
-            />
+              required />
           </div>
 
           <!-- Descripción -->
           <div>
             <label class="block text-sm font-semibold text-gray-300 mb-3">Descripción</label>
-            <textarea
-              v-model="settingsForm.description"
-              rows="4"
+            <textarea v-model="settingsForm.description" rows="4"
               class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
-              placeholder="Describe tu playlist..."
-            ></textarea>
+              placeholder="Describe tu playlist..."></textarea>
           </div>
 
           <!-- Imagen de portada -->
           <div>
             <label class="block text-sm font-semibold text-gray-300 mb-3">Imagen de Portada</label>
-            
+
             <!-- Opciones de imagen -->
             <div class="space-y-4">
               <!-- Opción 1: Subir archivo -->
@@ -251,29 +227,18 @@
                   <Icon name="material-symbols:upload-file" size="1.5em" class="text-purple-400" />
                   <h4 class="text-base font-medium text-white">Subir archivo</h4>
                 </div>
-                <input
-                  type="file"
-                  @change="handleCoverFileUpload"
-                  accept="image/*"
-                  ref="coverFileInput"
-                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
-                />
+                <input type="file" @change="handleCoverFileUpload" accept="image/*" ref="coverFileInput"
+                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700" />
                 <p class="text-xs text-gray-400 mt-2">Formatos soportados: JPG, PNG, GIF, WEBP</p>
               </div>
 
               <!-- Vista previa de la imagen actual -->
               <div v-if="currentCoverPreview" class="p-4 bg-gray-700/30 rounded-lg border border-gray-600">
                 <h4 class="text-sm font-medium text-gray-300 mb-3">Vista previa actual:</h4>
-                <img
-                  :src="currentCoverPreview"
-                  alt="Vista previa de portada"
-                  class="w-32 h-32 object-cover rounded-lg border border-gray-500"
-                />
-                <button
-                  @click="removeCurrentCover"
-                  type="button"
-                  class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-                >
+                <img :src="currentCoverPreview" alt="Vista previa de portada"
+                  class="w-32 h-32 object-cover rounded-lg border border-gray-500" />
+                <button @click="removeCurrentCover" type="button"
+                  class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
                   Eliminar imagen actual
                 </button>
               </div>
@@ -282,12 +247,8 @@
 
           <!-- Colaborativa -->
           <div class="flex items-center p-4 bg-gray-700/50 rounded-lg border border-gray-600">
-            <input
-              v-model="settingsForm.isCollaborative"
-              type="checkbox"
-              id="collaborative"
-              class="w-5 h-5 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-2 cursor-pointer"
-            />
+            <input v-model="settingsForm.isCollaborative" type="checkbox" id="collaborative"
+              class="w-5 h-5 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500 focus:ring-2 cursor-pointer" />
             <label for="collaborative" class="ml-3 text-base font-medium text-gray-300 cursor-pointer">
               Hacer colaborativa
             </label>
@@ -297,24 +258,23 @@
           </div>
 
           <!-- Sección de colaboradores (solo si es colaborativa) -->
-          <div v-if="settingsForm.isCollaborative" class="space-y-6 p-6 bg-gray-700/30 rounded-lg border border-gray-600">
+          <div v-if="settingsForm.isCollaborative"
+            class="space-y-6 p-6 bg-gray-700/30 rounded-lg border border-gray-600">
             <div class="flex items-center gap-3 mb-4">
               <Icon name="material-symbols:group" size="1.8em" class="text-purple-400" />
               <h3 class="text-xl font-semibold text-white">Colaboradores</h3>
             </div>
-            
+
             <!-- Lista de colaboradores actuales -->
             <div v-if="playlist.collaborators && playlist.collaborators.length > 0" class="space-y-3">
               <h4 class="text-sm font-semibold text-gray-300 border-b border-gray-600 pb-2">Colaboradores actuales:</h4>
-              <div v-for="collaborator in playlist.collaborators" :key="collaborator.id" class="flex items-center justify-between bg-gray-600 p-4 rounded-lg">
+              <div v-for="collaborator in playlist.collaborators" :key="collaborator.id"
+                class="flex items-center justify-between bg-gray-600 p-4 rounded-lg">
                 <div class="flex items-center">
-                  <img
-                    v-if="collaborator.profilePictureUrl"
-                    :src="collaborator.profilePictureUrl"
-                    :alt="collaborator.username"
-                    class="w-10 h-10 rounded-full mr-4 border-2 border-gray-500"
-                  />
-                  <div v-else class="w-10 h-10 rounded-full mr-4 bg-gray-500 flex items-center justify-center border-2 border-gray-400">
+                  <img v-if="collaborator.profilePictureUrl" :src="collaborator.profilePictureUrl"
+                    :alt="collaborator.username" class="w-10 h-10 rounded-full mr-4 border-2 border-gray-500" />
+                  <div v-else
+                    class="w-10 h-10 rounded-full mr-4 bg-gray-500 flex items-center justify-center border-2 border-gray-400">
                     <Icon name="material-symbols:person" size="1.5em" class="text-gray-300" />
                   </div>
                   <div>
@@ -324,13 +284,10 @@
                     </p>
                   </div>
                 </div>
-                <button
-                  v-if="collaborator.id !== playlist.ownerUserId"
-                  @click="removeCollaborator(collaborator.id)"
+                <button v-if="collaborator.id !== playlist.ownerUserId" @click="removeCollaborator(collaborator.id)"
                   type="button"
                   class="text-red-400 hover:text-red-300 p-2 rounded-full hover:bg-red-500/10 transition-colors"
-                  title="Eliminar colaborador"
-                >
+                  title="Eliminar colaborador">
                   <Icon name="material-symbols:remove" size="1.3em" />
                 </button>
               </div>
@@ -340,37 +297,30 @@
             <div class="space-y-4">
               <h4 class="text-sm font-semibold text-gray-300 border-b border-gray-600 pb-2">Agregar colaborador:</h4>
               <div class="relative">
-                <input
-                  v-model="newCollaboratorUsername"
-                  @input="handleSearchInput"
-                  type="text"
+                <input v-model="newCollaboratorUsername" @input="handleSearchInput" type="text"
                   placeholder="Buscar usuario por nombre..."
-                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                />
-                
+                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" />
+
                 <!-- Loading indicator -->
                 <div v-if="isSearching" class="absolute right-4 top-1/2 transform -translate-y-1/2">
-                  <svg class="animate-spin h-5 w-5 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg class="animate-spin h-5 w-5 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
                   </svg>
                 </div>
 
                 <!-- Search results dropdown -->
-                <div v-if="showSearchResults && searchResults.length > 0" class="absolute top-full left-0 right-0 bg-gray-700 border border-gray-600 rounded-lg mt-2 max-h-56 overflow-y-auto z-10 shadow-xl">
-                  <div
-                    v-for="user in searchResults"
-                    :key="user.id"
-                    @click="selectUser(user)"
-                    class="flex items-center p-4 hover:bg-gray-600 cursor-pointer transition-colors border-b border-gray-600 last:border-b-0"
-                  >
-                    <img
-                      v-if="user.profilePictureUrl"
-                      :src="user.profilePictureUrl"
-                      :alt="user.username"
-                      class="w-10 h-10 rounded-full mr-4 border-2 border-gray-500"
-                    />
-                    <div v-else class="w-10 h-10 rounded-full mr-4 bg-gray-500 flex items-center justify-center border-2 border-gray-400">
+                <div v-if="showSearchResults && searchResults.length > 0"
+                  class="absolute top-full left-0 right-0 bg-gray-700 border border-gray-600 rounded-lg mt-2 max-h-56 overflow-y-auto z-10 shadow-xl">
+                  <div v-for="user in searchResults" :key="user.id" @click="selectUser(user)"
+                    class="flex items-center p-4 hover:bg-gray-600 cursor-pointer transition-colors border-b border-gray-600 last:border-b-0">
+                    <img v-if="user.profilePictureUrl" :src="user.profilePictureUrl" :alt="user.username"
+                      class="w-10 h-10 rounded-full mr-4 border-2 border-gray-500" />
+                    <div v-else
+                      class="w-10 h-10 rounded-full mr-4 bg-gray-500 flex items-center justify-center border-2 border-gray-400">
                       <Icon name="material-symbols:person" size="1.5em" class="text-gray-300" />
                     </div>
                     <div>
@@ -381,7 +331,9 @@
                 </div>
 
                 <!-- No results message -->
-                <div v-if="showSearchResults && searchResults.length === 0 && !isSearching && newCollaboratorUsername.trim().length >= 2" class="absolute top-full left-0 right-0 bg-gray-700 border border-gray-600 rounded-lg mt-2 p-4 text-gray-400 text-center">
+                <div
+                  v-if="showSearchResults && searchResults.length === 0 && !isSearching && newCollaboratorUsername.trim().length >= 2"
+                  class="absolute top-full left-0 right-0 bg-gray-700 border border-gray-600 rounded-lg mt-2 p-4 text-gray-400 text-center">
                   <Icon name="material-symbols:search-off" size="1.5em" class="mx-auto mb-2 text-gray-500" />
                   No se encontraron usuarios
                 </div>
@@ -391,18 +343,12 @@
 
           <!-- Botones de acción -->
           <div class="flex justify-end gap-4 pt-6 border-t border-gray-600">
-            <button
-              type="button"
-              @click="closeSettingsModal"
-              class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
-            >
+            <button type="button" @click="closeSettingsModal"
+              class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium">
               Cancelar
             </button>
-            <button
-              type="submit"
-              :disabled="isSavingSettings"
-              class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
-            >
+            <button type="submit" :disabled="isSavingSettings"
+              class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2">
               <Icon v-if="isSavingSettings" name="material-symbols:sync" size="1.2em" class="animate-spin" />
               {{ isSavingSettings ? 'Guardando...' : 'Guardar Cambios' }}
             </button>
@@ -538,7 +484,7 @@ function getItemSearchPlaceholder() {
 
 const debounce = (func: Function, delay: number) => {
   let timeout: ReturnType<typeof setTimeout>;
-  return function(this: any, ...args: any[]) {
+  return function (this: any, ...args: any[]) {
     clearTimeout(timeout);
     timeout = setTimeout(() => func.apply(this, args), delay);
   };
@@ -782,7 +728,7 @@ const fetchPlaylist = async () => {
         ...data.value,
         items: data.value.items || [], // Ensure items is an array
       };
-      
+
       // Verificar si la playlist está guardada
       await checkIfPlaylistSaved();
     } else {
@@ -800,7 +746,7 @@ const checkIfPlaylistSaved = async () => {
   try {
     const token = localStorage.getItem('token');
     if (!token) return;
-    
+
     const response = await fetch(`${config.public.backend}/api/users/by-username/${JSON.parse(localStorage.getItem('user') || '{}').username}?include=savedPlaylists`, {
       method: 'GET',
       headers: {
@@ -808,7 +754,7 @@ const checkIfPlaylistSaved = async () => {
         'Authorization': `Bearer ${token}`,
       },
     });
-    
+
     if (response.ok) {
       const data = await response.json();
       const savedPlaylists = data.savedPlaylists || [];
@@ -821,7 +767,7 @@ const checkIfPlaylistSaved = async () => {
 
 const toggleSavePlaylist = async () => {
   if (isSavingPlaylist.value) return;
-  
+
   isSavingPlaylist.value = true;
   try {
     const { error } = await useFetch(
@@ -919,11 +865,11 @@ function openSettingsModal() {
     description: playlist.value.description,
     isCollaborative: playlist.value.isCollaborative
   };
-  
+
   // Establecer vista previa de la imagen actual
   currentCoverPreview.value = playlist.value.playlistCoverUrl || null;
   selectedCoverFile.value = null;
-  
+
   showSettingsModal.value = true;
 }
 
@@ -938,7 +884,7 @@ function closeSettingsModal() {
 function handleCoverFileUpload(event: Event) {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
-  
+
   if (file) {
     selectedCoverFile.value = file;
     currentCoverPreview.value = URL.createObjectURL(file);
@@ -958,7 +904,7 @@ async function savePlaylistSettings() {
   isSavingSettings.value = true;
   try {
     let requestOptions: any;
-    
+
     // Solo manejar subida de archivo
     if (selectedCoverFile.value) {
       // Usar multipart/form-data para subir archivo
@@ -967,7 +913,7 @@ async function savePlaylistSettings() {
       formData.append('description', settingsForm.value.description);
       formData.append('isCollaborative', settingsForm.value.isCollaborative.toString());
       formData.append('playlistCover', selectedCoverFile.value);
-      
+
       requestOptions = {
         method: 'PATCH',
         headers: {
@@ -1004,7 +950,7 @@ async function savePlaylistSettings() {
     playlist.value.name = settingsForm.value.name;
     playlist.value.description = settingsForm.value.description;
     playlist.value.isCollaborative = settingsForm.value.isCollaborative;
-    
+
     // Actualizar la imagen de portada
     if (data.value && data.value.playlistCoverUrl !== undefined) {
       playlist.value.playlistCoverUrl = data.value.playlistCoverUrl;
@@ -1199,21 +1145,25 @@ onMounted(() => {
 <style scoped>
 /* Estilo para la barra de desplazamiento vertical */
 .custom-scroll::-webkit-scrollbar {
-  width: 8px; /* Ancho de la barra de desplazamiento vertical */
+  width: 8px;
+  /* Ancho de la barra de desplazamiento vertical */
 }
 
 .custom-scroll::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2); /* Fondo de la pista */
+  background: rgba(0, 0, 0, 0.2);
+  /* Fondo de la pista */
   border-radius: 10px;
 }
 
 .custom-scroll::-webkit-scrollbar-thumb {
-  background: rgba(120, 120, 120, 0.5); /* Color del "pulgar" de la barra */
+  background: rgba(120, 120, 120, 0.5);
+  /* Color del "pulgar" de la barra */
   border-radius: 10px;
 }
 
 .custom-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(150, 150, 150, 0.7); /* Color al pasar el ratón */
+  background: rgba(150, 150, 150, 0.7);
+  /* Color al pasar el ratón */
 }
 
 /* Base styling for glass effect */

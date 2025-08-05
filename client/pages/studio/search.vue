@@ -10,22 +10,13 @@
         </h1>
 
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-          <SearchBar
-            :modelValue="searchQuery"
-            :modelSearchType="searchType"
-            :placeholder="getSearchPlaceholder()"
-            :loading="isSearching"
-            @update:modelValue="(v) => (searchQuery = v)"
-            @update:modelSearchType="(v) => (searchType = v)"
-            @search="searchUsers"
-            @focus-input="() => {}"
-          >
+          <SearchBar :modelValue="searchQuery" :modelSearchType="searchType" :placeholder="getSearchPlaceholder()"
+            :loading="isSearching" @update:modelValue="(v) => (searchQuery = v)"
+            @update:modelSearchType="(v) => (searchType = v)" @search="searchUsers" @focus-input="() => { }">
             <template #search-type-select>
               <div class="flex items-center justify-center max-md:w-full">
-                <select
-                  v-model="searchType"
-                  class="p-3 px-6 rounded-lg bg-gray-700/80 w-fit text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer"
-                >
+                <select v-model="searchType"
+                  class="p-3 px-6 rounded-lg bg-gray-700/80 w-fit text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer">
                   <option value="users">Usuarios</option>
                   <option value="general">Todo</option>
                   <option value="song">Canciones</option>
@@ -40,45 +31,40 @@
             </template>
 
             <template #search-button>
-              <button
-                @click="searchUsers"
-                :disabled="isSearching"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-300 text-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:scale-105 transform"
-              >
+              <button @click="searchUsers" :disabled="isSearching"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-300 text-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:scale-105 transform">
                 {{ isSearching ? 'Buscando...' : 'Buscar' }}
               </button>
             </template>
           </SearchBar>
         </div>
 
-        <p v-if="searchMessage" :class="{'text-red-400': searchError, 'text-green-400': !searchError}" class="mt-4 text-sm">
+        <p v-if="searchMessage" :class="{ 'text-red-400': searchError, 'text-green-400': !searchError }"
+          class="mt-4 text-sm">
           {{ searchMessage }}
         </p>
       </div>
 
-      <div v-if="isSearching && !searchMessage && searchQuery.trim() !== ''" class="flex flex-col items-center justify-center h-48">
+      <div v-if="isSearching && !searchMessage && searchQuery.trim() !== ''"
+        class="flex flex-col items-center justify-center h-48">
         <p class="text-xl mb-4 text-gray-300">Buscando...</p>
-        <svg class="animate-spin h-10 w-10 text-blue-400 mt-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin h-10 w-10 text-blue-400 mt-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
         </svg>
       </div>
 
-      <div v-if="searchType === 'users' && users.length > 0" class="glassEffect bg-gray-800/50 rounded-lg p-6 shadow-xl flex-grow overflow-y-auto custom-scroll">
+      <div v-if="searchType === 'users' && users.length > 0"
+        class="glassEffect bg-gray-800/50 rounded-lg p-6 shadow-xl flex-grow overflow-y-auto custom-scroll">
         <h2 class="text-2xl font-bold mb-5 text-gray-200">Resultados de Búsqueda de Usuarios ({{ users.length }})</h2>
         <div class="grid grid-cols-1 gap-4">
-          <NuxtLink
-            v-for="user in users"
-            :key="user.id"
-            :to="`/profile/${user.username}`"
-            class="bg-gray-700/60 rounded-lg p-3 flex items-center shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white"
-          >
-            <img
-              :src="getProfilePictureUrl(user)"
-              alt="Profile Picture"
-              @error="handleImageError"
-              class="w-16 h-16 object-cover rounded-full flex-shrink-0 mr-4 shadow-sm border border-gray-500"
-            />
+          <NuxtLink v-for="user in users" :key="user.id" :to="`/profile/${user.username}`"
+            class="bg-gray-700/60 rounded-lg p-3 flex items-center shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white">
+            <img :src="getProfilePictureUrl(user)" alt="Profile Picture" @error="handleImageError"
+              class="w-16 h-16 object-cover rounded-full flex-shrink-0 mr-4 shadow-sm border border-gray-500" />
             <div class="flex-grow">
               <h3 class="font-bold text-xl text-white">{{ user.username }}</h3>
               <p class="text-sm text-gray-300 truncate">{{ user.bio || 'Sin biografía' }}</p>
@@ -88,29 +74,18 @@
         </div>
       </div>
 
-      <div v-else-if="searchType !== 'users' && searchResults.length > 0" class="glassEffect bg-gray-800/50 rounded-lg p-6 shadow-xl flex-grow overflow-y-auto custom-scroll">
+      <div v-else-if="searchType !== 'users' && searchResults.length > 0"
+        class="glassEffect bg-gray-800/50 rounded-lg p-6 shadow-xl flex-grow overflow-y-auto custom-scroll">
         <h2 class="text-2xl font-bold mb-5 text-gray-200">Resultados de Búsqueda ({{ searchResults.length }})</h2>
         <div class="grid grid-cols-1 gap-4">
-          <NuxtLink
-            v-for="item in searchResults"
-            :key="item.externalId || item.title"
-            :to="getItemRedirectUrl(item)"
+          <NuxtLink v-for="item in searchResults" :key="item.externalId || item.title" :to="getItemRedirectUrl(item)"
             :target="(item as any).externalUrl ? '_blank' : '_self'"
             :rel="(item as any).externalUrl ? 'noopener noreferrer' : ''"
-            class="bg-gray-700/60 rounded-lg p-3 flex items-center shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white"
-          >
-            <img
-              v-if="item.coverUrl"
-              :src="item.coverUrl"
-              :alt="item.title"
-              loading="lazy"
-              referrerpolicy="no-referrer"
-              class="w-16 h-16 object-cover rounded-lg flex-shrink-0 mr-4 shadow-sm border border-gray-500"
-            />
-            <div
-              v-else
-              class="w-16 h-16 bg-gray-600 rounded-lg flex-shrink-0 mr-4 flex items-center justify-center text-gray-400 text-xs border border-gray-500"
-            >
+            class="bg-gray-700/60 rounded-lg p-3 flex items-center shadow-md transform transition-transform duration-300 hover:scale-[1.01] hover:bg-gray-600/70 border border-gray-600 no-underline text-white">
+            <img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title" loading="lazy" referrerpolicy="no-referrer"
+              class="w-16 h-16 object-cover rounded-lg flex-shrink-0 mr-4 shadow-sm border border-gray-500" />
+            <div v-else
+              class="w-16 h-16 bg-gray-600 rounded-lg flex-shrink-0 mr-4 flex items-center justify-center text-gray-400 text-xs border border-gray-500">
               Sin portada
             </div>
             <div class="flex-grow">
@@ -128,7 +103,7 @@
       <div v-else-if="!isSearching && !searchError && searchPerformed" class="text-center text-gray-400 text-lg py-10">
         <p>No se encontraron resultados para "{{ lastSearchQuery }}".</p>
       </div>
-       <div v-else-if="!isSearching && !searchPerformed" class="text-center text-gray-400 text-lg py-10">
+      <div v-else-if="!isSearching && !searchPerformed" class="text-center text-gray-400 text-lg py-10">
         <p>Comienza a buscar...</p>
       </div>
     </div>
@@ -294,21 +269,25 @@ function getItemRedirectUrl(item: any) {
 <style scoped>
 /* Estilo para la barra de desplazamiento vertical */
 .custom-scroll::-webkit-scrollbar {
-  width: 8px; /* Ancho de la barra de desplazamiento vertical */
+  width: 8px;
+  /* Ancho de la barra de desplazamiento vertical */
 }
 
 .custom-scroll::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2); /* Fondo de la pista */
+  background: rgba(0, 0, 0, 0.2);
+  /* Fondo de la pista */
   border-radius: 10px;
 }
 
 .custom-scroll::-webkit-scrollbar-thumb {
-  background: rgba(120, 120, 120, 0.5); /* Color del "pulgar" de la barra */
+  background: rgba(120, 120, 120, 0.5);
+  /* Color del "pulgar" de la barra */
   border-radius: 10px;
 }
 
 .custom-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(150, 150, 150, 0.7); /* Color al pasar el ratón */
+  background: rgba(150, 150, 150, 0.7);
+  /* Color al pasar el ratón */
 }
 
 /* Base styling for glass effect */
