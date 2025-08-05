@@ -12,7 +12,7 @@
       <div class="flex items-center justify-center max-md:w-full">
         <select
           v-model="searchType"
-          class="p-2 px-6 rounded-full bg-gray-700/80 w-fit text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105"
+          class="p-2 px-6 rounded-full bg-gray-700/80 w-fit text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer"
         >
           <option value="general">Todo</option>
           <option value="song">Canciones</option>
@@ -96,7 +96,7 @@
       <div class="flex items-center justify-center max-md:w-full max-md:max-w-4xl">
         <select
           v-model="selectedCategory"
-          class="p-2 px-6 rounded-full bg-gray-700/80 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105"
+          class="p-2 px-6 rounded-full bg-gray-700/80 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer"
         >
           <option value="mix">Tipo de lista: Mezcla</option>
           <option value="songs">Tipo de lista: Canciones</option>
