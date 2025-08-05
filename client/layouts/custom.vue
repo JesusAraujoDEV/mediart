@@ -121,7 +121,7 @@
 
 @keyframes dynamicBlur {
   0%, 100% {
-    backdrop-filter: blur(25px);
+    backdrop-filter: blur(5px);
     background-color: rgba(255, 255, 255, 0.12);
   }
   25% {
