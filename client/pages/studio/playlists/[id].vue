@@ -107,7 +107,7 @@
               <select
                 v-model="itemSearchType"
                 @change="debouncedSearchItems"
-                class="p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                class="p-3 rounded-lg bg-gray-700/80 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 shadow-md appearance-none"
               >
                 <option value="general">Todo</option>
                 <option value="song">Canciones</option>
