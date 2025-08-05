@@ -1,4 +1,5 @@
 <template>
+  <title>Mediart - Recuperar Contraseña</title>
   <NuxtLayout>
     <main class="w-screen h-dvh flex justify-center items-center">
       <div
@@ -25,7 +26,7 @@
           <button type="submit"
             class="w-full bg-white cursor-pointer text-black p-3 rounded-md transition-all duration-200"
             :class="{ 'hover:bg-gray-200': !loading, 'opacity-50 cursor-not-allowed': loading }" :disabled="loading">
-            <span v-if="!loading">Enviar codigo</span>
+            <span v-if="!loading">Enviar</span>
             <span v-else>Enviando...</span>
           </button>
           <NuxtLink to="/login" class="hover:underline text-center m-3 text-sm">
@@ -43,55 +44,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { usePasswordForgot } from '~/composables/usePasswordForgot';
 
 definePageMeta({
   layout: "default",
   title: "Mediart - Recuperar Contraseña",
 });
 
-const config = useRuntimeConfig();
-
-const email = ref('');
-const loading = ref(false);
-const error = ref<string | null>(null);
-const message = ref<string | null>(null);
-
-const requestPasswordReset = async () => {
-  loading.value = true;
-  error.value = null;
-  message.value = null;
-
-  if (!email.value) {
-    error.value = 'Por favor, ingresa tu correo electrónico.';
-    loading.value = false;
-    return;
-  }
-
-  try {
-    const requestResetUrl = `${config.public.backend}/api/auth/recovery`;
-
-    const response = await fetch(requestResetUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email: email.value }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Error al solicitar el restablecimiento de contraseña.');
-    }
-
-    message.value = 'Si tu correo electrónico está registrado, te enviaremos un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada y la carpeta de spam.';
-    email.value = '';
-
-  } catch (err: any) {
-    error.value = 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde.';
-    console.error('Request password reset error:', err);
-  } finally {
-    loading.value = false;
-  }
-};
+// Extraemos la lógica del composable
+const { email, loading, error, message, requestPasswordReset } = usePasswordForgot();
 </script>

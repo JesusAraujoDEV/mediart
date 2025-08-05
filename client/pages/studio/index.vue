@@ -25,7 +25,7 @@
             'rounded-2xl': selectedTags.length > 2,
             'rounded-xl': selectedTags.length > 1 && selectedTags.length <= 2,
             'rounded-full': selectedTags.length <= 1
-          }" @click="focusInputWrapper">
+          }" @click="focusInput(searchInput)">
           <span v-for="tag in selectedTags" :key="tag.title"
             class="bg-white/20 rounded-full px-3 py-1 text-sm flex items-center gap-1 backdrop-blur-sm flex-shrink-0 max-w-[200px]">
             <span class="truncate">{{ tag.title }}</span>
@@ -72,7 +72,7 @@
           <option value="books">Tipo de lista: Libros</option>
           <option value="videogames">Tipo de lista: Videojuegos</option>
         </select>
-        <button @click="handleSendClick"
+        <button @click="sendData(selectedTags)"
           class="ml-3 p-2 rounded-full cursor-pointer glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm"
           aria-label="Generar recomendaciones">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"
@@ -81,7 +81,6 @@
           </svg>
         </button>
       </div>
-
     </div>
 
     <div class="flex-grow flex w-full max-w-6xl items-center justify-center p-4">
@@ -99,7 +98,7 @@
         </div>
         <div v-else-if="recommendationsError" class="text-red-400 text-center flex flex-col items-center">
           <p class="text-xl mb-4">{{ recommendationsError }}</p>
-          <button @click="handleSendClick"
+          <button @click="sendData(selectedTags)"
             class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg">
             Reintentar
           </button>
@@ -148,7 +147,7 @@
               class="bg-green-600 cursor-pointer hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg disabled:opacity-50 disabled:cursor-not-allowed">
               Aceptar ({{ recommendations.length }} items)
             </button>
-            <button @click="handleSendClick"
+            <button @click="sendData(selectedTags)"
               class="bg-red-600 hover:bg-red-700 cursor-pointer text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg">
               Regenerar
             </button>
@@ -163,165 +162,78 @@
         </div>
       </div>
     </div>
-
-    <div v-if="showPlaylistModal"
-      class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-      <div class="glassEffect bg-gray-800/90 rounded-lg p-8 w-full max-w-md shadow-2xl border border-gray-700">
-        <h3 class="text-2xl font-bold text-white mb-6 text-center">
-          Crear Nueva Playlist
-        </h3>
-
-        <div class="mb-4">
-          <label for="playlistName" class="block text-gray-300 text-sm font-bold mb-2">Nombre de la Playlist:</label>
-          <input type="text" id="playlistName" v-model="newPlaylist.name"
-            class="shadow appearance-none border border-gray-600 rounded w-full py-3 px-4 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-700/70"
-            placeholder="Ej. Mis Favoritos de Junio" />
-        </div>
-
-        <div class="mb-6">
-          <label for="playlistDescription" class="block text-gray-300 text-sm font-bold mb-2">Descripción:</label>
-          <textarea id="playlistDescription" v-model="newPlaylist.description" rows="3"
-            class="shadow appearance-none border border-gray-600 rounded w-full py-3 px-4 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-700/70 resize-none"
-            placeholder="Una breve descripción de tu playlist..."></textarea>
-        </div>
-
-        <div class="flex items-center justify-between mb-8">
-          <span class="text-gray-300 font-bold text-sm">Colaborativa:</span>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" v-model="newPlaylist.isCollaborative" class="sr-only peer" />
-            <div
-              class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600">
-            </div>
-            <span class="ml-3 text-sm font-medium text-gray-300">{{
-              newPlaylist.isCollaborative ? "Sí" : "No"
-              }}</span>
-          </label>
-        </div>
-
-        <div class="flex justify-end gap-4">
-          <button @click="showPlaylistModal = false"
-            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-colors">
-            Cancelar
-          </button>
-          <button @click="createPlaylist" :disabled="!newPlaylist.name.trim() || playlistSaving"
-            class="bg-purple-600 cursor-pointer hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
-            <svg v-if="playlistSaving" class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg"
-              fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-              </path>
-            </svg>
-            <span v-else>Crear Playlist</span>
-          </button>
-        </div>
-      </div>
-    </div>
+    
+    <PlaylistModal v-if="showPlaylistModal" :saving="playlistSaving" @close="showPlaylistModal = false"
+      @create="(playlistData) => createPlaylist(playlistData)" />
   </main>
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
+import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
+import PlaylistModal from "~/components/ui/PlaylistModal.vue";
+import { useSuggestions } from "~/composables/studio/useSuggestions";
+import { useRecommendations } from "~/composables/studio/useRecommendations";
+
+// @ts-ignore
 definePageMeta({
   layout: "custom",
   middleware: ["auth-middleware"],
 });
 
-import { ref, watch } from "vue";
-import { useRouter } from "vue-router";
-import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
-import Swal from "sweetalert2";
-import { useSuggestions } from "~/composables/useSuggestions";
-import { useRecommendations } from "~/composables/useRecommendations";
-
-const router = useRouter();
-
-// Suggestions composable
+// Composable para la lógica de búsqueda y sugerencias
 const {
   inputValue,
   selectedTags,
-  suggestions,
   showDatalist,
   searchType,
   filteredSuggestions,
   getSearchPlaceholder,
-  fetchSuggestions,
   onInput,
   selectSuggestion,
   addTagFromInput,
   removeTag,
   focusInput,
   hideDatalist,
-  onChangeSearchType,
 } = useSuggestions();
 
-// Local ref for input element
-const searchInput = ref<HTMLInputElement | null>(null);
-
-// Recommendations composable
+// Composable para la lógica de recomendaciones y playlists
 const {
   recommendations,
   recommendationsLoading,
   recommendationsError,
   selectedCategory,
   showPlaylistModal,
-  newPlaylist,
   playlistSaving,
   sendData,
   removeRecommendation,
   createPlaylist,
 } = useRecommendations();
 
-// Proxy focus to composable helper with correct DOM call signature
-const focusInputWrapper = () => {
-  focusInput(searchInput.value);
-};
+const searchInput = ref<HTMLInputElement | null>(null);
 
-// Click handlers must accept MouseEvent; call underlying actions inside
-const handleSendClick = (_e: MouseEvent) => {
-  // sendData reads selected tags from composable in index.vue original version,
-  // but here sendData expects tags via composable; our useRecommendations sends with internal build.
-  // If needed to pass tags explicitly, adapt useRecommendations; for now it reads from arguments in composable API.
-  // We call sendData with current selectedTags.
-  // @ts-ignore - composable type accepts array of tags
-  sendData(selectedTags.value);
-};
-
-// When search type changes via select, notify composable
-watch(searchType, () => {
-  onChangeSearchType();
-});
 </script>
 
 <style scoped>
-/* Estilo para la barra de desplazamiento vertical principal */
+/* Estilos existentes */
 .custom-main-scroll::-webkit-scrollbar {
   width: 8px;
-  /* Ancho de la barra de desplazamiento vertical */
 }
-
 .custom-main-scroll::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
-  /* Fondo de la pista */
   border-radius: 10px;
 }
-
 .custom-main-scroll::-webkit-scrollbar-thumb {
   background: rgba(120, 120, 120, 0.5);
-  /* Color del "pulgar" de la barra */
   border-radius: 10px;
 }
-
 .custom-main-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(150, 150, 150, 0.7);
-  /* Color al pasar el ratón */
 }
-
-/* Transición para el datalist */
 .fade-slide-down-enter-active,
 .fade-slide-down-leave-active {
   transition: all 0.3s ease-out;
 }
-
 .fade-slide-down-enter-from,
 .fade-slide-down-leave-to {
   opacity: 0;
