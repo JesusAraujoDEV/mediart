@@ -1,19 +1,33 @@
 <template>
-  <div class="w-full flex gap-2 justify-center">
-    <button v-if="isOwner" class="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50"
-      :disabled="loading" @click="$emit('edit-profile')">
-      Edit profile
+  <div class="w-full flex flex-col gap-5">
+    <button 
+      v-if="isOwner" 
+      class="w-full px-8 py-5 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold text-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
+      :disabled="loading" 
+      @click="$emit('edit-profile')"
+    >
+      <Icon name="material-symbols:edit" size="24" class="mr-3" />
+      Edit Profile
     </button>
 
     <template v-else>
-      <button v-if="!isFriend"
-        class="px-3 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-50" :disabled="loading"
-        @click="$emit('add-friend')">
-        Add friend
+      <button 
+        v-if="!isFriend"
+        class="w-full px-8 py-5 rounded-lg bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold text-lg hover:from-emerald-700 hover:to-green-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
+        :disabled="loading"
+        @click="$emit('add-friend')"
+      >
+        <Icon name="material-symbols:person-add" size="24" class="mr-3" />
+        Add Friend
       </button>
-      <button v-else class="px-3 py-2 rounded bg-rose-600 text-white hover:bg-rose-500 disabled:opacity-50"
-        :disabled="loading" @click="$emit('remove-friend')">
-        Remove friend
+      <button 
+        v-else 
+        class="w-full px-8 py-5 rounded-lg bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold text-lg hover:from-red-700 hover:to-pink-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
+        :disabled="loading" 
+        @click="$emit('remove-friend')"
+      >
+        <Icon name="material-symbols:person-remove" size="24" class="mr-3" />
+        Remove Friend
       </button>
     </template>
   </div>

@@ -69,6 +69,7 @@ export function useProfile() {
   };
 
   async function fetchProfileByUsername(username: string) {
+    isLoading.value = true;
     try {
       const { data, error } = await useFetch<UserProfile>(
         `${config.public.backend}/api/users/by-username/${username}`,
@@ -100,6 +101,8 @@ export function useProfile() {
     } catch (e) {
       console.error("Excepción inesperada al cargar el perfil:", e);
       userProfile.value = defaultProfile;
+    } finally {
+      isLoading.value = false;
     }
   }
 

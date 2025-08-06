@@ -1,14 +1,21 @@
 <template>
-  <div class="w-full flex items-center justify-around gap-4">
-    <button class="flex flex-col items-center hover:opacity-80 transition disabled:opacity-50" :disabled="disabled"
-      @click="$emit('go-following')">
-      <span class="text-lg font-semibold">{{ followingCount }}</span>
-      <span class="text-xs text-gray-400">Following</span>
+  <div class="w-full flex items-center justify-center gap-10 py-8">
+    <button 
+      class="flex flex-col items-center hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group" 
+      :disabled="disabled"
+      @click="$emit('go-following')"
+    >
+      <span class="text-4xl font-bold text-white group-hover:text-purple-300 transition-colors">{{ followingCount }}</span>
+      <span class="text-base text-gray-400 group-hover:text-gray-300 transition-colors">Following</span>
     </button>
-    <button class="flex flex-col items-center hover:opacity-80 transition disabled:opacity-50" :disabled="disabled"
-      @click="$emit('go-followers')">
-      <span class="text-lg font-semibold">{{ followersCount }}</span>
-      <span class="text-xs text-gray-400">Followers</span>
+    <div class="w-px h-16 bg-gray-600"></div>
+    <button 
+      class="flex flex-col items-center hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group" 
+      :disabled="disabled"
+      @click="$emit('go-followers')"
+    >
+      <span class="text-4xl font-bold text-white group-hover:text-purple-300 transition-colors">{{ followersCount }}</span>
+      <span class="text-base text-gray-400 group-hover:text-gray-300 transition-colors">Followers</span>
     </button>
   </div>
 </template>
