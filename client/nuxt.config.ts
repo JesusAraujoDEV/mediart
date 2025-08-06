@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false,
   modules: ['@nuxt/icon', '@nuxt/image', '@nuxtjs/tailwindcss'],
+  css: ['~/assets/css/main.css'],
   runtimeConfig: {
     public: {
       backend: process.env.BACKEND_URL || 'http://localhost:3000',
