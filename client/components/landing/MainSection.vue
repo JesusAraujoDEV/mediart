@@ -58,7 +58,7 @@
 
     <!-- Hero Content -->
     <div class="relative z-10 flex h-full items-center justify-start text-left px-15 lg:px-18 xl:px-25 ">
-      <div class="text-white max-w-2xl pb-50 pl-15">
+      <div class="text-white max-w-3xl pb-50 pl-15"> <!--El pl es para moverlo un poco más a la izquierda o derecha-->
         <h1 class="text-6xl sm:text-7xl md:text-7xl font-halenoir font-extrabold leading-tight tracking-tight mb-4">
           Descubre tu Próxima <br class="hidden sm:inline" />Obsesión Artística
         </h1>
