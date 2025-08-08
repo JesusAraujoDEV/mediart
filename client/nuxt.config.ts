@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
   ssr: false,
-  modules: ['@nuxt/icon', '@nuxt/image', '@nuxtjs/tailwindcss'],
+  modules: ['@nuxt/icon', '@nuxt/image', '@nuxtjs/tailwindcss', '@vueuse/motion/nuxt'],
   runtimeConfig: {
     public: {
       backend: process.env.BACKEND_URL || 'http://localhost:3000',

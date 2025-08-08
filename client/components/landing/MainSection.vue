@@ -1,170 +1,229 @@
 <template>
-  <section 
-    class="relative w-full h-screen flex items-center p-4 md:p-8 overflow-hidden"
-    :style="{ 
-      backgroundImage: `url('/client/assets/backgroundNeat2.webp')`, 
-      backgroundSize: 'cover', 
-      backgroundPosition: 'center right'
-    }"
-  >
-    <div class="absolute inset-0 bg-black/20"></div>
-    
-    <div class="text-white text-left grid grid-cols-1 lg:grid-cols-2 gap-8 items-center h-full">
-      
-      <div class="text-white text-left pl-0 lg:pl-8 xl:pl-16">
-        <h1 class="text-6xl sm:text-7xl md:text-8xl font-extrabold leading-tight tracking-tight mb-4 drop-shadow-lg">
-          Descubre tu Próxima <br class="hidden sm:inline" />Obsesión Artística
-        </h1>
-        
-        <p class="text-lg sm:text-xl md:text-2xl font-light mb-8 drop-shadow-md font-alpine-body">
-          Encuentra películas, música, libros y experiencias culturales que amarás, basadas en lo que ya te apasiona.
-        </p>
-        
-        <div class="flex flex-col sm:flex-row gap-4">
-          <NuxtLink 
-            to="/register"
-            class="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold py-4 px-8 rounded-full backdrop-blur-sm hover:bg-white/10 transition-all duration-600 text-lg text-center"
+  <div class="relative w-full h-screen bg-black overflow-hidden">
+    <!-- Background Images Container -->
+    <div class="absolute inset-0">
+      <transition-group name="fade">
+        <div
+          v-for="(slide, index) in slides"
+          :key="slide.image"
+          v-show="index === currentSlide"
+          class="absolute inset-0 bg-cover bg-center w-full h-full"
+          :style="{
+            backgroundImage: `url('${slide.image}')`,
+            backgroundPosition: slide.position,
+          }"
+        />
+      </transition-group>
+    </div>
+
+    <div class="absolute inset-0 bg-black/40" />
+          <!-- Navigation -->
+      <nav class="relative z-20 flex items-center justify-between p-6 md:p-8">
+        <div class="text-white font-bold text-xl tracking-wider">MEDIART</div>
+
+        <div class="hidden md:flex items-center space-x-8">
+          <button
+            v-for="item in navItems"
+            :key="item.name"
+            @click="scrollToSection(item.href)"
+            class="relative text-white hover:text-gray-300 transition-colors duration-300 font-medium tracking-wide pb-1 group"
           >
-            Comenzar ahora
-          </NuxtLink>
-          <NuxtLink 
-            to="#como-funciona"
-            class="border-2 border-white/70 hover:border-white text-white font-semibold py-4 px-8 rounded-full backdrop-blur-sm hover:bg-white/10 transition-all duration-300 text-lg text-center"
-          >
-            Ver Cómo Funciona
-          </NuxtLink>
+            {{ item.name }}
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 ease-out group-hover:w-full"></span>
+          </button>
         </div>
-      </div>
-      
-      <div class="flex justify-center lg:justify-end items-end pr-0 lg:pr-8 xl:pr-16 order-1 lg:order-2 h-full pt-16 pb-8"> 
-        <div class="relative w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl 2xl:max-w-3xl h-[calc(100vh-4rem)] md:h-[calc(100vh-6rem)] lg:h-[calc(100vh-8rem)]"> 
-          <div class="relative w-full h-full">
-            <TransitionGroup name="carousel" tag="div" class="relative w-full h-full">
-              <div
-                v-for="(image, index) in images"
-                v-show="index === currentImageIndex"
-                :key="index"
-                class="absolute inset-0 flex items-center justify-center"
-              >
-                <img 
-                  :src="image.src"
-                  :alt="image.alt"
-                  class="w-full h-full object-contain rounded-2xl" style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"
-                />
-              </div>
-            </TransitionGroup>
-          </div>
-        </div>
+
+        <button
+          class="md:hidden text-white hover:text-gray-300 transition-colors"
+          @click="isMenuOpen = !isMenuOpen"
+        >
+          <X v-if="isMenuOpen" :size="24" />
+          <Menu v-else :size="24" />
+          <span class="sr-only">Toggle menu</span>
+        </button>
+      </nav>
+    <!-- Mobile Navigation Menu -->
+    <div v-if="isMenuOpen" class="absolute top-0 left-0 w-full h-full bg-black/90 z-30 md:hidden">
+      <div class="flex flex-col items-center justify-center h-full space-y-8">
+        <button
+          v-for="item in navItems"
+          :key="item.name"
+          @click="scrollToSection(item.href)"
+          class="text-white text-2xl font-bold tracking-wider hover:text-gray-300 transition-colors duration-300"
+        >
+          {{ item.name }}
+        </button>
       </div>
     </div>
-  </section>
+
+    <!-- Hero Content -->
+    <div class="relative z-10 flex h-full items-center justify-start text-left px-15 lg:px-18 xl:px-25 ">
+      <div class="text-white max-w-2xl pb-50 pl-15">
+        <h1 class="text-6xl sm:text-7xl md:text-7xl font-halenoir font-extrabold leading-tight tracking-tight mb-4">
+          Descubre tu Próxima <br class="hidden sm:inline" />Obsesión Artística
+        </h1>
+        <p class="text-lg sm:text-xl md:text-2xl font-light mb-8">
+          Encuentra películas, música, libros y experiencias culturales que amarás, basadas en lo que ya te apasiona.
+        </p>
+        <LiquidButton size="xxl" class="font-semibold text-lg tracking-wide" @click="scrollToSection('#join')">
+          Únete
+        </LiquidButton>
+      </div>
+    </div>
+
+    <!-- Slider Navigation (Mobile) -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 md:hidden">
+      <div class="flex items-center space-x-4">
+        <button @click="prevSlide" class="text-white hover:text-gray-300 transition-colors p-2">
+          <ChevronLeft :size="24" />
+        </button>
+        <div class="flex space-x-2">
+          <button
+            v-for="(_, index) in slides"
+            :key="index"
+            @click="currentSlide = index"
+            :class="`w-3 h-3 rounded-full transition-all duration-300 ${currentSlide === index ? 'bg-white' : 'bg-white/40'}`"
+          />
+        </div>
+        <button @click="nextSlide" class="text-white hover:text-gray-300 transition-colors p-2">
+          <ChevronRight :size="24" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Side Navigation Indicators (Desktop) -->
+    <div class="absolute right-8 top-1/2 transform -translate-y-1/2 z-20 hidden md:flex flex-col space-y-4">
+      <button
+        v-for="(_, index) in slides"
+        :key="index"
+        @click="currentSlide = index"
+        class="relative w-2 h-10 transition-all duration-300 group"
+      >
+        <div
+          :class="`w-full h-full transition-all duration-300 ${currentSlide === index ? 'bg-white' : 'bg-white/40 group-hover:bg-white/60'}`"
+        />
+        <div
+          v-if="currentSlide === index"
+          class="absolute top-0 left-0 w-full h-full bg-white animate-progress"
+          :style="{ animationDuration: '8s' }"
+        />
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue';
+import { Menu, ChevronLeft, ChevronRight, X } from 'lucide-vue-next';
+import LiquidButton from '../ui/LiquidButton.vue';
 
-// Array de imágenes para el carrusel
-const images = ref([
+const currentSlide = ref(0);
+const isMenuOpen = ref(false);
+let intervalId: NodeJS.Timeout | null = null;
+
+const slides = [
   {
-    src: '/landingImages/Martin-Scorsese.webp',
-    alt: 'Movies'
+    image: '/landingImages/Spiderverse.jpg',
+    alt: 'Spider-Man in the Spider-Verse',
+    position: '45% center',
   },
   {
-    src: '/landingImages/sabrina.png',
-    alt: 'Musica'
+    image: '/landingImages/Brody-Eras-Tour.webp',
+    alt: 'Taylor Swift on The Eras Tour',
+    position: 'center 20%',
   },
   {
-    src: '/landingImages/harry.webp',
-    alt: 'Books'
+    image: '/landingImages/Ghost of Tsushima.jpg',
+    alt: 'Game',
+    position: 'center center',
   },
-  {
-    src: '/landingImages/link.webp',
-    alt: 'Videogames'
-  }
-])
+];
 
-const currentImageIndex = ref(0)
-let intervalId: NodeJS.Timeout | null = null
 
-// Función para cambiar a la siguiente imagen
-const nextImage = () => {
-  currentImageIndex.value = (currentImageIndex.value + 1) % images.value.length
-}
+const nextSlide = () => {
+  currentSlide.value = (currentSlide.value + 1) % slides.length;
+  resetAutoPlay();
+};
 
-// Iniciar el carrusel automático
-const startCarousel = () => {
-  intervalId = setInterval(nextImage, 4000) // Cambia cada 4 segundos
-}
+const prevSlide = () => {
+  currentSlide.value = (currentSlide.value - 1 + slides.length) % slides.length;
+  resetAutoPlay();
+};
 
-// Detener el carrusel
-const stopCarousel = () => {
+const startAutoPlay = () => {
+  intervalId = setInterval(nextSlide, 8000);
+};
+
+const stopAutoPlay = () => {
   if (intervalId) {
-    clearInterval(intervalId)
-    intervalId = null
+    clearInterval(intervalId);
   }
-}
+};
 
-// Lifecycle hooks
+const resetAutoPlay = () => {
+  stopAutoPlay();
+  startAutoPlay();
+};
+
+const scrollToSection = (href: string) => {
+  const element = document.querySelector(href);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+  }
+  isMenuOpen.value = false;
+};
+
 onMounted(() => {
-  startCarousel()
-})
+  startAutoPlay();
+});
 
 onUnmounted(() => {
-  stopCarousel()
-})
+  stopAutoPlay();
+});
 </script>
 
 <style scoped>
-h1 {
-  text-shadow: 0 4px 8px rgba(0,0,0,0.5);
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 1s ease-in-out;
 }
-
-/* Transiciones del carrusel */
-.carousel-enter-active,
-.carousel-leave-active {
-  transition: all 0.8s ease-in-out;
-}
-
-.carousel-enter-from {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
-  transform: translateX(100px);
 }
-
-.carousel-leave-to {
-  opacity: 0;
-  transform: translateX(-100px);
-}
-
-.carousel-enter-to,
-.carousel-leave-from {
+.fade-enter-to,
+.fade-leave-from {
   opacity: 1;
-  transform: translateX(0);
 }
 
-/* Optimización para imágenes PNG */
-img {
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: -o-crisp-edges;
-  image-rendering: crisp-edges;
+@font-face {
+  font-family: 'Halenoir';
+  src: url('/fonts/Halenoir-Bold.otf') format('opentype');
+  font-weight: bold;
 }
 
-@supports (backdrop-filter: blur(10px)) {
-  .backdrop-blur-sm {
-    backdrop-filter: blur(4px);
+@font-face {
+  font-family: 'Halenoir';
+  src: url('/fonts/Halenoir-Black.otf') format('opentype');
+  font-weight: 800;
+}
+
+.font-halenoir {
+  font-family: 'Halenoir', sans-serif;
+}
+
+@keyframes progress {
+  from {
+    transform: scaleY(0);
   }
-  .backdrop-blur-md {
-    backdrop-filter: blur(12px);
-  }
-  .backdrop-blur-lg {
-    backdrop-filter: blur(20px);
+  to {
+    transform: scaleY(1);
   }
 }
 
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .grid-cols-1.lg\:grid-cols-2 {
-    text-align: center;
-  }
+.animate-progress {
+  animation-name: progress;
+  animation-timing-function: linear;
+  transform-origin: top;
 }
 </style>
