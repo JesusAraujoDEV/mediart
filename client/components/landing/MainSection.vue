@@ -17,45 +17,12 @@
     </div>
 
     <div class="absolute inset-0 bg-black/40" />
-          <!-- Navigation -->
-      <nav class="relative z-20 flex items-center justify-between p-6 md:p-8">
-        <div class="text-white font-bold text-xl tracking-wider">MEDIART</div>
 
-        <div class="hidden md:flex items-center space-x-8">
-          <button
-            v-for="item in navItems"
-            :key="item.name"
-            @click="scrollToSection(item.href)"
-            class="relative text-white hover:text-gray-300 transition-colors duration-300 font-medium tracking-wide pb-1 group"
-          >
-            {{ item.name }}
-            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 ease-out group-hover:w-full"></span>
-          </button>
-        </div>
-
-        <button
-          class="md:hidden text-white hover:text-gray-300 transition-colors"
-          @click="isMenuOpen = !isMenuOpen"
-        >
-          <X v-if="isMenuOpen" :size="24" />
-          <Menu v-else :size="24" />
-          <span class="sr-only">Toggle menu</span>
-        </button>
-      </nav>
-    <!-- Mobile Navigation Menu -->
-    <div v-if="isMenuOpen" class="absolute top-0 left-0 w-full h-full bg-black/90 z-30 md:hidden">
-      <div class="flex flex-col items-center justify-center h-full space-y-8">
-        <button
-          v-for="item in navItems"
-          :key="item.name"
-          @click="scrollToSection(item.href)"
-          class="text-white text-2xl font-bold tracking-wider hover:text-gray-300 transition-colors duration-300"
-        >
-          {{ item.name }}
-        </button>
-      </div>
+    <!-- Logo en la parte superior -->
+    <div class="relative z-20 flex items-center justify-between p-6 md:p-8">
+      <div class="text-white font-bold text-xl tracking-wider">MEDIART</div>
     </div>
-
+    
     <!-- Hero Content -->
     <div class="relative z-10 flex h-full items-center justify-start text-left px-15 lg:px-18 xl:px-25 ">
       <div class="text-white max-w-3xl pb-50 pl-15"> <!--El pl es para moverlo un poco más a la izquierda o derecha-->
@@ -114,11 +81,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { Menu, ChevronLeft, ChevronRight, X } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import LiquidButton from '../ui/LiquidButton.vue';
 
 const currentSlide = ref(0);
-const isMenuOpen = ref(false);
 let intervalId: NodeJS.Timeout | null = null;
 
 const slides = [
@@ -138,7 +104,6 @@ const slides = [
     position: 'center center',
   },
 ];
-
 
 const nextSlide = () => {
   currentSlide.value = (currentSlide.value + 1) % slides.length;
@@ -170,7 +135,6 @@ const scrollToSection = (href: string) => {
   if (element) {
     element.scrollIntoView({ behavior: 'smooth' });
   }
-  isMenuOpen.value = false;
 };
 
 onMounted(() => {
