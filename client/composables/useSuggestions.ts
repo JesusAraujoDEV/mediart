@@ -201,6 +201,20 @@ export function useSuggestions(config = useRuntimeConfig()) {
 
         case "general":
         default:
+          // Si el backend devuelve un array plano, usarlo directamente
+          if (Array.isArray(data)) {
+            list.push(
+              ...data.map((item: any) => ({
+                title: item.title ?? item.name ?? '',
+                coverUrl:
+                  item.coverUrl ?? item.thumbnail_url ?? item.poster_url ?? item.image_url ?? item.cover_url ?? null,
+                type: item.type ?? 'item',
+                externalId: (item.externalId ?? item.id)?.toString?.() ?? undefined,
+                description: item.description ?? item.overview ?? null,
+              }))
+            );
+          }
+
           if (Array.isArray(data.movies)) {
             list.push(
               ...data.movies.map((item: any) => ({

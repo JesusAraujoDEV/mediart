@@ -35,6 +35,7 @@ export const useSearch = () => {
     searchType,
     getSearchPlaceholder,
     fetchSuggestions,
+    suggestions,
   } = useSuggestions();
 
   let debounceHandle: ReturnType<typeof setTimeout> | null = null;
@@ -101,7 +102,7 @@ export const useSearch = () => {
 
   const searchForGeneralItems = async (query: string) => {
     await fetchSuggestions(query);
-    searchResults.value = useSuggestions().suggestions.value.map((s: any) => ({
+    searchResults.value = suggestions.value.map((s: any) => ({
       ...s,
       type: s.type || 'Sin tipo',
     }));
