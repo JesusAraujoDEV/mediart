@@ -45,16 +45,13 @@
         <div class="flex gap-4">
           <!-- Playlist Image -->
           <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-700 flex-shrink-0">
-            <img 
-              v-if="playlist.playlistCoverUrl" 
-              :src="playlist.playlistCoverUrl" 
-              :alt="playlist.name"
+            <img
+              :src="coverCandidates(playlist)[0]"
+              :data-alt-src="coverCandidates(playlist)[1] || ''"
+              :alt="playlist.name || 'Playlist cover'"
               class="w-full h-full object-cover"
               @error="handleImageError"
             />
-            <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-              <Icon name="material-symbols:music-note" size="24" />
-            </div>
           </div>
 
           <!-- Playlist Info -->
@@ -232,9 +229,31 @@ const canRemovePlaylist = (playlist: Playlist) => {
   return currentUser.value.username === username.value || playlist.ownerUserId === currentUser.value.id
 }
 
+const PLACEHOLDER = '/resources/plPreview.webp'
+const resolveUrl = (url?: string | null) => {
+  const value = (url ?? '').toString().trim()
+  if (!value) return ''
+  return value.startsWith('http') ? value : `${config.public.backend}${value}`
+}
+
+const coverCandidates = (p: Playlist): string[] => {
+  const candidates = [
+    resolveUrl(p.playlistCoverUrl),
+    resolveUrl(p.imgbbDeleteUrl),
+  ].filter(Boolean) as string[]
+  return candidates.length > 0 ? candidates : [PLACEHOLDER]
+}
+
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
-  img.style.display = 'none'
+  if (!img) return
+  const alt = img.getAttribute('data-alt-src') || ''
+  if (alt && img.src !== alt) {
+    img.src = alt
+    img.setAttribute('data-alt-src', '')
+    return
+  }
+  if (!img.src.includes(PLACEHOLDER)) img.src = PLACEHOLDER
 }
 
 const loadMore = () => {
