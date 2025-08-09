@@ -20,18 +20,18 @@
     <!-- Acciones en móvil -->
     <div class="flex items-center gap-3 md:gap-4">
       <NuxtLink
-        class="flex items-center cursor-pointer p-2 rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out"
+        class="flex items-center cursor-pointer rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out"
         :to="`/studio/help`">
-        <Icon name="material-symbols:help" size="1.5em" class="md:text-2xl" />
+        <Icon name="material-symbols:help" size="2em" class="md:text-2xl" />
       </NuxtLink>
       <NuxtLink
-        class="flex items-center cursor-pointer p-2 rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out"
+        class="flex items-center cursor-pointer rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out"
         :to="`/studio/search`">
-        <Icon name="material-symbols:search" size="1.5em" class="md:text-2xl" />
+        <Icon name="material-symbols:search" size="2em" class="md:text-2xl" />
       </NuxtLink>
       <div @click="logout"
-        class="flex items-center cursor-pointer p-2 rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out">
-        <Icon name="material-symbols:logout" size="1.5em" class="md:text-2xl" />
+        class="flex items-center cursor-pointer rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out">
+        <Icon name="material-symbols:logout" size="2em" class="md:text-2xl" />
       </div>
     </div>
   </nav>

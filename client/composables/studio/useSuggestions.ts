@@ -49,7 +49,30 @@ export const useSuggestions = () => {
       if (!resp.ok) throw new Error("Error fetching suggestions");
       const data = await resp.json();
       // Extraer el array correcto basado en el tipo de búsqueda
-      suggestions.value = data[searchType.value + 's'] || data[searchType.value] || [];
+      if (searchType.value === 'general') {
+        // Si el backend devuelve un array plano (como en el ejemplo), úsalo directamente
+        if (Array.isArray(data)) {
+          suggestions.value = data as any[];
+        } else {
+          // Si viene por claves, combinar todas las categorías conocidas
+          const keys = ['songs','artists','albums','movies','tvshows','books','videogames'];
+          const combined: any[] = [];
+          for (const k of keys) {
+            if (Array.isArray((data as any)[k])) combined.push(...(data as any)[k]);
+          }
+          suggestions.value = combined;
+        }
+      } else {
+        // No-general: intenta plural/singular; si llega array plano, filtra por type
+        const byKey = (data as any)[searchType.value + 's'] || (data as any)[searchType.value];
+        if (Array.isArray(byKey)) {
+          suggestions.value = byKey;
+        } else if (Array.isArray(data)) {
+          suggestions.value = (data as any[]).filter((it: any) => it?.type === searchType.value);
+        } else {
+          suggestions.value = [];
+        }
+      }
     } catch (e) {
       console.error("Error fetching suggestions:", e);
       suggestions.value = [];
