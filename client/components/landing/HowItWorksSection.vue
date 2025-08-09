@@ -1,319 +1,230 @@
 <template>
   <section
-    id="como-funciona"
-    ref="sectionRef"
-    class="relative w-full min-h-screen flex flex-col justify-center items-center p-4 md:p-8 overflow-hidden"
+    aria-labelledby="how-it-works-title"
+    class="relative w-full min-h-screen py-16 md:py-24 overflow-hidden text-white"
   >
-    <div class="absolute inset-0 bg-black/10"></div>
-    <div class="relative z-10 text-white text-center max-w-6xl mx-auto">
-      <div class="mb-16">
-        <div class="flex items-center justify-center mb-6">
-          <div class="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-            <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-            <span class="text-sm font-medium">Cómo Funciona</span>
-          </div>
+    <!-- Fondo NEAT (3D gradient con tres.js) -->
+    <canvas ref="neatHost" class="absolute inset-0 -z-10 pointer-events-none w-full h-full" />
+
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="text-center mb-12 md:mb-16">
+        <div class="flex items-center justify-center">
+          <span
+            class="uppercase tracking-[0.18em] rounded-full px-3 py-1 text-[10px]"
+            :style="pillStyle"
+          >
+            Cómo Funciona
+          </span>
         </div>
-      
-        <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight mb-6">
-          Descubre el Arte que Amarás
-        </h1>
-        
-        <p class="text-lg sm:text-xl md:text-2xl font-light max-w-3xl mx-auto">
-          Mediart te conecta con tus próximas obsesiones artísticas en 3 simples pasos
+
+        <h2
+          id="how-it-works-title"
+          class="mt-5 text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight uppercase tracking-tight"
+          :style="{ color: hexA('#FFFFFF', 0.96) }"
+        >
+          Empieza con Mediart, tu Asistente de Arte con IA
+        </h2>
+        <p class="mt-4 text-sm sm:text-base max-w-3xl mx-auto" :style="{ color: hexA('#FFFFFF', 0.75) }">
+          Descubre, organiza y gestiona contenido creativo en tres pasos sencillos. Desde el registro, pasando por tus gustos,
+          hasta recomendaciones y colecciones personalizadas.
         </p>
       </div>
 
-      <!--Paso1-->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-        <div 
-          ref="step1Ref"
-          :class="[
-            'relative group transition-all duration-3000 ease-out',
-            isVisible ? 'step-slide-in step-delay-1' : 'step-hidden',
-            isVisible ? 'step-floating' : ''
-          ]"
-        >
-          <div class="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
-          <div class="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300 flex flex-col h-full"> <div class="text-center mb-6">
-              <div class="inline-flex items-center justify-center w-12 h-12 bg-purple-500/20 rounded-xl mb-4">
-                <User class="w-6 h-6 text-purple-300" />
-              </div>
-              <div class="text-sm font-semibold text-purple-300 mb-2">PASO 1</div>
-              <h3 class="text-xl font-bold mb-2">Regístrate en Mediart</h3>
-              <p class="text-sm text-purple-200">Comienza tu viaje artístico registrándote con tu correo electrónico, creando un nombre de usuario y estableciendo una contraseña segura. <br>¡Es rápido y sencillo!</p>
+      <!-- Grid de pasos (estructura conservada) -->
+      <div class="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-3">
+        <!-- Paso 1 -->
+        <div class="overflow-hidden rounded-xl p-6 backdrop-blur-sm border shadow-[0_10px_40px_-20px_rgba(0,0,0,0.6)]" :style="cardStyle">
+          <div class="pt-2">
+            <span class="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] rounded-full px-3 py-1" :style="pillStyle">
+              Step <span class="font-mono">1</span> <CheckIcon class="h-3.5 w-3.5" />
+            </span>
+          </div>
+          <div class="pb-2 mt-3">
+            <h3 class="flex items-center gap-2 font-semibold text-lg" :style="{ color: hexA('#FFFFFF', 0.9) }">
+              <UserPlusIcon class="h-5 w-5" :style="{ color: hexA('#FFFFFF', 0.72) }" />
+              Crea tu cuenta
+            </h3>
+          </div>
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <div class="h-10 w-full rounded-md px-3 flex items-center" :style="ghostInputStyle">Nombre de usuario</div>
+              <div class="h-10 w-full rounded-md px-3 flex items-center" :style="ghostInputStyle">Correo electrónico</div>
+              <div class="h-10 w-full rounded-md px-3 flex items-center" :style="ghostInputStyle">Contraseña</div>
             </div>
-            
-            <div class="space-y-3 mt-auto"> <div class="bg-white/5 rounded-lg p-3 border border-white/10">
-                <div class="flex items-center space-x-2">
-                  <Mail class="w-4 h-4 text-purple-300" />
-                  <span class="text-sm text-purple-200">Correo Electrónico</span>
-                </div>
-              </div>
-              <div class="bg-white/5 rounded-lg p-3 border border-white/10">
-                <div class="flex items-center space-x-2">
-                  <User class="w-4 h-4 text-purple-300" />
-                  <span class="text-sm text-purple-200">Nombre de Usuario</span>
-                </div>
-              </div>
-              <div class="bg-white/5 rounded-lg p-3 border border-white/10">
-                <div class="flex items-center space-x-2">
-                  <Lock class="w-4 h-4 text-purple-300" />
-                  <span class="text-sm text-purple-200">Contraseña</span>
-                </div>
-              </div>
-            </div>
+            <p class="text-sm" :style="{ color: hexA('#FFFFFF', 0.72) }">
+              Regístrate y gestiona tu perfil para empezar a personalizar tu experiencia.
+            </p>
           </div>
         </div>
 
-        <!--Paso2-->
-        <div 
-          ref="step2Ref"
-          :class="[
-            'relative group transition-all duration-4000 ease-out',
-            isVisible ? 'step-slide-in step-delay-2' : 'step-hidden',
-            isVisible ? 'step-floating step-floating-delay-1' : ''
-          ]"
-        >
-          <div class="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
-          <div class="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300 flex flex-col h-full"> <div class="text-center mb-6">
-              <div class="inline-flex items-center justify-center w-12 h-12 bg-indigo-500/20 rounded-xl mb-4">
-                <Heart class="w-6 h-6 text-indigo-300"/>
-              </div>
-              <div class="text-sm font-semibold text-indigo-300 mb-2">PASO 2</div>
-              <h3 class="text-xl font-bold mb-2">Define tus Intereses</h3>
-              <p class="text-sm text-indigo-200">
-                Busca y añade tus gustos (canciones, artistas, películas, etc.) como tags y elige qué tipo de arte quieres que te recomendemos.
-              </p>
+        <!-- Paso 2 -->
+        <div class="overflow-hidden rounded-xl p-6 backdrop-blur-sm border shadow-[0_10px_40px_-20px_rgba(0,0,0,0.6)]" :style="cardStyle">
+          <div class="pt-2">
+            <span class="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] rounded-full px-3 py-1" :style="pillStyle">
+              Step <span class="font-mono">2</span> <CheckIcon class="h-3.5 w-3.5" />
+            </span>
+          </div>
+          <div class="pb-2 mt-3">
+            <h3 class="flex items-center gap-2 font-semibold text-lg" :style="{ color: hexA('#FFFFFF', 0.9) }">
+              <TagsIcon class="h-5 w-5" :style="{ color: hexA('#FFFFFF', 0.72) }" />
+              Añade gustos y elige tipos
+            </h3>
+          </div>
+          <div class="space-y-4">
+            <div class="h-10 w-full rounded-md px-3 flex items-center justify-between" :style="ghostInputStyle">
+              <span class="truncate" :style="{ color: hexA('#FFFFFF', 0.64) }">Selecciona una categoría</span>
+              <ChevronDown class="h-5 w-5" :style="{ color: hexA('#FFFFFF', 0.64) }" />
             </div>
-            
-            <div class="space-y-4 mt-auto"> <div class="bg-white/5 rounded-lg p-3 border border-white/10">
-                <div class="flex items-center space-x-2">
-                  <Search class="w-4 h-4 text-indigo-300"/>
-                  <span class="text-sm text-indigo-200">Ej: Olivia Rodrigo</span>
-                </div>
-              </div>
-
-              <div class="text-xs text-indigo-200 text-left">Quiero recomendaciones de:</div>
-              <div class="grid grid-cols-2 gap-2 text-sm">
-                <div class="bg-indigo-500/20 rounded-lg p-2 border border-indigo-500/30 flex items-center justify-center space-x-2 hover:bg-indigo-500/30 transition-colors duration-200 cursor-pointer">
-                  <Music class="w-4 h-4 text-indigo-300"/>
-                  <span>Música</span>
-                </div>
-                <div class="bg-white/5 rounded-lg p-2 border border-white/10 flex items-center justify-center space-x-2 hover:bg-white/10 transition-colors duration-200 cursor-pointer">
-                  <Clapperboard class="w-4 h-4 text-indigo-300"/>
-                  <span>Películas</span>
-                </div>
-                <div class="bg-white/5 rounded-lg p-2 border border-white/10 flex items-center justify-center space-x-2 hover:bg-white/10 transition-colors duration-200 cursor-pointer">
-                  <Gamepad2 class="w-4 h-4 text-indigo-300"/>
-                  <span>Juegos</span>
-                </div>
-                <div class="bg-white/5 rounded-lg p-2 border border-white/10 flex items-center justify-center space-x-2 hover:bg-white/10 transition-colors duration-200 cursor-pointer">
-                  <BookText class="w-4 h-4 text-indigo-300"/>
-                  <span>Libros</span>
-                </div>
-              </div>
+            <div class="h-10 w-full rounded-md px-3 flex items-center" :style="ghostInputStyle">
+              <SearchIcon class="h-5 w-5 mr-2" />
+              <span class="truncate" :style="{ color: hexA('#FFFFFF', 0.64) }">Busca tus artistas, películas, etc...</span>
             </div>
+            <div class="h-10 w-full rounded-md px-3 flex items-center justify-between" :style="ghostInputStyle">
+              <span class="truncate" :style="{ color: hexA('#FFFFFF', 0.64) }">¿Qué te gustaría recibir?</span>
+              <ChevronDown class="h-5 w-5" :style="{ color: hexA('#FFFFFF', 0.64) }" />
+            </div>
+            <p class="text-sm" :style="{ color: hexA('#FFFFFF', 0.72) }">
+              Selecciona gustos y el tipo de recomendaciones que deseas.
+            </p>
           </div>
         </div>
 
-        <!--Paso 3-->
-        <div 
-          ref="step3Ref"
-          :class="[
-            'relative group transition-all duration-5000 ease-out',
-            isVisible ? 'step-slide-in step-delay-3' : 'step-hidden',
-            isVisible ? 'step-floating step-floating-delay-2' : ''
-          ]"
-        >
-          <div class="absolute inset-0 bg-gradient-to-r from-pink-600/20 to-purple-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
-          <div class="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-all duration-300 flex flex-col h-full"> <div class="text-center mb-6">
-              <div class="inline-flex items-center justify-center w-12 h-12 bg-pink-500/20 rounded-xl mb-4">
-                <Sparkles class="w-6 h-6 text-pink-300" />
-              </div>
-              <div class="text-sm font-semibold text-pink-300 mb-2">PASO 3</div>
-              <h3 class="text-xl font-bold mb-2">Organiza tu Colección de Arte</h3>
-              <p class="text-sm text-pink-200">
-                Recibe tus recomendaciones, guárdalas en playlists personalizadas en tu biblioteca y revísalas cuando quieras.
-              </p>
-            </div>
-            
-            <div class="space-y-3 mt-auto"> <div class="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <List class="w-4 h-4 text-pink-300" />
-                  <span class="text-sm text-pink-200">Recomendaciones en lista</span>
-                </div>
-                <Check class="w-4 h-4 text-green-400" />
-              </div>
-              <div class="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <Folder class="w-4 h-4 text-pink-300" />
-                  <span class="text-sm text-pink-200">Guarda en tus Playlists</span>
-                </div>
-                <Check class="w-4 h-4 text-green-400" />
-              </div>
-              <div class="bg-white/5 rounded-lg p-3 border border-white/10 flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <Search class="w-4 h-4 text-pink-300" />
-                  <span class="text-sm text-pink-200">Busca en tu Biblioteca</span>
-                </div>
-                <Check class="w-4 h-4 text-green-400" />
+        <!-- Paso 3 -->
+        <div class="overflow-hidden rounded-xl p-6 backdrop-blur-sm border shadow-[0_10px_40px_-20px_rgba(0,0,0,0.6)]" :style="cardStyle">
+          <div class="pt-2">
+            <span class="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] rounded-full px-3 py-1" :style="pillStyle">
+              Step <span class="font-mono">3</span> <CheckIcon class="h-3.5 w-3.5" />
+            </span>
+          </div>
+          <div class="pb-2 mt-3">
+            <h3 class="flex items-center gap-2 font-semibold text-lg whitespace-nowrap" :style="{ color: hexA('#FFFFFF', 0.9) }">
+              <LibraryIcon class="h-5 w-5" :style="{ color: hexA('#FFFFFF', 0.72) }" />
+              Recibe y organiza recomendaciones
+            </h3>
+          </div>
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <div
+                v-for="(collection, i) in collections"
+                :key="i"
+                class="w-full rounded-md p-3 border"
+                :style="collectionItemStyle"
+              >
+                <div class="text-sm" :style="{ color: hexA('#FFFFFF', 0.92) }">{{ collection.title }}</div>
+                <div class="text-xs" :style="{ color: hexA('#FFFFFF', 0.66) }">{{ collection.meta }}</div>
               </div>
             </div>
+            <p class="text-sm" :style="{ color: hexA('#FFFFFF', 0.72) }">
+              Guarda contenido en tus colecciones y consúltalo cuando quieras.
+            </p>
           </div>
         </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="mt-10 md:mt-14 flex justify-center">
+        <div
+          class="pointer-events-none w-full max-w-5xl h-px rounded-full"
+          :style="{ background: `linear-gradient(90deg, transparent, ${hexA(colors.step,0.35)}, ${hexA(colors.step,0.35)}, transparent)` }"
+        />
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { User, Mail, Lock, Search, Heart, Music, Gamepad2, BookText, Clapperboard, Sparkles, List, Folder, Check } from 'lucide-vue-next'
+import {
+  Check as CheckIcon,
+  Tags as TagsIcon,
+  UserPlus as UserPlusIcon,
+  Library as LibraryIcon,
+  Search as SearchIcon,
+  ChevronDown,
+} from 'lucide-vue-next'
+import { onMounted, onBeforeUnmount, ref } from 'vue'
+import { NeatGradient, type NeatConfig } from '@firecms/neat'
 
-const sectionRef = ref<HTMLElement>()
-const step1Ref = ref<HTMLElement>()
-const step2Ref = ref<HTMLElement>()
-const step3Ref = ref<HTMLElement>()
-const isVisible = ref(false)
-
-let observer: IntersectionObserver | null = null
+// Lógica del Neat Gradient integrada en el componente principal
+const neatHost = ref<HTMLCanvasElement | null>(null)
+let neat: NeatGradient | null = null
 
 onMounted(() => {
-  // Crear el Intersection Observer
-  observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
-          isVisible.value = true
-          // Una vez que se activa la animación, podemos desconectar el observer
-          observer?.disconnect()
-        }
-      })
-    },
-    {
-      threshold: 0.4, // Se activa cuando el 30% de la sección es visible
-      rootMargin: '-50px 0px -50px 0px' // Margen para activar un poco antes
-    }
-  )
-
-  // Observar la sección
-  if (sectionRef.value) {
-    observer.observe(sectionRef.value)
+  if (!neatHost.value) return
+  const defaultConfig: NeatConfig = {
+    colors: [
+      { color: '#e01e2f', enabled: true },  // rojo
+      { color: '#1c6abd', enabled: true },  // azul
+    ],
+    speed: 4,
+    horizontalPressure: 3,
+    verticalPressure: 4,
+    waveFrequencyX: 3,
+    waveFrequencyY: 3,
+    waveAmplitude: 8,
+    shadows: 1,
+    highlights: 5,
+    colorBrightness: 1,
+    colorSaturation: 7,
+    wireframe: false,
+    colorBlending: 8,
+    backgroundColor: '#0b1418', // Fondo oscuro para la sección
+    backgroundAlpha: 1,
+    grainScale: 3,
+    grainIntensity: 0.3,
+    grainSpeed: 1,
   }
+
+  neat = new NeatGradient({
+    ref: neatHost.value,
+    ...defaultConfig,
+  })
 })
 
-onUnmounted(() => {
-  if (observer) {
-    observer.disconnect()
-  }
+onBeforeUnmount(() => {
+  if (neat) neat.destroy()
 })
+
+type Collection = { title: string; meta: string }
+const collections: Collection[] = [
+  { title: 'Playlist: Neo‑Synth', meta: '12 pistas · Música' },
+  { title: 'Colección: Sci‑Fi Essentials', meta: '18 títulos · Películas' },
+  { title: 'Lista: Worlds & Lore', meta: '9 libros · Lectura' },
+]
+
+const colors = {
+  card: '#022834',
+  step: '#16a696',
+}
+
+function hexA(hex: string, alpha = 1) {
+  const h = hex.replace('#', '')
+  const bigint = parseInt(h, 16)
+  const r = (bigint >> 16) & 255
+  const g = (bigint >> 8) & 255
+  const b = bigint & 255
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+const cardStyle = {
+  background: colors.card,
+  border: `1px solid ${hexA(colors.step, 0.18)}`,
+}
+
+const ghostInputStyle = {
+  background: hexA('#000000', 0.12),
+  border: `1px solid ${hexA(colors.step, 0.16)}`,
+  color: hexA('#FFFFFF', 0.66),
+}
+
+const collectionItemStyle = {
+  background: hexA('#000000', 0.14),
+  borderColor: hexA(colors.step, 0.18),
+}
+
+const pillStyle = {
+  background: hexA(colors.step, 0.26),
+  color: hexA('#FFFFFF', 0.9),
+  border: `1px solid ${hexA(colors.step, 0.32)}`,
+}
 </script>
-
-<style scoped>
-h1 {
-  text-shadow: 0 4px 8px rgba(0,0,0,0.5);
-}
-
-@supports (backdrop-filter: blur(10px)) {
-  .backdrop-blur-sm {
-    backdrop-filter: blur(4px);
-  }
-  .backdrop-blur-md {
-    backdrop-filter: blur(12px);
-  }
-  .backdrop-blur-lg {
-    backdrop-filter: blur(20px);
-  }
-}
-
-/* Estados iniciales y animaciones de entrada */
-.step-hidden {
-  opacity: 0;
-  transform: translateX(100px);
-}
-
-.step-slide-in {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Delays escalonados para cada paso */
-.step-delay-1 {
-  transition-delay: 0.5s;
-}
-
-.step-delay-2 {
-  transition-delay: 1.0s;
-}
-
-.step-delay-3 {
-  transition-delay: 1.5s;
-}
-
-/* Animaciones de flotación */
-.step-floating {
-  animation: gentle-float 8s ease-in-out infinite;
-  animation-delay: 0.5s
-}
-
-.step-floating-delay-1 {
-  animation: gentle-float 8s ease-in-out infinite;
-  animation-delay: 0.5s;
-}
-
-.step-floating-delay-2 {
-  animation: gentle-float 8s ease-in-out infinite;
-  animation-delay: 0.5s;
-}
-
-/* Keyframes para flotar suave */
-@keyframes gentle-float {
-  0%, 100% { 
-    transform: translateY(0px) translateX(0px);
-  }
-  25% { 
-    transform: translateY(-8px) translateX(2px);
-  }
-  50% { 
-    transform: translateY(-4px) translateX(-1px);
-  }
-  75% { 
-    transform: translateY(-12px) translateX(1px);
-  }
-}
-
-/* Efecto hover mejorado */
-.group:hover {
-  transform: translateY(-5px);
-  transition: transform 0.3s ease-out;
-}
-
-/* Animación más suave en dispositivos móviles */
-@media (max-width: 768px) {
-  .step-hidden {
-    transform: translateX(50px);
-  }
-  
-  @keyframes gentle-float {
-    0%, 100% { 
-      transform: translateY(0px);
-    }
-    50% { 
-      transform: translateY(-6px);
-    }
-  }
-}
-
-/* Reducir movimiento para usuarios que prefieren menos animación */
-@media (prefers-reduced-motion: reduce) {
-  .step-floating,
-  .step-floating-delay-1,
-  .step-floating-delay-2 {
-    animation: none;
-  }
-  
-  .step-slide-in {
-    transition-duration: 0.3s;
-  }
-}
-</style>
