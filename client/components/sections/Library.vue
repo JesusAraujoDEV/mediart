@@ -15,7 +15,7 @@
         <button 
           v-if="searchQuery" 
           @click="searchQuery = ''"
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer"
         >
           <Icon name="material-symbols:close" size="20" />
         </button>
@@ -29,9 +29,9 @@
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="text-center py-12">
+      <div v-else-if="error" class="text-center py-12">
       <p class="text-red-400 mb-4">{{ error }}</p>
-      <button @click="fetchPlaylists" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200">Reintentar</button>
+        <button @click="fetchPlaylists" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 cursor-pointer">Reintentar</button>
     </div>
 
     <!-- Playlists List -->
@@ -71,14 +71,14 @@
               v-if="canRemovePlaylist(playlist)"
               @click.stop="removePlaylist(playlist)"
               :disabled="removingPlaylist === playlist.id"
-              class="bg-gray-700 hover:bg-gray-600 text-white font-bold text-sm px-3 py-1 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="bg-gray-700 hover:bg-gray-600 text-white font-bold text-sm px-3 py-1 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <Icon name="material-symbols:delete" size="16" />
             </button>
             <button 
               @click.stop="viewPlaylist(playlist)"
               :disabled="loadingPlaylist === playlist.id"
-              class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold text-sm px-3 py-1 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold text-sm px-3 py-1 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               Ver más
             </button>
@@ -88,7 +88,7 @@
 
       <!-- Load More -->
       <div v-if="hasMorePlaylists" class="text-center mt-6">
-        <button @click="loadMore" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200">Cargar más</button>
+        <button @click="loadMore" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-200 cursor-pointer">Cargar más</button>
       </div>
     </div>
 
@@ -161,15 +161,15 @@ const fetchPlaylists = async () => {
   try {
     const token = localStorage.getItem('token')
     if (!token) throw new Error('No hay token de autenticación')
-    
+
+    const authHeaders = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    } as const
+
     const response = await fetch(
       `${config.public.backend}/api/users/by-username/${username.value}?include=savedPlaylists`,
-      {
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
+      { headers: authHeaders }
     )
     
     if (!response.ok) throw new Error('Error al cargar playlists')
@@ -200,7 +200,26 @@ const viewPlaylist = async (playlist: Playlist) => {
 
 const removePlaylist = async (playlist: Playlist) => {
   if (removingPlaylist.value === playlist.id) return
-  
+
+  // Confirmación bonita
+  const result = await import('sweetalert2').then(({ default: Swal }) =>
+    Swal.fire({
+      title: '¿Quitar esta playlist?',
+      html: `<div class="text-left"><p class='mb-2'>Se eliminará de tu biblioteca.</p><p class='text-sm text-gray-400'>${playlist.name}</p></div>`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, quitar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+      focusCancel: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#374151',
+      backdrop: true,
+    })
+  )
+
+  if (!result.isConfirmed) return
+
   removingPlaylist.value = playlist.id
   try {
     const { error: fetchError } = await useFetch(
@@ -213,13 +232,28 @@ const removePlaylist = async (playlist: Playlist) => {
         }
       }
     )
-    
+
     if (fetchError.value) throw new Error('Error al quitar playlist')
-    
+
     playlists.value = playlists.value.filter(p => p.id !== playlist.id)
-    
+
+    // Éxito bonito
+    await import('sweetalert2').then(({ default: Swal }) =>
+      Swal.fire({
+        title: 'Eliminada',
+        text: 'La playlist fue quitada de tu biblioteca.',
+        icon: 'success',
+        timer: 1600,
+        showConfirmButton: false,
+        position: 'top-end',
+        toast: true,
+      })
+    )
   } catch (err: any) {
     console.error('Error:', err)
+    await import('sweetalert2').then(({ default: Swal }) =>
+      Swal.fire('Error', err.message || 'No se pudo quitar la playlist', 'error')
+    )
   } finally {
     removingPlaylist.value = null
   }
