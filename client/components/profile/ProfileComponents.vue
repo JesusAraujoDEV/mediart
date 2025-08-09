@@ -1,5 +1,5 @@
 <template>
-  <section class="w-1/3 h-full rounded-lg max-md:h-fit p-12 max-md:w-full flex flex-col justify-center items-center gap-10 profile-section">
+  <section class="w-full md:w-1/3 h-auto md:h-auto rounded-lg p-6 sm:p-8 md:p-12 flex flex-col items-center gap-6 sm:gap-8 md:gap-10 profile-section">
     <ProfileAvatar 
       :avatar-url="userProfile.profilePictureUrl" 
       :backend-base="runtimeConfig.public.backend"
@@ -115,5 +115,19 @@ const getUserFromStorage = () => {
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid #ffffff20;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-height: 740px) {
+  .profile-section {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .profile-section {
+    max-width: 100vw;
+  }
 }
 </style>

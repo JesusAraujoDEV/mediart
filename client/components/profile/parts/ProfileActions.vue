@@ -1,8 +1,8 @@
 <template>
-  <div class="w-full flex flex-col gap-5">
+  <div class="w-full flex flex-col gap-3 sm:gap-4 items-center">
     <button 
       v-if="isOwner" 
-      class="w-full px-8 py-5 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold text-lg hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
+      class="w-auto max-w-full px-4 sm:px-6 py-3 sm:py-3.5 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold text-sm sm:text-base hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center"
       :disabled="loading" 
       @click="$emit('edit-profile')"
     >
@@ -13,7 +13,7 @@
     <template v-else>
       <button 
         v-if="!isFriend"
-        class="w-full px-8 py-5 rounded-lg bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold text-lg hover:from-emerald-700 hover:to-green-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
+        class="w-full sm:w-auto px-4 sm:px-6 py-3 sm:py-3.5 rounded-lg bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold text-sm sm:text-base hover:from-emerald-700 hover:to-green-700 disabled:opacity-50 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center"
         :disabled="loading"
         @click="$emit('add-friend')"
       >
@@ -22,7 +22,7 @@
       </button>
       <button 
         v-else 
-        class="w-full px-8 py-5 rounded-lg bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold text-lg hover:from-red-700 hover:to-pink-700 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
+        class="w-full sm:w-auto px-4 sm:px-6 py-3 sm:py-3.5 rounded-lg bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold text-sm sm:text-base hover:from-red-700 hover:to-pink-700 disabled:opacity-50 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center"
         :disabled="loading" 
         @click="$emit('remove-friend')"
       >

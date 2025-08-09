@@ -1,11 +1,11 @@
 <template>
-  <div class="w-full flex flex-col gap-4">
+  <div class="w-full flex flex-col gap-3 sm:gap-4">
     <!-- Encabezado de la sección de playlists -->
     <div class="flex items-center justify-between">
-      <h3 class="text-lg font-bold text-white">My Playlists</h3>
+      <h3 class="text-sm sm:text-base font-bold text-white">My Playlists</h3>
     </div>
 
-    <p class="text-xs text-gray-400 text-center" aria-live="polite">
+    <p class="text-xs text-gray-400 text-center px-3" aria-live="polite">
       Your saved playlists will appear here.
     </p>
 
@@ -14,15 +14,15 @@
       <div 
         v-for="pl in createdPlaylists" 
         :key="pl.id"
-        class="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-200 group"
+        class="flex items-center justify-between p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-200 group"
       >
         <div class="flex items-center gap-3 overflow-hidden flex-1">
           <Icon name="i-ph:playlist" size="20" class="text-purple-400 flex-shrink-0" />
-          <span class="truncate text-white font-medium">{{ pl.name }}</span>
+          <span class="truncate text-white font-medium text-sm sm:text-base">{{ pl.name }}</span>
         </div>
 
         <button 
-          class="text-sm px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           :class="savedPlaylistsIds.includes(pl.id) 
             ? 'bg-green-600 hover:bg-green-700 text-white' 
             : 'bg-gray-700 hover:bg-gray-600 text-white'"

@@ -1,10 +1,10 @@
 <template>
   <div class="w-full text-center space-y-5">
-    <h2 class="text-4xl font-bold text-white">@{{ username }}</h2>
+    <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white break-words leading-tight max-w-[85vw] sm:max-w-sm md:max-w-md mx-auto">@{{ username }}</h2>
     <!-- Share actions -->
-    <div class="flex items-center justify-center">
+    <div class="flex items-center justify-center mt-1">
       <button
-        class="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+        class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-xs sm:text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
         @click="shareOrCopy"
         aria-label="Share profile"
       >
@@ -12,7 +12,7 @@
         <span>Share</span>
       </button>
     </div>
-    <p v-if="bio" class="text-base text-gray-300 leading-relaxed max-w-sm mx-auto">{{ bio }}</p>
+    <p v-if="bio" class="text-sm sm:text-base text-gray-300 leading-relaxed max-w-[85vw] sm:max-w-sm mx-auto">{{ bio }}</p>
     <div class="space-y-3">
       <p v-if="email" class="text-sm text-gray-400">{{ email }}</p>
       <p class="text-sm text-gray-500">Joined {{ createdAtFormatted }}</p>
