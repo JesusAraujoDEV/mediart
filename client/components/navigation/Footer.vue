@@ -12,7 +12,7 @@
               alt="Mediart Logo" 
               class="h-12 w-auto mr-3" 
             />
-            <span class="text-2xl font-bold text-gray-800">Mediart</span>
+            <span class="text-2xl font-bold text-gray-800 font-halenoir">MEDIART</span>
           </div>
           <p class="text-gray-600 text-lg font-medium max-w-md text-right">
             Descubre tu próxima obsesión artística con recomendaciones personalizadas.
@@ -24,7 +24,8 @@
 
             <!-- Columna Empresa -->
           <div>
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Empresa</h3>
+            <!-- Se ha añadido la clase 'font-halenoir' al título de la columna -->
+            <h3 class="text-lg font-bold text-gray-800 mb-4 font-halenoir">Empresa</h3>
             <ul class="space-y-3">
               <li><NuxtLink to="/sobre-nosotros" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Sobre Nosotros</NuxtLink></li>
               <li><NuxtLink to="/como-funciona" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Cómo Funciona</NuxtLink></li>
@@ -36,7 +37,7 @@
 
           <!-- Columna Navegación -->
           <div>
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Navegación</h3>
+            <h3 class="text-lg font-bold text-gray-800 mb-4 font-halenoir">Navegación</h3>
             <ul class="space-y-3">
               <li><NuxtLink to="/categorias" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Categorías</NuxtLink></li>
               <li><NuxtLink to="/recomendaciones" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Recomendaciones</NuxtLink></li>
@@ -48,7 +49,7 @@
 
           <!-- Columna Contacto -->
           <div>
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Contacto</h3>
+            <h3 class="text-lg font-bold text-gray-800 mb-4 font-halenoir">Contacto</h3>
             <ul class="space-y-4">
               <li class="flex items-center">
                 <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,9 +63,9 @@
                 <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                 </svg>
-                 <a href="tel:+584144019911" class="text-gray-600 hover:text-blue-600 transition-colors duration-200 ml-2 number-font">
-                  +58 414-4019911
-                </a>
+                  <a href="tel:+584144019911" class="text-gray-600 hover:text-blue-600 transition-colors duration-200 ml-2 number-font">
+                    +58 414-4019911
+                  </a>
               </li>
               <li class="flex items-center">
                 <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +79,7 @@
 
           <!-- Columna Redes Sociales -->
           <div>
-            <h3 class="text-lg font-bold text-gray-800 mb-4">Síguenos</h3>
+            <h3 class="text-lg font-bold text-gray-800 mb-4 font-halenoir">Síguenos</h3>
             <div class="flex space-x-4 mb-6">
               <!--Instagram-->
               <a href="https://www.instagram.com/mediart.ai?igsh=MW51emNqNjJrMHdnZA==" class="w-10 h-10 bg-purple-100 hover:bg-purple-200 rounded-full flex items-center justify-center transition-colors duration-200">
@@ -146,4 +147,19 @@
 </script>
 
 <style scoped>
+@font-face {
+  font-family: 'Halenoir';
+  src: url('/fonts/Halenoir-Bold.otf') format('opentype');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: 'Halenoir';
+  src: url('/fonts/Halenoir-Black.otf') format('opentype');
+  font-weight: 800;
+}
+
+.font-halenoir {
+  font-family: 'Halenoir', sans-serif;
+}
 </style>

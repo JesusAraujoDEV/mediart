@@ -20,7 +20,7 @@
 
     <!-- Logo en la parte superior -->
     <div class="relative z-20 flex items-center justify-between p-6 md:p-8">
-      <div class="text-white font-bold text-xl tracking-wider">MEDIART</div>
+      
     </div>
     
     <!-- Hero Content -->
