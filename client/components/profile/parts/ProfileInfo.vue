@@ -4,7 +4,7 @@
     <!-- Share actions -->
     <div class="flex items-center justify-center mt-1">
       <button
-        class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-xs sm:text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+        class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-xs sm:text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer"
         @click="shareOrCopy"
         aria-label="Share profile"
       >

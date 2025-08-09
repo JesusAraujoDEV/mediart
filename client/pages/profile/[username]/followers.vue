@@ -30,7 +30,7 @@
               </svg>
             </div>
             <button v-if="searchQuery" @click="clearSearch"
-              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors cursor-pointer"
               aria-label="Limpiar búsqueda">
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -57,7 +57,7 @@
         <div v-else-if="error" class="text-red-400 text-center flex flex-col items-center">
           <p class="text-xl mb-4">{{ error }}</p>
           <button @click="fetchFollowers"
-            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
             Reintentar
           </button>
         </div>
@@ -85,7 +85,7 @@
           <!-- Load more button -->
           <div v-if="hasMoreFollowers" class="flex justify-center mt-6">
             <button @click="loadMoreFollowers"
-              class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-gray-500">
+              class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-gray-500 cursor-pointer">
               Cargar más
             </button>
           </div>
@@ -96,7 +96,7 @@
           class="text-center text-gray-400 text-2xl flex flex-col items-center">
           <p class="mb-4">No se encontraron seguidores que coincidan con "{{ searchQuery }}"</p>
           <button @click="clearSearch"
-            class="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+            class="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer">
             Limpiar búsqueda
           </button>
         </div>

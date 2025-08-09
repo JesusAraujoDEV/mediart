@@ -23,7 +23,7 @@
 
     <!-- Action button -->
     <button @click="onSearchClick" :disabled="loading"
-      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
       {{ loading ? 'Buscando...' : 'Buscar' }}
     </button>
   </div>

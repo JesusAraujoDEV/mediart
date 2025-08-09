@@ -22,7 +22,7 @@
         </div>
 
         <button 
-          class="text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           :class="savedPlaylistsIds.includes(pl.id) 
             ? 'bg-green-600 hover:bg-green-700 text-white' 
             : 'bg-gray-700 hover:bg-gray-600 text-white'"
