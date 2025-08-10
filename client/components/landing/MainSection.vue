@@ -24,15 +24,15 @@
     </div>
     
     <!-- Hero Content -->
-    <div class="relative z-10 flex h-full items-center justify-start text-left px-15 lg:px-18 xl:px-25 ">
-      <div class="text-white max-w-3xl pb-50 pl-15"> <!--El pl es para moverlo un poco más a la izquierda o derecha-->
+    <div class="relative z-10 flex h-full items-center justify-start text-left px-15 lg:px-18 xl:px-25">
+      <div class="text-white max-w-3xl pb-50 pl-15">
         <h1 class="text-6xl sm:text-7xl md:text-7xl font-halenoir font-extrabold leading-tight tracking-tight mb-4">
           Descubre tu Próxima <br class="hidden sm:inline" />Obsesión Artística
         </h1>
         <p class="text-lg sm:text-xl md:text-2xl font-light mb-8">
           Encuentra películas, música, libros y experiencias culturales que amarás, basadas en lo que ya te apasiona.
         </p>
-        <LiquidButton size="xxl" class="font-semibold text-lg tracking-wide" @click="scrollToSection('#join')">
+        <LiquidButton size="xxl" class="font-semibold text-lg tracking-wide cursor-pointer" @click="goToRegister">
           Únete
         </LiquidButton>
       </div>
@@ -130,11 +130,8 @@ const resetAutoPlay = () => {
   startAutoPlay();
 };
 
-const scrollToSection = (href: string) => {
-  const element = document.querySelector(href);
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' });
-  }
+const goToRegister = () => {
+  window.location.href = '/register';
 };
 
 onMounted(() => {

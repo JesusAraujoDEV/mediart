@@ -3,7 +3,7 @@
     aria-labelledby="how-it-works-title"
     class="relative w-full min-h-screen py-16 md:py-24 overflow-hidden text-white"
   >
-    <!-- Fondo NEAT (3D gradient con tres.js) -->
+    <!-- El Neat Gradient está fuera de la lógica v-if para evitar recargas -->
     <canvas ref="neatHost" class="absolute inset-0 -z-10 pointer-events-none w-full h-full" />
 
     <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -16,6 +16,13 @@
           >
             Cómo Funciona
           </span>
+          <button
+            @click="isDemoMode ? exitDemo() : startDemo()"
+            class="ml-4 px-4 py-2 text-sm font-bold rounded-full transition-all duration-300 transform"
+            :class="isDemoMode ? 'bg-red-600 hover:bg-red-700 text-white shadow-xl' : 'bg-yellow-400 hover:bg-yellow-500 text-gray-900 shadow-xl'"
+          >
+            {{ isDemoMode ? 'Salir de Demo' : 'Modo Demo' }}
+          </button>
         </div>
 
         <h2
@@ -26,100 +33,51 @@
           Empieza con Mediart, tu Asistente de Arte con IA
         </h2>
         <p class="mt-4 text-sm sm:text-base max-w-3xl mx-auto" :style="{ color: hexA('#FFFFFF', 0.75) }">
-          Descubre, organiza y gestiona contenido creativo en tres pasos sencillos. Desde el registro, pasando por tus gustos,
-          hasta recomendaciones y colecciones personalizadas.
+          Descubre, organiza y gestiona contenido creativo en tres pasos sencillos.
         </p>
       </div>
 
-      <!-- Grid de pasos (estructura conservada) -->
+      <!-- VISTA ESTÁTICA (sin modo demo activo) -->
       <div class="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-3">
-        <!-- Paso 1 -->
-        <div class="overflow-hidden rounded-xl p-6 backdrop-blur-sm border shadow-[0_10px_40px_-20px_rgba(0,0,0,0.6)]" :style="cardStyle">
-          <div class="pt-2">
-            <span class="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] rounded-full px-3 py-1" :style="pillStyle">
-              Step <span class="font-mono">1</span> <CheckIcon class="h-3.5 w-3.5" />
-            </span>
-          </div>
-          <div class="pb-2 mt-3">
-            <h3 class="flex items-center gap-2 font-semibold text-lg" :style="{ color: hexA('#FFFFFF', 0.9) }">
-              <UserPlusIcon class="h-5 w-5" :style="{ color: hexA('#FFFFFF', 0.72) }" />
-              Crea tu cuenta
-            </h3>
-          </div>
-          <div class="space-y-4">
-            <div class="space-y-2">
-              <div class="h-10 w-full rounded-md px-3 flex items-center" :style="ghostInputStyle">Nombre de usuario</div>
-              <div class="h-10 w-full rounded-md px-3 flex items-center" :style="ghostInputStyle">Correo electrónico</div>
-              <div class="h-10 w-full rounded-md px-3 flex items-center" :style="ghostInputStyle">Contraseña</div>
-            </div>
-            <p class="text-sm" :style="{ color: hexA('#FFFFFF', 0.72) }">
-              Regístrate y gestiona tu perfil para empezar a personalizar tu experiencia.
-            </p>
-          </div>
-        </div>
-
-        <!-- Paso 2 -->
-        <div class="overflow-hidden rounded-xl p-6 backdrop-blur-sm border shadow-[0_10px_40px_-20px_rgba(0,0,0,0.6)]" :style="cardStyle">
-          <div class="pt-2">
-            <span class="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] rounded-full px-3 py-1" :style="pillStyle">
-              Step <span class="font-mono">2</span> <CheckIcon class="h-3.5 w-3.5" />
-            </span>
-          </div>
-          <div class="pb-2 mt-3">
-            <h3 class="flex items-center gap-2 font-semibold text-lg" :style="{ color: hexA('#FFFFFF', 0.9) }">
-              <TagsIcon class="h-5 w-5" :style="{ color: hexA('#FFFFFF', 0.72) }" />
-              Añade gustos y elige tipos
-            </h3>
-          </div>
-          <div class="space-y-4">
-            <div class="h-10 w-full rounded-md px-3 flex items-center justify-between" :style="ghostInputStyle">
-              <span class="truncate" :style="{ color: hexA('#FFFFFF', 0.64) }">Selecciona una categoría</span>
-              <ChevronDown class="h-5 w-5" :style="{ color: hexA('#FFFFFF', 0.64) }" />
-            </div>
-            <div class="h-10 w-full rounded-md px-3 flex items-center" :style="ghostInputStyle">
-              <SearchIcon class="h-5 w-5 mr-2" />
-              <span class="truncate" :style="{ color: hexA('#FFFFFF', 0.64) }">Busca tus artistas, películas, etc...</span>
-            </div>
-            <div class="h-10 w-full rounded-md px-3 flex items-center justify-between" :style="ghostInputStyle">
-              <span class="truncate" :style="{ color: hexA('#FFFFFF', 0.64) }">¿Qué te gustaría recibir?</span>
-              <ChevronDown class="h-5 w-5" :style="{ color: hexA('#FFFFFF', 0.64) }" />
-            </div>
-            <p class="text-sm" :style="{ color: hexA('#FFFFFF', 0.72) }">
-              Selecciona gustos y el tipo de recomendaciones que deseas.
-            </p>
-          </div>
-        </div>
-
-        <!-- Paso 3 -->
-        <div class="overflow-hidden rounded-xl p-6 backdrop-blur-sm border shadow-[0_10px_40px_-20px_rgba(0,0,0,0.6)]" :style="cardStyle">
-          <div class="pt-2">
-            <span class="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] rounded-full px-3 py-1" :style="pillStyle">
-              Step <span class="font-mono">3</span> <CheckIcon class="h-3.5 w-3.5" />
-            </span>
-          </div>
-          <div class="pb-2 mt-3">
-            <h3 class="flex items-center gap-2 font-semibold text-lg whitespace-nowrap" :style="{ color: hexA('#FFFFFF', 0.9) }">
-              <LibraryIcon class="h-5 w-5" :style="{ color: hexA('#FFFFFF', 0.72) }" />
-              Recibe y organiza recomendaciones
-            </h3>
-          </div>
-          <div class="space-y-4">
-            <div class="space-y-2">
-              <div
-                v-for="(collection, i) in collections"
-                :key="i"
-                class="w-full rounded-md p-3 border"
-                :style="collectionItemStyle"
-              >
-                <div class="text-sm" :style="{ color: hexA('#FFFFFF', 0.92) }">{{ collection.title }}</div>
-                <div class="text-xs" :style="{ color: hexA('#FFFFFF', 0.66) }">{{ collection.meta }}</div>
-              </div>
-            </div>
-            <p class="text-sm" :style="{ color: hexA('#FFFFFF', 0.72) }">
-              Guarda contenido en tus colecciones y consúltalo cuando quieras.
-            </p>
-          </div>
-        </div>
+        <HowItWorksStep1
+          :is-demo-mode="isDemoMode"
+          :demo-step="demoStep"
+          v-model:username="username"
+          v-model:email="email"
+          v-model:password="password"
+          @next="nextDemoStep"
+        />
+        <HowItWorksStep2
+          :is-demo-mode="isDemoMode"
+          :demo-step="demoStep"
+          :is-dropdown-open="isDropdownOpen"
+          :selected-category="selectedCategory"
+          :categories="categories"
+          :filtered-suggestions="filteredSuggestions"
+          :is-receive-dropdown-open="isReceiveDropdownOpen"
+          :selected-receive-category="selectedReceiveCategory"
+          :receive-categories="receiveCategories"
+          @toggle-dropdown="toggleDropdown"
+          @select-category="selectCategory"
+          v-model:searchQuery="searchQuery"
+          v-model:showSuggestions="showSuggestions"
+          @add-suggestion="addSuggestion"
+          @toggle-receive-dropdown="toggleReceiveDropdown"
+          @select-receive-category="selectReceiveCategory"
+          @next="nextDemoStep"
+        />
+        <HowItWorksStep3
+          :is-demo-mode="isDemoMode"
+          :demo-step="demoStep"
+          :is-loading="isLoading"
+          :show-suggestions-result="showSuggestionsResult"
+          :suggestions-accepted="suggestionsAccepted"
+          :generated-suggestions="generatedSuggestions"
+          :collections="collections"
+          @generate-suggestions="generateSuggestions"
+          @accept-suggestions="acceptSuggestions"
+          @regenerate-suggestions="regenerateSuggestions"
+        />
       </div>
 
       <!-- Divider -->
@@ -134,97 +92,284 @@
 </template>
 
 <script setup lang="ts">
-import {
-  Check as CheckIcon,
-  Tags as TagsIcon,
-  UserPlus as UserPlusIcon,
-  Library as LibraryIcon,
-  Search as SearchIcon,
-  ChevronDown,
-} from 'lucide-vue-next'
-import { onMounted, onBeforeUnmount, ref } from 'vue'
-import { NeatGradient, type NeatConfig } from '@firecms/neat'
+import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
+import { ChevronDown, Search as SearchIcon, Tags as TagsIcon, UserPlus as UserPlusIcon } from "lucide-vue-next";
+import HowItWorksStep1 from './how-it-works/HowItWorksStep1.vue';
+import HowItWorksStep2 from './how-it-works/HowItWorksStep2.vue';
+import HowItWorksStep3 from './how-it-works/HowItWorksStep3.vue';
+import { NeatGradient, type NeatConfig } from '@firecms/neat';
+import { cardStyle, collectionItemStyle, ghostInputStyle, hexA, pillStyle, colors } from '../../utils/styleUtils';
 
-// Lógica del Neat Gradient integrada en el componente principal
-const neatHost = ref<HTMLCanvasElement | null>(null)
-let neat: NeatGradient | null = null
+// Lógica del Neat Gradient
+const neatHost = ref<HTMLCanvasElement | null>(null);
+let neat: NeatGradient | null = null;
 
 onMounted(() => {
-  if (!neatHost.value) return
-  const defaultConfig: NeatConfig = {
-    colors: [
-      { color: '#e01e2f', enabled: true },  // rojo
-      { color: '#1c6abd', enabled: true },  // azul
-    ],
-    speed: 4,
-    horizontalPressure: 3,
-    verticalPressure: 4,
-    waveFrequencyX: 3,
-    waveFrequencyY: 3,
-    waveAmplitude: 8,
-    shadows: 1,
-    highlights: 5,
-    colorBrightness: 1,
-    colorSaturation: 7,
-    wireframe: false,
-    colorBlending: 8,
-    backgroundColor: '#0b1418', // Fondo oscuro para la sección
-    backgroundAlpha: 1,
-    grainScale: 3,
-    grainIntensity: 0.3,
-    grainSpeed: 1,
-  }
+  if (!neatHost.value) return;
+    const defaultConfig = {
+        colors: [
+            { color: '#e01e2f', enabled: true },
+            { color: '#1c6abd', enabled: true },
+        ],
+        speed: 4,
+        horizontalPressure: 3,
+        verticalPressure: 4,
+        waveFrequencyX: 3,
+        waveFrequencyY: 3,
+        waveAmplitude: 8,
+        shadows: 1,
+        highlights: 5,
+        colorBrightness: 1,
+        colorSaturation: 7,
+        wireframe: false,
+        colorBlending: 8,
+        backgroundColor: '#0b1418',
+        backgroundAlpha: 1,
+        grainScale: 3,
+        grainIntensity: 0.3,
+        grainSpeed: 1,
+    };
 
   neat = new NeatGradient({
     ref: neatHost.value,
     ...defaultConfig,
-  })
-})
+  });
+});
 
 onBeforeUnmount(() => {
-  if (neat) neat.destroy()
-})
+  if (neat) neat.destroy();
+});
 
-type Collection = { title: string; meta: string }
-const collections: Collection[] = [
-  { title: 'Playlist: Neo‑Synth', meta: '12 pistas · Música' },
-  { title: 'Colección: Sci‑Fi Essentials', meta: '18 títulos · Películas' },
-  { title: 'Lista: Worlds & Lore', meta: '9 libros · Lectura' },
-]
+// Lógica del modo Demo
+const isDemoMode = ref(false);
+const demoStep = ref(0); // 0: no demo, 1, 2, 3
 
-const colors = {
-  card: '#022834',
-  step: '#16a696',
-}
+const username = ref('');
+const email = ref('');
+const password = ref('');
 
-function hexA(hex: string, alpha = 1) {
-  const h = hex.replace('#', '')
-  const bigint = parseInt(h, 16)
-  const r = (bigint >> 16) & 255
-  const g = (bigint >> 8) & 255
-  const b = bigint & 255
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
+const categories = ref(['Canciones', 'Artistas', 'Álbumes', 'Películas', 'Series', 'Libros', 'Videojuegos']);
+const isDropdownOpen = ref(false);
+const selectedCategory = ref('');
+const searchQuery = ref('');
+const showSuggestions = ref(false);
 
-const cardStyle = {
-  background: colors.card,
-  border: `1px solid ${hexA(colors.step, 0.18)}`,
-}
+const receiveCategories = ref(['Mezcla', 'Canciones', 'Artistas', 'Álbumes', 'Películas', 'Series', 'Libros', 'Videojuegos']);
+const isReceiveDropdownOpen = ref(false);
+const selectedReceiveCategory = ref('');
 
-const ghostInputStyle = {
-  background: hexA('#000000', 0.12),
-  border: `1px solid ${hexA(colors.step, 0.16)}`,
-  color: hexA('#FFFFFF', 0.66),
-}
+const isLoading = ref(false);
+const showSuggestionsResult = ref(false);
+const suggestionsAccepted = ref(false);
+const generatedSuggestions = ref<any[]>([]);
+const initialCollections = [
+    { title: 'Playlist: Neo-Synth', meta: '12 pistas · Música' },
+    { title: 'Colección: Sci-Fi Essentials', meta: '18 títulos · Películas' },
+    { title: 'Lista: Worlds & Lore', meta: '9 libros · Lectura' },
+];
+const collections = ref([...initialCollections]);
 
-const collectionItemStyle = {
-  background: hexA('#000000', 0.14),
-  borderColor: hexA(colors.step, 0.18),
-}
+const startDemo = () => {
+  isDemoMode.value = true;
+  demoStep.value = 1;
+};
 
-const pillStyle = {
-  background: hexA(colors.step, 0.26),
-  color: hexA('#FFFFFF', 0.9),
-  border: `1px solid ${hexA(colors.step, 0.32)}`,
-}
+const exitDemo = () => {
+  isDemoMode.value = false;
+  demoStep.value = 0;
+  // Reset demo state
+  isLoading.value = false;
+  showSuggestionsResult.value = false;
+  suggestionsAccepted.value = false;
+  collections.value = [...initialCollections];
+};
+
+const nextDemoStep = () => {
+  if (demoStep.value === 1) {
+    demoStep.value++;
+  } else if (demoStep.value === 2) {
+    generateSuggestions();
+  }
+};
+
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value;
+  isReceiveDropdownOpen.value = false;
+};
+
+const selectCategory = (category: string) => {
+  selectedCategory.value = category;
+  isDropdownOpen.value = false;
+  searchQuery.value = '';
+  showSuggestions.value = true;
+};
+
+const toggleReceiveDropdown = () => {
+  isReceiveDropdownOpen.value = !isReceiveDropdownOpen.value;
+  isDropdownOpen.value = false;
+};
+
+const selectReceiveCategory = (category: string) => {
+  selectedReceiveCategory.value = category;
+  isReceiveDropdownOpen.value = false;
+};
+
+const suggestionsData = {
+  'Canciones': ['Bohemian Rhapsody', 'Stairway to Heaven', 'Imagine', 'Billie Jean', 'Like a Rolling Stone'],
+    'Artistas': ['Queen', 'Led Zeppelin', 'John Lennon', 'Michael Jackson', 'Bob Dylan'],
+    'Álbumes': ['A Night at the Opera', 'Led Zeppelin IV', 'Thriller', 'The Freewheelin\' Bob Dylan'],
+    'Películas': ['El Padrino', 'Pulp Fiction', 'Matrix', 'Parasite', 'Interestelar'],
+    'Series': ['Breaking Bad', 'Juego de Tronos', 'Stranger Things', 'Chernobyl', 'The Office'],
+    'Libros': ['Cien años de soledad', '1984', 'Don Quijote de la Mancha', 'El Señor de los Anillos', 'Crimen y Castigo'],
+    'Videojuegos': ['The Last of Us', 'Red Dead Redemption 2', 'Grand Theft Auto V', 'Cyberpunk 2077', 'The Legend of Zelda: Breath of the Wild'],
+} as Record<string, string[]>;
+
+const filteredSuggestions = computed(() => {
+  if (!selectedCategory.value || !suggestionsData[selectedCategory.value]) {
+    return [];
+  }
+  return suggestionsData[selectedCategory.value].filter(suggestion =>
+    suggestion.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+const addSuggestion = (suggestion: string) => {
+  searchQuery.value = suggestion;
+  showSuggestions.value = false;
+};
+
+const generateSuggestions = () => {
+  isLoading.value = true;
+  showSuggestionsResult.value = false;
+  suggestionsAccepted.value = false;
+
+  setTimeout(() => {
+    const dummySuggestions = {
+      'Mezcla': [
+        { title: `Mezcla: Basado en ${searchQuery.value || 'tus gustos'}`, meta: 'Sugerencias para ti.' },
+        { title: 'Mezcla: Descubrimientos de la semana', meta: 'Nuevas recomendaciones.' },
+        { title: 'Mezcla: Clásicos atemporales', meta: 'Lo mejor de siempre.' }
+      ],
+      'Canciones': [
+        { title: 'Canción: "Nueva Canción"', meta: `Artista: ${searchQuery.value || 'Desconocido'}` },
+        { title: 'Canción: "El Hit del Momento"', meta: 'Artista: Varios' },
+        { title: 'Canción: "Clásico Oculto"', meta: 'Artista: Leyenda' }
+      ],
+      'Artistas': [
+        { title: 'Artista: "El Sucesor de ' + (searchQuery.value || 'Alguien') + '"', meta: 'Género similar' },
+        { title: 'Artista: "El Rey de ' + (selectedCategory.value || 'General') + '"', meta: 'Artista emergente' },
+        { title: 'Artista: "La Leyenda Viva"', meta: 'Ícono del género' }
+      ],
+      'Álbumes': [
+        { title: 'Álbum: "Nuevo Álbum de ' + (searchQuery.value || 'Alguien') + '"', meta: 'Estilo similar' },
+        { title: 'Álbum: "El Clásico del Género"', meta: 'Álbum premiado' },
+        { title: 'Álbum: "El Descubrimiento Oculto"', meta: 'Joyas musicales' }
+      ],
+      'Películas': [
+        { title: 'Película: "La Trama Oculta"', meta: `Dirigida por ${searchQuery.value || 'Alguien'}` },
+        { title: 'Película: "El Nuevo Éxito de Taquilla"', meta: 'Acción y aventura' },
+        { title: 'Película: "El Cine Independiente"', meta: 'Drama y misterio' }
+      ],
+      'Series': [
+        { title: 'Serie: "La Conclusión Épica"', meta: `Secuela de ${searchQuery.value || 'Alguien'}` },
+        { title: 'Serie: "El Thriller Psicológico"', meta: 'Temporada completa' },
+        { title: 'Serie: "La Comedia del Año"', meta: 'Humor y situaciones' }
+      ],
+      'Libros': [
+        { title: 'Libro: "La Nueva Novela de ' + (searchQuery.value || 'Alguien') + '"', meta: 'Género literario' },
+        { title: 'Libro: "El Bestseller del Año"', meta: 'Literatura contemporánea' },
+        { title: 'Libro: "El Clásico de la Época"', meta: 'Fantasía épica' }
+      ],
+      'Videojuegos': [
+        { title: 'Videojuego: "El Mundo de ' + (searchQuery.value || 'Alguien') + '"', meta: 'Rol y aventura' },
+        { title: 'Videojuego: "El Sucesor Espiritual"', meta: 'Acción y estrategia' },
+        { title: 'Videojuego: "El Indie del Año"', meta: 'Plataformas' }
+      ],
+    };
+
+    const categoryKey = selectedReceiveCategory.value || 'Mezcla';
+    const suggestionsForCategory = dummySuggestions[categoryKey as keyof typeof dummySuggestions];
+
+    generatedSuggestions.value = suggestionsForCategory;
+    isLoading.value = false;
+    showSuggestionsResult.value = true;
+    suggestionsAccepted.value = false;
+
+    if (demoStep.value === 2) {
+      demoStep.value = 3;
+    }
+  }, 1500);
+};
+
+const acceptSuggestions = () => {
+  collections.value = [...generatedSuggestions.value];
+  suggestionsAccepted.value = true;
+  if (isDemoMode.value) {
+    setTimeout(exitDemo, 1500);
+  }
+};
+
+const regenerateSuggestions = () => {
+  generateSuggestions();
+};
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.loader {
+  border-top-color: #3498db;
+  -webkit-animation: spinner 1.5s linear infinite;
+  animation: spinner 1.5s linear infinite;
+}
+
+@-webkit-keyframes spinner {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spinner {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@font-face {
+  font-family: 'Halenoir';
+  src: url('/fonts/Halenoir-Bold.otf') format('opentype');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: 'Halenoir';
+  src: url('/fonts/Halenoir-Black.otf') format('opentype');
+  font-weight: 800;
+}
+
+.font-halenoir {
+  font-family: 'Halenoir', sans-serif;
+}
+
+@keyframes progress {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.animate-progress {
+  animation-name: progress;
+  animation-timing-function: linear;
+  transform-origin: top;
+}
+</style>
