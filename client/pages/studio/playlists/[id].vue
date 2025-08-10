@@ -361,6 +361,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
+import { getCache, setCache } from "~/utils/cache";
 import { useRoute } from "vue-router";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 import Swal from "sweetalert2";
@@ -629,6 +630,12 @@ const fetchPlaylist = async () => {
   }
 
   try {
+    const cacheKey = `playlist:${playlistId}`;
+    const cached = getCache<Playlist>(cacheKey);
+    if (cached) {
+      playlist.value = { ...cached, items: cached.items || [] };
+    }
+
     const { data, error } = await useFetch<Playlist>(
       `${config.public.backend}/api/playlists/${playlistId}`,
       {
@@ -650,6 +657,7 @@ const fetchPlaylist = async () => {
         ...data.value,
         items: data.value.items || [], // Ensure items is an array
       };
+      setCache(cacheKey, playlist.value, 2 * 60 * 1000); // 2 minutos
 
       // Verificar si la playlist está guardada
       await checkIfPlaylistSaved();

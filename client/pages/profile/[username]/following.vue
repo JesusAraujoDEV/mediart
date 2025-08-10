@@ -117,6 +117,7 @@ definePageMeta({
 });
 
 import { ref, computed, onMounted, watch, nextTick } from "vue";
+import { getCache, setCache } from "~/utils/cache";
 import { useRoute } from "vue-router";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 
@@ -197,6 +198,12 @@ const fetchFollowing = async () => {
     }
 
     // Obtener el perfil del usuario específico
+    const cacheKey = `following:${username}`;
+    const cached = getCache<any[]>(cacheKey);
+    if (cached) {
+      following.value = cached;
+    }
+
     const response = await fetch(`${config.public.backend}/api/users/by-username/${username}`, {
       method: "GET",
       headers: {
@@ -212,6 +219,7 @@ const fetchFollowing = async () => {
 
     const data = await response.json();
     following.value = data.followingUsers || [];
+    setCache(cacheKey, following.value, 2 * 60 * 1000);
     console.log("Amigos cargados:", following.value);
 
   } catch (error: any) {

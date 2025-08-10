@@ -108,6 +108,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import type { Playlist } from '~/types/Playlist'
+import { getCache, setCache } from '~/utils/cache'
 
 // Composables
 const router = useRouter()
@@ -145,6 +146,12 @@ const hasMorePlaylists = computed(() => {
 const username = computed(() => route.params.username as string)
 const currentUser = computed(() => {
   try {
+    const cacheKey = `savedPlaylists:${username.value}`
+    const cached = getCache<Playlist[]>(cacheKey)
+    if (cached && cached.length) {
+      playlists.value = cached
+      // No early return: continuamos para refrescar en background
+    }
     return JSON.parse(localStorage.getItem('user') || '{}')
   } catch {
     return {}
@@ -175,8 +182,10 @@ const fetchPlaylists = async () => {
     if (!response.ok) throw new Error('Error al cargar playlists')
     
     const data = await response.json()
-    // Reverse para mostrar las más recientes primero
-    playlists.value = (data.savedPlaylists || []).reverse()
+    const fresh = (data.savedPlaylists || []).reverse() as Playlist[]
+    playlists.value = fresh
+    // Cache 2 minutos
+    setCache(`savedPlaylists:${username.value}`, fresh, 2 * 60 * 1000)
     
   } catch (err: any) {
     error.value = err.message || 'Error inesperado'
