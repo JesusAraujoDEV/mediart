@@ -17,7 +17,7 @@
     <div v-else-if="errorMessage" class="flex flex-col items-center justify-center h-full text-red-400 text-center">
       <p class="text-xl mb-4">{{ errorMessage }}</p>
       <button @click="fetchPlaylist"
-        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg">
+        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg cursor-pointer">
         Reintentar
       </button>
     </div>
@@ -490,7 +490,7 @@ const debounce = (func: Function, delay: number) => {
   };
 };
 
-const internalSearchItems = async () => {
+  const internalSearchItems = async () => {
   if (!itemSearchQuery.value.trim()) {
     itemSearchResults.value = [];
     return;
@@ -512,126 +512,156 @@ const internalSearchItems = async () => {
     if (signal.aborted) return;
     if (error.value) throw new Error(error.value.data?.message || error.value.message || 'Error al buscar ítems');
     const newResults: any[] = [];
-    // Procesar resultados igual que en search.vue
-    if (itemSearchType.value === 'song' && data.value?.songs) {
+
+    // Si el backend devuelve un array plano
+    if (Array.isArray(data.value)) {
+      const sourceArray = data.value as any[];
+      if (itemSearchType.value === 'general') {
+        newResults.push(
+          ...sourceArray.map((item: any) => ({
+            title: item.title ?? item.name,
+            coverUrl:
+              item.coverUrl ?? item.thumbnail_url ?? item.poster_url ?? item.image_url ?? item.cover_url ?? null,
+            type: item.type ?? 'item',
+            externalId: (item.externalId ?? item.id)?.toString?.(),
+            description: item.description ?? item.overview ?? null,
+            externalUrl: item.externalUrl ?? item.external_url ?? null,
+          }))
+        );
+      } else {
+        newResults.push(
+          ...sourceArray
+            .filter((it: any) => (it.type ?? '').toLowerCase() === itemSearchType.value)
+            .map((item: any) => ({
+              title: item.title ?? item.name,
+              coverUrl:
+                item.coverUrl ?? item.thumbnail_url ?? item.poster_url ?? item.image_url ?? item.cover_url ?? null,
+              type: item.type ?? itemSearchType.value,
+              externalId: (item.externalId ?? item.id)?.toString?.(),
+              description: item.description ?? item.overview ?? null,
+              externalUrl: item.externalUrl ?? item.external_url ?? null,
+            }))
+        );
+      }
+    } else if (itemSearchType.value === 'song' && Array.isArray(data.value?.songs)) {
       newResults.push(...data.value.songs.map((item: any) => ({
-        title: item.title,
-        coverUrl: item.thumbnail_url || null,
-        type: "song",
-        externalId: item.id?.toString(),
-        description: `${item.artist_name} - ${item.album_name}`,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.thumbnail_url ?? item.poster_url ?? item.image_url ?? item.cover_url ?? null,
+        type: item.type ?? 'song',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? (item.artist_name && item.album_name ? `${item.artist_name} - ${item.album_name}` : null),
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
     } else if (itemSearchType.value === 'movie' && data.value?.movies) {
       newResults.push(...data.value.movies.map((item: any) => ({
-        title: item.title,
-        coverUrl: item.poster_url || null,
-        type: "movie",
-        externalId: item.id?.toString(),
-        description: item.overview || null,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.poster_url ?? item.thumbnail_url ?? item.image_url ?? item.cover_url ?? null,
+        type: item.type ?? 'movie',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? item.overview ?? null,
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
     } else if (itemSearchType.value === 'tvshow' && data.value?.tvshows) {
       newResults.push(...data.value.tvshows.map((item: any) => ({
-        title: item.title || item.name,
-        coverUrl: item.poster_url || null,
-        type: "tvshow",
-        externalId: item.id?.toString(),
-        description: item.overview || null,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.poster_url ?? item.thumbnail_url ?? item.image_url ?? item.cover_url ?? null,
+        type: item.type ?? 'tvshow',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? item.overview ?? null,
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
     } else if (itemSearchType.value === 'artist' && data.value?.artists) {
       newResults.push(...data.value.artists.map((item: any) => ({
-        title: item.name,
-        coverUrl: item.image_url || null,
-        type: "artist",
-        externalId: item.id?.toString(),
-        description: null,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.image_url ?? item.poster_url ?? item.thumbnail_url ?? item.cover_url ?? null,
+        type: item.type ?? 'artist',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? null,
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
     } else if (itemSearchType.value === 'album' && data.value?.albums) {
       newResults.push(...data.value.albums.map((item: any) => ({
-        title: item.name,
-        coverUrl: item.thumbnail_url || null,
-        type: "album",
-        externalId: item.id?.toString(),
-        description: item.artist_name || null,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.thumbnail_url ?? item.poster_url ?? item.image_url ?? item.cover_url ?? null,
+        type: item.type ?? 'album',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? item.artist_name ?? null,
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
     } else if (itemSearchType.value === 'book' && data.value?.books) {
       newResults.push(...data.value.books.map((item: any) => ({
-        title: item.title || item.name,
-        coverUrl: item.thumbnail_url || null,
-        type: "book",
-        externalId: item.id?.toString(),
-        description: item.description || null,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.thumbnail_url ?? item.poster_url ?? item.image_url ?? item.cover_url ?? null,
+        type: item.type ?? 'book',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? null,
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
     } else if (itemSearchType.value === 'videogame' && data.value?.videogames) {
       newResults.push(...data.value.videogames.map((item: any) => ({
-        title: item.name,
-        coverUrl: item.cover_url || null,
-        type: "videogame",
-        externalId: item.id?.toString(),
-        description: item.description || null,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.cover_url ?? item.thumbnail_url ?? item.poster_url ?? item.image_url ?? null,
+        type: item.type ?? 'videogame',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? null,
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
     } else if (itemSearchType.value === 'general') {
       if (data.value?.movies) newResults.push(...data.value.movies.map((item: any) => ({
-        title: item.title,
-        coverUrl: item.poster_url || null,
-        type: "movie",
-        externalId: item.id?.toString(),
-        description: item.overview || null,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.poster_url ?? item.thumbnail_url ?? item.image_url ?? item.cover_url ?? null,
+        type: item.type ?? 'movie',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? item.overview ?? null,
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
       if (data.value?.tvshows) newResults.push(...data.value.tvshows.map((item: any) => ({
-        title: item.title || item.name,
-        coverUrl: item.poster_url || null,
-        type: "tvshow",
-        externalId: item.id?.toString(),
-        description: item.overview || null,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.poster_url ?? item.thumbnail_url ?? item.image_url ?? item.cover_url ?? null,
+        type: item.type ?? 'tvshow',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? item.overview ?? null,
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
       if (data.value?.songs) newResults.push(...data.value.songs.map((item: any) => ({
-        title: item.title,
-        coverUrl: item.thumbnail_url || null,
-        type: "song",
-        externalId: item.id?.toString(),
-        description: `${item.artist_name} - ${item.album_name}`,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.thumbnail_url ?? item.poster_url ?? item.image_url ?? item.cover_url ?? null,
+        type: item.type ?? 'song',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? (item.artist_name && item.album_name ? `${item.artist_name} - ${item.album_name}` : null),
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
       if (data.value?.artists) newResults.push(...data.value.artists.map((item: any) => ({
-        title: item.name,
-        coverUrl: item.image_url || null,
-        type: "artist",
-        externalId: item.id?.toString(),
-        description: null,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.image_url ?? item.poster_url ?? item.thumbnail_url ?? item.cover_url ?? null,
+        type: item.type ?? 'artist',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? null,
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
       if (data.value?.albums) newResults.push(...data.value.albums.map((item: any) => ({
-        title: item.name,
-        coverUrl: item.thumbnail_url || null,
-        type: "album",
-        externalId: item.id?.toString(),
-        description: item.artist_name || null,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.thumbnail_url ?? item.poster_url ?? item.image_url ?? item.cover_url ?? null,
+        type: item.type ?? 'album',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? item.artist_name ?? null,
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
       if (data.value?.books) newResults.push(...data.value.books.map((item: any) => ({
-        title: item.title || item.name,
-        coverUrl: item.thumbnail_url || null,
-        type: "book",
-        externalId: item.id?.toString(),
-        description: item.description || null,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.thumbnail_url ?? item.poster_url ?? item.image_url ?? item.cover_url ?? null,
+        type: item.type ?? 'book',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? null,
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
       if (data.value?.videogames) newResults.push(...data.value.videogames.map((item: any) => ({
-        title: item.name,
-        coverUrl: item.cover_url || null,
-        type: "videogame",
-        externalId: item.id?.toString(),
-        description: item.description || null,
-        externalUrl: item.external_url || null,
+        title: item.title ?? item.name,
+        coverUrl: item.coverUrl ?? item.cover_url ?? item.thumbnail_url ?? item.poster_url ?? item.image_url ?? null,
+        type: item.type ?? 'videogame',
+        externalId: (item.externalId ?? item.id)?.toString?.(),
+        description: item.description ?? null,
+        externalUrl: item.externalUrl ?? item.external_url ?? null,
       })));
     }
     itemSearchResults.value = newResults;
