@@ -25,9 +25,12 @@
           </p>
         </div>
         <div class="shrink-0">
-          <button class="rounded-full bg-white/15 text-white border border-white/20 hover:bg-white/25 px-6 py-2.5 text-sm font-medium">
+          <a
+            href="/categories"
+            class="rounded-full bg-white/15 text-white border border-white/20 hover:bg-white/25 px-6 py-2.5 text-sm font-medium cursor-pointer transition-all duration-300 transform active:scale-95"
+          >
             Ver todas las categorías
-          </button>
+          </a>
         </div>
       </div>
 
@@ -46,8 +49,8 @@
             :subtitle="c.subtitle"
             :image="c.image"
             :badge="c.badge"
-            href="#"
-            :class="i === 0 ? 'w-[340px]' : ''"
+            :href="'/categories/' + c.key"
+            :class="[i === 0 ? 'w-[340px]' : '', 'cursor-pointer']"
           />
         </div>
       </div>
@@ -67,8 +70,8 @@
             :subtitle="c.subtitle"
             :image="c.image"
             :badge="c.badge"
-            href="#"
-            :class="i === 0 ? 'h-full' : ''"
+            :href="'/categories/' + c.key"
+            :class="[i === 0 ? 'h-full' : '', 'cursor-pointer']"
           />
         </div>
       </div>
@@ -97,24 +100,24 @@ onMounted(() => {
       ref: neatHost.value,
       colors: [
         {
-            color: '#FF5373',
-            enabled: true,
+          color: '#FF5373',
+          enabled: true,
         },
         {
-            color: '#17E7FF',
-            enabled: true,
+          color: '#17E7FF',
+          enabled: true,
         },
         {
-            color: '#FFC858',
-            enabled: true,
+          color: '#FFC858',
+          enabled: true,
         },
         {
-            color: '#6D3BFF',
-            enabled: true,
+          color: '#6D3BFF',
+          enabled: true,
         },
         {
-            color: '#f5e1e5',
-            enabled: false,
+          color: '#f5e1e5',
+          enabled: false,
         },
       ],
       speed: 6,
@@ -147,35 +150,35 @@ onBeforeUnmount(() => {
 
 const categories = [
   {
-    key: "mezcla",
+    key: "mix",
     title: "Mezcla",
     subtitle: "Recomendaciones combinadas multi‑género",
     image: "/landingImages/mix.png",
     badge: { text: "Nuevo", variant: "orange" },
   },
   {
-    key: "canciones",
+    key: "songs",
     title: "Canciones",
     subtitle: "Ejemplo: Stay With Me",
     image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-W0mpYQjz6o5o3ZqX1xLvldzpctwOd4.png",
     badge: { text: "Top", variant: "pink" },
   },
   {
-    key: "artistas",
+    key: "artist",
     title: "Artistas",
     subtitle: "Descubre artistas cercanos a tu gusto",
     image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-MgaTJsXIsgFtM80qTOcWgfRaN0pR9i.png",
     badge: { text: "Explorar", variant: "indigo" },
   },
   {
-    key: "albumes",
+    key: "albums",
     title: "Álbumes",
     subtitle: "Vida y Muerte de Can",
     image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-q8SwG2nu7aHg3SCfuiY0Nvuv30W7Pi.png",
     badge: { text: "Nuevo", variant: "orange" },
   },
   {
-    key: "peliculas",
+    key: "movies",
     title: "Películas",
     subtitle: "Selección curada para tu mood",
     image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image.png-tEZMccN6Z3SL58oChNwG2zQaxm6bP2.jpeg",
@@ -189,14 +192,14 @@ const categories = [
     badge: { text: "Tendencia", variant: "indigo" },
   },
   {
-    key: "videojuegos",
+    key: "videogames",
     title: "Videojuegos",
     subtitle: "Aventuras para explorar",
     image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-hIKnLq4uaZpqGvo1RoBSrQoNwTrrfc.png",
     badge: { text: "Nuevo", variant: "orange" },
   },
   {
-    key: "libros",
+    key: "books",
     title: "Libros",
     subtitle: "Historias que te atrapan",
     image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-gQzi85u4mZ4CuyHCRBoPIZY3TQll3z.png",

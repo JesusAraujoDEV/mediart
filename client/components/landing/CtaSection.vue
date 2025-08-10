@@ -26,7 +26,7 @@
 
         <div class="absolute inset-0 bg-black/10"></div>
 
-         Content 
+        <!-- Content -->
         <div class="relative z-10 text-center px-6 py-14 sm:py-20">
           <h2 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white/95">
             ¿Listo para descubrir tu próxima obra favorita?
@@ -35,12 +35,12 @@
             Mediart te recomienda música, películas, juegos y libros a tu medida. Empieza gratis y crea colecciones únicas.
           </p>
           <div class="mt-8 flex items-center justify-center gap-3">
-            <button class="rounded-full bg-white text-black hover:bg-white/90 px-6 py-3 font-medium transition-colors">
+            <a href="/register" class="rounded-full bg-white text-black hover:bg-white/90 px-6 py-3 font-medium transition-colors">
               Crear cuenta
-            </button>
-            <button class="rounded-full bg-white/15 text-white border border-white/30 hover:bg-white/25 px-6 py-3 font-medium transition-colors">
+            </a>
+            <a href="/about-us" class="rounded-full bg-white/15 text-white border border-white/30 hover:bg-white/25 px-6 py-3 font-medium transition-colors">
               Saber más
-            </button>
+            </a>
           </div>
         </div>
 

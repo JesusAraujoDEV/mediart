@@ -40,13 +40,13 @@
 
           <div class="mt-8 flex flex-wrap gap-3">
             <a
-              href="#"
+              href="/testimonials"
               class="inline-flex items-center justify-center rounded-md bg-neutral-900 px-5 py-3 text-white text-sm font-semibold shadow-sm transition hover:shadow-md hover:bg-neutral-800"
             >
               Ver casos de éxito
             </a>
             <a
-              href="#"
+              href="/testimonials"
               class="inline-flex items-center justify-center rounded-md border border-neutral-300 bg-white px-5 py-3 text-neutral-900 text-sm font-semibold shadow-sm transition hover:bg-neutral-50"
             >
               Más testimonios
@@ -103,7 +103,7 @@
               <div class="absolute top-8 left-full -translate-x-1/8">
                 <div class="chip">
                   <span class="chip-quote">“</span>
-                  Satisfacción Garantizada
+                  Mis expectativas fueron superadas
                   <span class="chip-quote">”</span>
                 </div>
               </div>

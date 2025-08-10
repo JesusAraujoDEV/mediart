@@ -69,8 +69,8 @@
             <p class="cta-desc">
               Mediart es una plataforma completamente gratuita, diseñada para que tu creatividad y conexión con la comunidad artística sean tu única prioridad.
             </p>
-
-            <button
+            <a
+              href="/register"
               class="cta-button"
               :style="{
                 background: `linear-gradient(90deg, ${hexA(colors.accent,0.85)}, ${hexA(colors.accent,0.75)})`,
@@ -79,7 +79,7 @@
             >
               Empieza ahora gratis
               <ArrowRightIcon class="h-4 w-4 ml-2" />
-            </button>
+            </a>
           </div>
         </aside>
 
@@ -268,7 +268,7 @@ section {
   justify-content: center;
   gap: .5rem;
   font-weight: 700;
-  color: #041b1d;
+  color: #ffffff;
   padding: .75rem 1rem;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,.14);

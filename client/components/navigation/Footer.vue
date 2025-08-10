@@ -39,7 +39,7 @@
           <div>
             <h3 class="text-lg font-bold text-gray-800 mb-4 font-halenoir">Navegación</h3>
             <ul class="space-y-3">
-              <li><NuxtLink to="/categorias" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Categorías</NuxtLink></li>
+              <li><NuxtLink to="/categories" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Categorías</NuxtLink></li>
               <li><NuxtLink to="/recomendaciones" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Recomendaciones</NuxtLink></li>
               <li><NuxtLink to="/comunidad" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Comunidad</NuxtLink></li>
               <li><NuxtLink to="/blog" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Blog</NuxtLink></li>
