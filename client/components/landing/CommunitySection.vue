@@ -11,12 +11,25 @@
       />
     </div>
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <header class="mb-10 md:mb-14" id="comunidad-title">
+        <div class="mb-4 flex items-center gap-2">
+          <span
+            class="inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em]"
+            :style="{
+              background: hexA(colors.accent, 0.18),
+              color: hexA('#ffffff', 0.9),
+              border: `1px solid ${hexA(colors.accent, 0.28)}`,
+            }"
+          >
+            COMUNIDAD
+          </span>
+        </div>
+      </header>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
         <!-- Left: Heading -->
         <div>
           <h2
-            id="testimonials-collage-title"
-            class="mt-4 text-3xl sm:text-4xl md:text-5xl font-extrabold text-white/95 leading-tight uppercase tracking-tight"
+            class="mt-4 text-3xl sm:text-2xl md:text-5xl font-extrabold text-white/95 leading-tight uppercase tracking-tight"
           >
             Lo que la comunidad dice de Mediart
           </h2>
@@ -138,6 +151,28 @@
 </template>
 
 <script setup lang="ts">
+const colors = {
+  cardBase: '#022834',
+  accent: '#16a696',
+  blue: '#1c6abd',
+  red: '#e01e2f',
+}
+
+function hexA(hex: string, alpha = 1) {
+  const h = hex.replace('#', '')
+  const bigint = parseInt(h, 16)
+  const r = (bigint >> 16) & 255
+  const g = (bigint >> 8) & 255
+  const b = bigint & 255
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+// --- Dynamic Styles ---
+const animatedBackgroundStyle = computed(() => ({
+  '--bg-color-1': hexA(colors.blue, 0.6),
+  '--bg-color-2': hexA(colors.red, 0.6),
+  '--bg-color-3': hexA(colors.accent, 0.65),
+}));
 </script>
 
 <style scoped>
