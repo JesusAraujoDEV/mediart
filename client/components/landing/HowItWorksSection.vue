@@ -39,45 +39,55 @@
 
       <!-- VISTA ESTÁTICA (sin modo demo activo) -->
       <div class="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-3">
-        <HowItWorksStep1
-          :is-demo-mode="isDemoMode"
-          :demo-step="demoStep"
-          v-model:username="username"
-          v-model:email="email"
-          v-model:password="password"
-          @next="nextDemoStep"
-        />
-        <HowItWorksStep2
-          :is-demo-mode="isDemoMode"
-          :demo-step="demoStep"
-          :is-dropdown-open="isDropdownOpen"
-          :selected-category="selectedCategory"
-          :categories="categories"
-          :filtered-suggestions="filteredSuggestions"
-          :is-receive-dropdown-open="isReceiveDropdownOpen"
-          :selected-receive-category="selectedReceiveCategory"
-          :receive-categories="receiveCategories"
-          @toggle-dropdown="toggleDropdown"
-          @select-category="selectCategory"
-          v-model:searchQuery="searchQuery"
-          v-model:showSuggestions="showSuggestions"
-          @add-suggestion="addSuggestion"
-          @toggle-receive-dropdown="toggleReceiveDropdown"
-          @select-receive-category="selectReceiveCategory"
-          @next="nextDemoStep"
-        />
-        <HowItWorksStep3
-          :is-demo-mode="isDemoMode"
-          :demo-step="demoStep"
-          :is-loading="isLoading"
-          :show-suggestions-result="showSuggestionsResult"
-          :suggestions-accepted="suggestionsAccepted"
-          :generated-suggestions="generatedSuggestions"
-          :collections="collections"
-          @generate-suggestions="generateSuggestions"
-          @accept-suggestions="acceptSuggestions"
-          @regenerate-suggestions="regenerateSuggestions"
-        />
+        <template v-if="!isDemoMode">
+          <HowItWorksStep1 :is-demo-mode="false" />
+          <HowItWorksStep2 :is-demo-mode="false" />
+          <HowItWorksStep3 :is-demo-mode="false" :collections="collections" />
+        </template>
+        <template v-else>
+          <HowItWorksStep1
+            v-if="demoStep === 1"
+            :is-demo-mode="true"
+            :demo-step="demoStep"
+            v-model:username="username"
+            v-model:email="email"
+            v-model:password="password"
+            @next="nextDemoStep"
+          />
+          <HowItWorksStep2
+            v-if="demoStep === 2"
+            :is-demo-mode="true"
+            :demo-step="demoStep"
+            :is-dropdown-open="isDropdownOpen"
+            :selected-category="selectedCategory"
+            :categories="categories"
+            :filtered-suggestions="filteredSuggestions"
+            :is-receive-dropdown-open="isReceiveDropdownOpen"
+            :selected-receive-category="selectedReceiveCategory"
+            :receive-categories="receiveCategories"
+            @toggle-dropdown="toggleDropdown"
+            @select-category="selectCategory"
+            v-model:searchQuery="searchQuery"
+            v-model:showSuggestions="showSuggestions"
+            @add-suggestion="addSuggestion"
+            @toggle-receive-dropdown="toggleReceiveDropdown"
+            @select-receive-category="selectReceiveCategory"
+            @next="nextDemoStep"
+          />
+          <HowItWorksStep3
+            v-if="demoStep === 3"
+            :is-demo-mode="true"
+            :demo-step="demoStep"
+            :is-loading="isLoading"
+            :show-suggestions-result="showSuggestionsResult"
+            :suggestions-accepted="suggestionsAccepted"
+            :generated-suggestions="generatedSuggestions"
+            :collections="collections"
+            @generate-suggestions="generateSuggestions"
+            @accept-suggestions="acceptSuggestions"
+            @regenerate-suggestions="regenerateSuggestions"
+          />
+        </template>
       </div>
 
       <!-- Divider -->
@@ -182,6 +192,15 @@ const exitDemo = () => {
   showSuggestionsResult.value = false;
   suggestionsAccepted.value = false;
   collections.value = [...initialCollections];
+  username.value = '';
+  email.value = '';
+  password.value = '';
+  selectedCategory.value = '';
+  searchQuery.value = '';
+  selectedReceiveCategory.value = '';
+  isDropdownOpen.value = false;
+  isReceiveDropdownOpen.value = false;
+  showSuggestions.value = false;
 };
 
 const nextDemoStep = () => {

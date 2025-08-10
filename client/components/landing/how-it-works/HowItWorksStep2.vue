@@ -158,17 +158,17 @@ import { defineProps, computed, withDefaults } from 'vue';
 import { hexA, cardStyle, pillStyle, ghostInputStyle } from '../../../utils/styleUtils';
 
 const props = withDefaults(defineProps<{
-  isDemoMode: boolean,
-  demoStep: number,
-  isDropdownOpen: boolean,
-  selectedCategory: string,
-  categories: string[],
-  searchQuery: string,
-  showSuggestions: boolean,
-  filteredSuggestions: string[],
-  isReceiveDropdownOpen: boolean,
-  selectedReceiveCategory: string,
-  receiveCategories: string[],
+  isDemoMode: boolean;
+  demoStep?: number;
+  isDropdownOpen?: boolean;
+  selectedCategory?: string;
+  categories?: string[];
+  searchQuery?: string;
+  showSuggestions?: boolean;
+  filteredSuggestions?: string[];
+  isReceiveDropdownOpen?: boolean;
+  selectedReceiveCategory?: string;
+  receiveCategories?: string[];
 }>(), {
   isDemoMode: false,
   demoStep: 0,

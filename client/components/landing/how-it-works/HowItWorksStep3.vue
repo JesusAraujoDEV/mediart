@@ -129,12 +129,12 @@ interface Collection {
 
 const props = withDefaults(defineProps<{
   isDemoMode: boolean;
-  demoStep: number;
-  isLoading: boolean;
-  showSuggestionsResult: boolean;
-  suggestionsAccepted: boolean;
-  generatedSuggestions: Collection[];
   collections: Collection[];
+  demoStep?: number;
+  isLoading?: boolean;
+  showSuggestionsResult?: boolean;
+  suggestionsAccepted?: boolean;
+  generatedSuggestions?: Collection[];
 }>(), {
   isDemoMode: false,
   demoStep: 0,
