@@ -51,7 +51,3 @@ const emit = defineEmits<{
   (e: 'save-playlist', id: Id): void
 }>()
 </script>
-
-<style scoped>
-/* Estilos mínimos necesarios */
-</style>

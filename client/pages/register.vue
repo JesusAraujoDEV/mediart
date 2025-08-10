@@ -63,6 +63,5 @@ definePageMeta({
   layout: 'default',
 });
 
-// Extraemos la lógica de registro desde el composable
 const { email, username, password, loading, error, handleRegister } = useAuthRegister();
 </script>

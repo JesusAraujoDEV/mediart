@@ -43,7 +43,6 @@ onMounted(fetchItem);
 </script>
 
 <style scoped>
-/* Keep local page-scoped utilities if needed */
 .custom-scroll::-webkit-scrollbar {
   width: 8px;
 }

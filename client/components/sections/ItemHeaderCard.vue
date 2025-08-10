@@ -59,7 +59,3 @@ defineProps<{
 
 const { formatDate, formatDateTime } = useDateFormat();
 </script>
-
-<style scoped>
-/* This component inherits .glassEffect styles from global or parent CSS */
-</style>
