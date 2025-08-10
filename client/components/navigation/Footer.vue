@@ -27,11 +27,11 @@
             <!-- Se ha añadido la clase 'font-halenoir' al título de la columna -->
             <h3 class="text-lg font-bold text-gray-800 mb-4 font-halenoir">Empresa</h3>
             <ul class="space-y-3">
-              <li><NuxtLink to="/sobre-nosotros" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Sobre Nosotros</NuxtLink></li>
-              <li><NuxtLink to="/como-funciona" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Cómo Funciona</NuxtLink></li>
-              <li><NuxtLink to="/por-que-elegirnos" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Por Qué Elegirnos</NuxtLink></li>
-              <li><NuxtLink to="/testimonios" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Testimonios</NuxtLink></li>
-              <li><NuxtLink to="/contacto" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Contacto</NuxtLink></li>
+              <li><NuxtLink to="/about-us" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Sobre Nosotros</NuxtLink></li>
+              <li><NuxtLink to="/how-it-work" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Cómo Funciona</NuxtLink></li>
+              <li><NuxtLink to="/why-choose-us" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Por Qué Elegirnos</NuxtLink></li>
+              <li><NuxtLink to="/testimonials" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Testimonios</NuxtLink></li>
+              <li><NuxtLink to="/contact" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Contacto</NuxtLink></li>
             </ul>
           </div>
 
