@@ -27,11 +27,11 @@
         class="glassEffect bg-gray-800/50 rounded-lg p-6 mb-6 shadow-xl flex flex-col md:flex-row items-center md:items-start text-center md:text-left relative">
         <div
           class="w-40 h-40 rounded-lg mb-4 md:mb-0 md:mr-6 flex-shrink-0 shadow-md border border-gray-600 overflow-hidden">
-          <img v-if="playlist.playlistCoverUrl" :src="playlist.playlistCoverUrl" alt="Playlist Cover"
-            class="w-full h-full object-cover" />
+            <img v-if="playlist.playlistCoverUrl" :src="playlist.playlistCoverUrl" alt="Playlist Cover" loading="lazy" decoding="async"
+              class="w-full h-full object-cover" />
           <div v-else class="w-full h-full grid grid-cols-2 grid-rows-2 gap-0 bg-gray-700">
             <img v-for="i in 4" :key="i" :src="playlist.items?.[i - 1]?.coverUrl || '/resources/item-placeholder.webp'"
-              :alt="playlist.items?.[i - 1]?.title || 'Item Cover'" class="w-full h-full object-cover" />
+              :alt="playlist.items?.[i - 1]?.title || 'Item Cover'" loading="lazy" decoding="async" class="w-full h-full object-cover" />
           </div>
         </div>
 
@@ -156,7 +156,7 @@
             </button>
             <NuxtLink :to="`/studio/item/${item.id}`"
               class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left flex-grow">
-              <img :src="item.coverUrl || '/resources/item-placeholder.webp'" :alt="item.title || 'Item Cover'"
+               <img :src="item.coverUrl || '/resources/item-placeholder.webp'" :alt="item.title || 'Item Cover'" loading="lazy" decoding="async"
                 class="w-24 h-24 object-cover rounded-md mb-3 sm:mb-0 sm:mr-4 flex-shrink-0 shadow-sm border border-gray-500" />
               <div class="flex-grow flex flex-col justify-center items-center sm:items-start">
                 <h3 class="font-bold text-lg text-white mb-1">{{ item.title }}</h3>

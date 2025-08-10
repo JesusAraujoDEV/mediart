@@ -45,7 +45,7 @@
         <div class="flex gap-4">
           <!-- Playlist Image -->
           <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-700 flex-shrink-0">
-            <img
+            <img loading="lazy" decoding="async"
               :src="coverCandidates(playlist)[0]"
               :data-alt-src="coverCandidates(playlist)[1] || ''"
               :alt="playlist.name || 'Playlist cover'"
