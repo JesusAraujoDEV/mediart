@@ -55,22 +55,28 @@
 
           <!-- Feature row -->
           <div class="mt-10 grid grid-cols-3 gap-6 text-center">
-            <div class="text-sm text-neutral-500">
+            <div class="text-sm text-neutral-100">
               <div
-                class="mx-auto mb-2 h-9 w-9 rounded-full bg-neutral-100 ring-1 ring-neutral-200"
-              />
+                class="mx-auto mb-2 h-9 w-9 rounded-full bg-white/10 ring-1 ring-white/20 text-white/90 flex items-center justify-center"
+              >
+                <Check class="h-5 w-5" />
+              </div>
               Satisfacción 100%
             </div>
-            <div class="text-sm text-neutral-500">
+            <div class="text-sm text-neutral-100">
               <div
-                class="mx-auto mb-2 h-9 w-9 rounded-full bg-neutral-100 ring-1 ring-neutral-200"
-              />
+                class="mx-auto mb-2 h-9 w-9 rounded-full bg-white/10 ring-1 ring-white/20 text-white/90 flex items-center justify-center"
+              >
+                <Telescope class="h-5 w-5" />
+              </div>
               Descubrimientos semanales
             </div>
-            <div class="text-sm text-neutral-500">
+            <div class="text-sm text-neutral-100">
               <div
-                class="mx-auto mb-2 h-9 w-9 rounded-full bg-neutral-100 ring-1 ring-neutral-200"
-              />
+                class="mx-auto mb-2 h-9 w-9 rounded-full bg-white/10 ring-1 ring-white/20 text-white/90 flex items-center justify-center"
+              >
+                <Users class="h-5 w-5" />
+              </div>
               Comunidad activa
             </div>
           </div>
@@ -98,6 +104,7 @@
                 <div class="chip">
                   <span class="chip-quote">“</span>
                   Satisfacción Garantizada
+                  <span class="chip-quote">”</span>
                 </div>
               </div>
             </div>
@@ -119,6 +126,7 @@
                 <div class="chip">
                   <span class="chip-quote">“</span>
                   Diseños de Edición Limitada
+                  <span class="chip-quote">”</span>
                 </div>
               </div>
             </div>
@@ -131,7 +139,7 @@
                 class="absolute inset-0 bg-neutral-200 rounded-t-full rounded-b-[4rem] overflow-hidden shadow-lg ring-1 ring-black/5"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1521119989659-a83eee488004?q=80&w=2523&auto=format&fit=crop"
+                  src="../../public/landingImages/UserMediart2.jpeg"
                   alt="Tercer testimonio de un usuario de Mediart"
                   class="h-full w-full object-cover"
                 />
@@ -139,7 +147,8 @@
               <div class="absolute bottom-0 right-full translate-x-1/2 z-30">
                 <div class="chip">
                   <span class="chip-quote">“</span>
-                  Diseñado para la Autoexpresión
+                  Guau
+                  <span class="chip-quote">”</span>
                 </div>
               </div>
             </div>
@@ -151,6 +160,8 @@
 </template>
 
 <script setup lang="ts">
+import { Check, Telescope, Users } from 'lucide-vue-next';
+
 const colors = {
   cardBase: '#022834',
   accent: '#16a696',
@@ -192,7 +203,7 @@ const animatedBackgroundStyle = computed(() => ({
 }
 .chip-quote {
   font-weight: 900;
-  color: #ff2e72;
+  color: #2eb2ff;
   line-height: 1;
   font-size: 20px;
 }
