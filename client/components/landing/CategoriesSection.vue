@@ -42,7 +42,8 @@
         <div
           v-for="(c, i) in categories"
           :key="c.key"
-          class="snap-start shrink-0 w-[320px]"
+          class="snap-start shrink-0 w-[320px] ml-4 first:ml-8"
+          :class="[i === 0 ? 'w-[320px]' : '']"
         >
           <CategoryCard
             :title="c.title"
@@ -50,7 +51,7 @@
             :image="c.image"
             :badge="c.badge"
             :href="'/categories/' + c.key"
-            :class="[i === 0 ? 'w-[340px]' : '', 'cursor-pointer']"
+            class="cursor-pointer"
           />
         </div>
       </div>

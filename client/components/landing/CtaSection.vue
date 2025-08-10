@@ -1,7 +1,7 @@
 <template>
   <section class="relative w-full py-13 md:py-5">
     <div class="mx-1 md:mx-1 lg:mx-6">
-      <div class="relative overflow-hidden rounded-[2rem] border border-white/15 shadow-2xl mr-5">
+      <div class="relative overflow-hidden rounded-[2rem] border border-white/15 shadow-2xl lg:mr-5">
         <div class="absolute inset-0">
           <img
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-yOtoUWoBJy2l66eG0FF748BQWPLKEz.png"
@@ -34,11 +34,11 @@
           <p class="mt-4 text-white/85 max-w-2xl mx-auto text-sm sm:text-base">
             Mediart te recomienda música, películas, juegos y libros a tu medida. Empieza gratis y crea colecciones únicas.
           </p>
-          <div class="mt-8 flex items-center justify-center gap-3">
-            <a href="/register" class="rounded-full bg-white text-black hover:bg-white/90 px-6 py-3 font-medium transition-colors">
+          <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="/register" class="w-full sm:w-auto rounded-full bg-white text-black hover:bg-white/90 px-6 py-3 font-medium transition-colors">
               Crear cuenta
             </a>
-            <a href="/about-us" class="rounded-full bg-white/15 text-white border border-white/30 hover:bg-white/25 px-6 py-3 font-medium transition-colors">
+            <a href="/about-us" class="w-full sm:w-auto rounded-full bg-white/15 text-white border border-white/30 hover:bg-white/25 px-6 py-3 font-medium transition-colors">
               Saber más
             </a>
           </div>

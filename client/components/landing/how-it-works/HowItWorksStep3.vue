@@ -7,9 +7,10 @@
       </span>
     </div>
     <div class="pb-2 mt-3">
-      <h3 class="flex items-center gap-2 font-semibold text-lg whitespace-nowrap" :style="{ color: hexA('#FFFFFF', 0.9) }">
-        <LibraryIcon class="h-5 w-5" :style="{ color: hexA('#FFFFFF', 0.72) }" />
-        Recibe y organiza recomendaciones
+      <!-- Se elimina la clase whitespace-nowrap para evitar que el texto se desborde en móviles -->
+      <h3 class="flex items-start gap-2 font-semibold text-lg" :style="{ color: hexA('#FFFFFF', 0.9) }">
+        <LibraryIcon class="h-5 w-5 flex-shrink-0 mt-1" :style="{ color: hexA('#FFFFFF', 0.72) }" />
+        <span>Recibe y organiza recomendaciones</span>
       </h3>
     </div>
     <div class="space-y-4">
@@ -45,9 +46,10 @@
         </span>
       </div>
       <div class="pb-2 mt-3">
-        <h3 class="flex items-center gap-2 font-semibold text-lg whitespace-nowrap" :style="{ color: hexA('#FFFFFF', 0.9) }">
-          <LibraryIcon class="h-5 w-5" :style="{ color: hexA('#FFFFFF', 0.72) }" />
-          Recibe y organiza recomendaciones
+        <!-- Se elimina la clase whitespace-nowrap para evitar que el texto se desborde en móviles -->
+        <h3 class="flex items-start gap-2 font-semibold text-lg" :style="{ color: hexA('#FFFFFF', 0.9) }">
+          <LibraryIcon class="h-5 w-5 flex-shrink-0 mt-1" :style="{ color: hexA('#FFFFFF', 0.72) }" />
+          <span>Recibe y organiza recomendaciones</span>
         </h3>
       </div>
       <div class="space-y-4">

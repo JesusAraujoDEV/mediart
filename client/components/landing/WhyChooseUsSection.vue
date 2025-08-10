@@ -32,19 +32,6 @@
 
       <!-- Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-        <!-- Card 1 -->
-        <article class="feature-card" :style="cardStyle">
-          <div class="feature-card-inner">
-            <div class="icon">
-              <UsersIcon class="h-5 w-5" :style="{ color: hexA('#ffffff', 0.85) }" />
-            </div>
-            <h3 class="feature-title">Comunidad inspiradora</h3>
-            <p class="feature-desc">
-              Conéctate con una red de creadores apasionados. Puedes seguir a otros usuarios para descubrir nuevos gustos y ser seguido para compartir tu perspectiva única.
-            </p>
-          </div>
-        </article>
-
         <!-- Card 2 -->
         <article class="feature-card" :style="cardStyle">
           <div class="feature-card-inner">
@@ -57,9 +44,21 @@
             </p>
           </div>
         </article>
-        
+        <!-- Card 3 -->
+        <article class="feature-card" :style="cardStyle">
+          <div class="feature-card-inner">
+            <div class="icon">
+              <ListMusicIcon class="h-5 w-5" :style="{ color: hexA('#ffffff', 0.85) }" />
+            </div>
+            <h3 class="feature-title">Playlists Colaborativas y Privadas</h3>
+            <p class="feature-desc">
+              Crea playlists privadas para guardar tus favoritos o únete a playlists colaborativas para explorar nuevos horizontes de gusto junto a otros usuarios.
+            </p>
+          </div>
+        </article>
         <!-- CTA Card (destacada) -->
-        <aside class="cta-card lg:row-span-2 lg:col-start-3">
+        <!-- La clase 'order-last' lo mueve al final en móvil, 'md:order-none' revierte el orden en desktop -->
+        <aside class="cta-card lg:row-span-2 lg:col-start-3 order-last md:order-none">
           <div class="cta-surface" :style="ctaSurfaceStyle" />
           <div class="cta-content">
             <div class="icon-cta">
@@ -83,18 +82,20 @@
           </div>
         </aside>
 
-        <!-- Card 3 -->
+        <!-- Card 1 -->
         <article class="feature-card" :style="cardStyle">
           <div class="feature-card-inner">
             <div class="icon">
-              <ListMusicIcon class="h-5 w-5" :style="{ color: hexA('#ffffff', 0.85) }" />
+              <UsersIcon class="h-5 w-5" :style="{ color: hexA('#ffffff', 0.85) }" />
             </div>
-            <h3 class="feature-title">Playlists Colaborativas y Privadas</h3>
+            <h3 class="feature-title">Comunidad inspiradora</h3>
             <p class="feature-desc">
-              Crea playlists privadas para guardar tus favoritos o únete a playlists colaborativas para explorar nuevos horizontes de gusto junto a otros usuarios.
+              Conéctate con una red de creadores apasionados. Puedes seguir a otros usuarios para descubrir nuevos gustos y ser seguido para compartir tu perspectiva única.
             </p>
           </div>
         </article>
+
+        
       </div>
     </div>
   </section>

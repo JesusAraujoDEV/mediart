@@ -18,18 +18,17 @@
 
     <div class="absolute inset-0 bg-black/40" />
 
-    <!-- Logo en la parte superior -->
-    <div class="relative z-20 flex items-center justify-between p-6 md:p-8">
-      
-    </div>
-    
+
     <!-- Hero Content -->
-    <div class="relative z-10 flex h-full items-center justify-start text-left px-15 lg:px-18 xl:px-25">
-      <div class="text-white max-w-3xl pb-50 pl-15">
-        <h1 class="text-6xl sm:text-7xl md:text-7xl font-halenoir font-extrabold leading-tight tracking-tight mb-4">
+    <!-- Ajuste del padding para móvil y tamaño de texto -->
+    <div class="relative z-10 flex h-full items-center justify-start text-left px-6 sm:px-15 lg:px-18 xl:px-25">
+      <div class="text-white max-w-3xl pb-20 pl-0 sm:pl-15">
+        <!-- Ajuste del tamaño del h1 y leading en móvil -->
+        <h1 class="text-4xl sm:text-7xl md:text-7xl font-halenoir font-extrabold leading-tight tracking-tight mb-2 sm:mb-4">
           Descubre tu Próxima <br class="hidden sm:inline" />Obsesión Artística
         </h1>
-        <p class="text-lg sm:text-xl md:text-2xl font-light mb-8">
+        <!-- Ajuste del tamaño del párrafo en móvil -->
+        <p class="text-sm sm:text-xl md:text-2xl font-light mb-4 sm:mb-8">
           Encuentra películas, música, libros y experiencias culturales que amarás, basadas en lo que ya te apasiona.
         </p>
         <LiquidButton size="xxl" class="font-semibold text-lg tracking-wide cursor-pointer" @click="goToRegister">

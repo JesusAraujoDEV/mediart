@@ -82,9 +82,68 @@
           </div>
         </div>
 
-        <!-- Right: Collage -->
+        <!-- Right: Responsive Collages -->
+
+        <!-- Mobile Collage (Apilado) -->
+        <div class="lg:hidden mt-10 lg:mt-0 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <!-- Card 1 -->
+          <div class="testimonial-card">
+            <div class="image-wrapper">
+              <img
+                src="../../public/landingImages/UserMediart1.jpeg"
+                alt="Testimonio de un usuario de Mediart"
+                class="testimonial-image"
+              />
+            </div>
+            <div class="chip-container">
+              <div class="chip">
+                <span class="chip-quote">“</span>
+                Mis expectativas fueron superadas
+                <span class="chip-quote">”</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="testimonial-card">
+            <div class="image-wrapper">
+              <img
+                src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=2574&auto=format&fit=crop"
+                alt="Otro testimonio de un usuario de Mediart"
+                class="testimonial-image"
+              />
+            </div>
+            <div class="chip-container">
+              <div class="chip">
+                <span class="chip-quote">“</span>
+                Cada semana, una sorpresa
+                <span class="chip-quote">”</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="testimonial-card">
+            <div class="image-wrapper">
+              <img
+                src="../../public/landingImages/UserMediart2.jpeg"
+                alt="Tercer testimonio de un usuario de Mediart"
+                class="testimonial-image"
+              />
+            </div>
+            <div class="chip-container">
+              <div class="chip">
+                <span class="chip-quote">“</span>
+                Guau
+                <span class="chip-quote">”</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop Collage (Superpuesto) -->
         <div
-          class="relative mt-10 lg:mt-0 h-[500px] sm:h-[600px] flex items-center justify-center"
+          class="hidden lg:block relative mt-10 lg:mt-0 h-[500px] sm:h-[600px] flex items-center justify-center"
         >
           <div class="relative w-full h-full">
             <!-- Image 1 + Chip 1 -->
@@ -125,7 +184,7 @@
               <div class="absolute bottom-1/4 -left-1/2 z-30">
                 <div class="chip">
                   <span class="chip-quote">“</span>
-                  Diseños de Edición Limitada
+                  Cada semana, una sorpresa
                   <span class="chip-quote">”</span>
                 </div>
               </div>
@@ -177,16 +236,39 @@ function hexA(hex: string, alpha = 1) {
   const b = bigint & 255
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
-
-// --- Dynamic Styles ---
-const animatedBackgroundStyle = computed(() => ({
-  '--bg-color-1': hexA(colors.blue, 0.6),
-  '--bg-color-2': hexA(colors.red, 0.6),
-  '--bg-color-3': hexA(colors.accent, 0.65),
-}));
 </script>
 
 <style scoped>
+/* Mobile specific testimonial card styles */
+.testimonial-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.image-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%; /* Esto hace el contenedor cuadrado */
+  overflow: hidden;
+}
+.testimonial-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.chip-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+}
 .chip {
   display: inline-flex;
   align-items: center;
