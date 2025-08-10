@@ -1,20 +1,138 @@
 <template>
   <section
-    id="comunidad"
-    class="relative w-full h-screen flex items-center p-4 md:p-8 overflow-hidden" 
-    >
-    <!-- <div class="absolute inset-0 bg-black/10"></div> -->
-    <div class="relative z-10 text-white text-left max-w-xl mx-auto md:mx-0 md:ml-[calc(10% + 4rem)] lg:ml-[calc(15% + 6rem)]">
-        <!-- Main Headline -->
-        <h1 class="text-5xl sm:text-5xl md:text-5xl font-extrabold leading-tight tracking-tight mb-4 drop-shadow-lg">
-        Crea tu próxima <br>Historia Artística
-        </h1>
+    aria-labelledby="testimonials-collage-title"
+    class="relative w-full min-h-screen overflow-hidden py-16 md:py-24 isolate"
+  >
+    <div class="absolute inset-0 -z-10">
+      <img
+        src="../../public/landingImages/backgroundCommunity.png"
+        alt=""
+        class="h-full w-full object-cover opacity-90"
+      />
+    </div>
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+        <!-- Left: Heading -->
+        <div>
+          <h2
+            id="testimonials-collage-title"
+            class="mt-4 text-3xl sm:text-4xl md:text-5xl font-extrabold text-white/95 leading-tight uppercase tracking-tight"
+          >
+            Lo que la comunidad dice de Mediart
+          </h2>
+          <p class="mt-3 text-white/75 text-sm sm:text-base max-w-2xl">
+            Historias reales de usuarios que descubren nuevas obsesiones artísticas y comparten su
+            perspectiva con el mundo.
+          </p>
 
-        <!-- Subtitle/Description -->
-        <p class="text-lg sm:text-xl md:text-2xl font-light mb-8 drop-shadow-md font-alpine-body">
-        En Mediart, no solo descubres arte; creas tu propia narrativa cultural. 
-        Únete a una comunidad que valora la curiosidad, la conexión y la pasión por explorar lo extraordinario.
-        </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a
+              href="#"
+              class="inline-flex items-center justify-center rounded-md bg-neutral-900 px-5 py-3 text-white text-sm font-semibold shadow-sm transition hover:shadow-md hover:bg-neutral-800"
+            >
+              Ver casos de éxito
+            </a>
+            <a
+              href="#"
+              class="inline-flex items-center justify-center rounded-md border border-neutral-300 bg-white px-5 py-3 text-neutral-900 text-sm font-semibold shadow-sm transition hover:bg-neutral-50"
+            >
+              Más testimonios
+            </a>
+          </div>
+
+          <!-- Feature row -->
+          <div class="mt-10 grid grid-cols-3 gap-6 text-center">
+            <div class="text-sm text-neutral-500">
+              <div
+                class="mx-auto mb-2 h-9 w-9 rounded-full bg-neutral-100 ring-1 ring-neutral-200"
+              />
+              Satisfacción 100%
+            </div>
+            <div class="text-sm text-neutral-500">
+              <div
+                class="mx-auto mb-2 h-9 w-9 rounded-full bg-neutral-100 ring-1 ring-neutral-200"
+              />
+              Descubrimientos semanales
+            </div>
+            <div class="text-sm text-neutral-500">
+              <div
+                class="mx-auto mb-2 h-9 w-9 rounded-full bg-neutral-100 ring-1 ring-neutral-200"
+              />
+              Comunidad activa
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Collage -->
+        <div
+          class="relative mt-10 lg:mt-0 h-[500px] sm:h-[600px] flex items-center justify-center"
+        >
+          <div class="relative w-full h-full">
+            <!-- Image 1 + Chip 1 -->
+            <div
+              class="absolute z-10 w-[220px] h-[330px] sm:w-[250px] sm:h-[375px] top-0 left-0"
+            >
+              <div
+                class="absolute inset-0 bg-neutral-200 rounded-t-full rounded-b-[4rem] overflow-hidden shadow-lg ring-1 ring-black/5"
+              >
+                <img
+                  src="../../public/landingImages/UserMediart1.jpeg"
+                  alt="Testimonio de un usuario de Mediart"
+                  class="h-full w-full object-cover"
+                />
+              </div>
+              <div class="absolute top-8 left-full -translate-x-1/8">
+                <div class="chip">
+                  <span class="chip-quote">“</span>
+                  Satisfacción Garantizada
+                </div>
+              </div>
+            </div>
+
+            <!-- Image 2 + Chip 2 -->
+            <div
+              class="absolute z-20 w-[220px] h-[330px] sm:w-[250px] sm:h-[375px] top-1/4 left-1/2 -translate-x-1/2"
+            >
+              <div
+                class="absolute inset-0 rounded-t-full rounded-b-[4rem] overflow-hidden shadow-xl ring-1 ring-black/5 flex"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=2574&auto=format&fit=crop"
+                  alt="Otro testimonio de un usuario de Mediart"
+                  class="h-full object-cover object-center"
+                />
+              </div>
+              <div class="absolute bottom-1/4 -left-1/2 z-30">
+                <div class="chip">
+                  <span class="chip-quote">“</span>
+                  Diseños de Edición Limitada
+                </div>
+              </div>
+            </div>
+
+            <!-- Image 3 + Chip 3 -->
+            <div
+              class="absolute z-30 w-[220px] h-[330px] sm:w-[250px] sm:h-[375px] bottom-0 right-0"
+            >
+              <div
+                class="absolute inset-0 bg-neutral-200 rounded-t-full rounded-b-[4rem] overflow-hidden shadow-lg ring-1 ring-black/5"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1521119989659-a83eee488004?q=80&w=2523&auto=format&fit=crop"
+                  alt="Tercer testimonio de un usuario de Mediart"
+                  class="h-full w-full object-cover"
+                />
+              </div>
+              <div class="absolute bottom-0 right-full translate-x-1/2 z-30">
+                <div class="chip">
+                  <span class="chip-quote">“</span>
+                  Diseñado para la Autoexpresión
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </template>
@@ -23,19 +141,24 @@
 </script>
 
 <style scoped>
-h1 {
-  text-shadow: 0 4px 8px rgba(0,0,0,0.5);
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  color: #0a0a0a;
+  border: 1px solid #e7e7e7;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
 }
-
-@supports (backdrop-filter: blur(10px)) {
-  .backdrop-blur-sm {
-    backdrop-filter: blur(4px);
-  }
-  .backdrop-blur-md {
-    backdrop-filter: blur(12px);
-  }
-  .backdrop-blur-lg {
-    backdrop-filter: blur(20px);
-  }
+.chip-quote {
+  font-weight: 900;
+  color: #ff2e72;
+  line-height: 1;
+  font-size: 20px;
 }
 </style>
