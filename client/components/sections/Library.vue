@@ -291,7 +291,26 @@ const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
   if (!img) return
   const alt = img.getAttribute('data-alt-src') || ''
-  if (alt && img.src !== alt) {
+  // Only allow safe URLs (http, https, or relative paths not starting with dangerous schemes)
+  let isSafeUrl = false;
+  if (alt) {
+    try {
+      // Allow only http(s) URLs or relative URLs that do not start with dangerous schemes
+      const url = new URL(alt, window.location.origin);
+      if (url.protocol === 'http:' || url.protocol === 'https:') {
+        isSafeUrl = true;
+      } else if (
+        url.origin === window.location.origin &&
+        !/^(\s*)(javascript:|data:|vbscript:)/i.test(alt)
+      ) {
+        isSafeUrl = true;
+      }
+    } catch (e) {
+      // Invalid URL, do not allow
+      isSafeUrl = false;
+    }
+  }
+  if (isSafeUrl && img.src !== alt) {
     img.src = alt
     img.setAttribute('data-alt-src', '')
     return

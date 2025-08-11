@@ -7,8 +7,8 @@ const passport = require('passport');
 function checkMasterApiKey(req, res, next) {
     const apiKey = req.headers['x-api-key'] || req.query.api_key;
     
-    console.log('API Key recibida:', apiKey);
-    console.log('API Key configurada:', config.apiKey);
+    console.log('API Key recibida: [REDACTED]');
+    console.log('API Key configurada: [REDACTED]');
     console.log('¿Coinciden las API Keys?', apiKey === config.apiKey);
 
     if (config.apiKey && apiKey === config.apiKey) {
