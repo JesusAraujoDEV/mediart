@@ -4,6 +4,10 @@ interface SearchSuggestion {
   coverUrl?: string | null;
   type?: string;
   externalId?: string;
+  externalSource?: string;
+  externalUrl?: string | null;
+  releaseDate?: string | null;
+  avgRating?: string | null | number;
 }
 
 interface RecommendationItem {

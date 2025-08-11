@@ -28,7 +28,7 @@
         <div
           class="w-40 h-40 rounded-lg mb-4 md:mb-0 md:mr-6 flex-shrink-0 shadow-md border border-gray-600 overflow-hidden">
             <img v-if="playlist.playlistCoverUrl" :src="playlist.playlistCoverUrl" alt="Playlist Cover" loading="lazy" decoding="async"
-              class="w-full h-full object-cover" />
+            class="w-full h-full object-cover" />
           <div v-else class="w-full h-full grid grid-cols-2 grid-rows-2 gap-0 bg-gray-700">
             <img v-for="i in 4" :key="i" :src="playlist.items?.[i - 1]?.coverUrl || '/resources/item-placeholder.webp'"
               :alt="playlist.items?.[i - 1]?.title || 'Item Cover'" loading="lazy" decoding="async" class="w-full h-full object-cover" />
@@ -491,7 +491,7 @@ const debounce = (func: Function, delay: number) => {
   };
 };
 
-  const internalSearchItems = async () => {
+const internalSearchItems = async () => {
   if (!itemSearchQuery.value.trim()) {
     itemSearchResults.value = [];
     return;

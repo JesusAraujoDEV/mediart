@@ -29,6 +29,13 @@
         :to="`/studio/search`">
         <Icon name="material-symbols:search" size="2em" class="md:text-2xl" />
       </NuxtLink>
+      <NuxtLink
+        class="px-3 py-1.5 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs md:text-sm cursor-pointer flex items-center"
+        :to="`/studio/create`"
+        aria-label="Crear Playlist"
+      >
+        Crear Playlist
+      </NuxtLink>
       <div @click="logout"
         class="flex items-center cursor-pointer rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out">
         <Icon name="material-symbols:logout" size="2em" class="md:text-2xl" />
