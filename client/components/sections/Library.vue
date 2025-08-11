@@ -299,7 +299,10 @@ const handleImageError = (event: Event) => {
       const url = new URL(alt, window.location.origin);
       if (url.protocol === 'http:' || url.protocol === 'https:') {
         isSafeUrl = true;
-      } else if (url.origin === window.location.origin && !alt.trim().toLowerCase().startsWith('javascript:') && !alt.trim().toLowerCase().startsWith('data:') && !alt.trim().toLowerCase().startsWith('vbscript:')) {
+      } else if (
+        url.origin === window.location.origin &&
+        !/^(\s*)(javascript:|data:|vbscript:)/i.test(alt)
+      ) {
         isSafeUrl = true;
       }
     } catch (e) {
