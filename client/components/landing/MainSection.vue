@@ -88,7 +88,7 @@ let intervalId: NodeJS.Timeout | null = null;
 
 const slides = [
   {
-    image: '/landingImages/Spiderverse.jpg',
+    image: '/landingImages/Spiderverse.webp',
     alt: 'Spider-Man in the Spider-Verse',
     position: '45% center',
   },
@@ -98,7 +98,7 @@ const slides = [
     position: 'center 20%',
   },
   {
-    image: '/landingImages/Ghost of Tsushima.jpg',
+    image: '/landingImages/Ghost of Tsushima.webp',
     alt: 'Game',
     position: 'center center',
   },

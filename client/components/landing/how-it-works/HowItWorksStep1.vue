@@ -86,7 +86,7 @@
 
 <script setup lang="ts">
 import { Check as CheckIcon, UserPlus as UserPlusIcon } from 'lucide-vue-next';
-import { defineProps, toRefs } from 'vue';
+import { defineProps } from 'vue';
 import { hexA, cardStyle, pillStyle, ghostInputStyle } from '../../../utils/styleUtils';
 
 const props = defineProps({

@@ -103,12 +103,11 @@
 
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
-import { ChevronDown, Search as SearchIcon, Tags as TagsIcon, UserPlus as UserPlusIcon } from "lucide-vue-next";
 import HowItWorksStep1 from './how-it-works/HowItWorksStep1.vue';
 import HowItWorksStep2 from './how-it-works/HowItWorksStep2.vue';
 import HowItWorksStep3 from './how-it-works/HowItWorksStep3.vue';
-import { NeatGradient, type NeatConfig } from '@firecms/neat';
-import { cardStyle, collectionItemStyle, ghostInputStyle, hexA, pillStyle, colors } from '../../utils/styleUtils';
+import { NeatGradient } from '@firecms/neat';
+import { hexA, pillStyle, colors } from '../../utils/styleUtils';
 
 // Lógica del Neat Gradient
 const neatHost = ref<HTMLCanvasElement | null>(null);
