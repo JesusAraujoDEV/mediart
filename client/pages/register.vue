@@ -14,7 +14,7 @@
               class="absolute top-1/2 -translate-y-1/2 right-1 mr-1 -z-1" />
             <input type="email" placeholder="tu@email.com"
               class="w-full p-4 rounded border border-gray-300 max-md:text-sm" id="Email" v-model="email"
-              :disabled="loading" required />
+              :disabled="loading" required autocomplete="email" />
           </div>
 
           <label class="w-full mb-0" for="Username">Nombre de Usuario</label>
@@ -22,7 +22,7 @@
             <Icon name="material-symbols:person-outline" size="1.2rem"
               class="absolute top-1/2 -translate-y-1/2 right-1 mr-1 -z-1" />
             <input type="text" placeholder="tu_usuario" class="w-full p-4 rounded border border-gray-300 max-md:text-sm"
-              id="Username" v-model="username" :disabled="loading" required />
+              id="Username" v-model="username" :disabled="loading" required autocomplete="off" />
           </div>
 
           <label class="w-full mb-0" for="Password">Contraseña</label>
@@ -31,7 +31,7 @@
               class="absolute top-1/2 -translate-y-1/2 right-1 mr-1 -z-1" />
             <input type="password" placeholder="••••••••"
               class="w-full p-4 rounded border border-gray-300 max-md:text-sm" id="Password" v-model="password"
-              :disabled="loading" required />
+              :disabled="loading" required autocomplete="new-password" />
           </div>
 
           <p v-if="error" class="text-red-500 text-sm mt-2">{{ error }}</p>

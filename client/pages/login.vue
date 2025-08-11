@@ -8,12 +8,12 @@
         <form class="flex flex-col w-2/3 h-3/4 max-md:w-5/6 justify-center items-center" id="loginForm"
           @submit.prevent="handleLogin">
           
-          <!-- Campo de Correo Electrónico / Usuario -->
-          <label class="w-full mb-0" for="Email">Correo Electrónico o Usuario</label>
+          <!-- Campo de Correo Electrónico -->
+          <label class="w-full mb-0" for="Email">Correo Electrónico</label>
           <div class="flex flex-row w-full relative h-12 mb-6">
             <Icon name="material-symbols:mail-outline" size="1.2rem"
               class="absolute top-1/2 -translate-y-1/2 right-1 mr-1 pointer-events-none" />
-            <input type="text" placeholder="tu@email.com o usuario"
+            <input type="email" placeholder="tu@email.com"
               class="w-full pl-2 pr-6 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 max-md:text-sm"
               id="Email" v-model="email" :disabled="loading" autocomplete="email" />
           </div>
