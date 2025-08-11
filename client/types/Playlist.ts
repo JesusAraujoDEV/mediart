@@ -1,4 +1,4 @@
-import type { RecommendationItem } from './Recommendations'; // Asegúrate de que la ruta sea correcta
+import type { RecommendationItem } from "./Recommendations"; // Asegúrate de que la ruta sea correcta
 
 export interface Playlist {
   id: number;
