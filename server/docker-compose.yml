@@ -1,0 +1,49 @@
+# server/docker-compose.yml
+services:
+  postgres:
+    image: postgres:13
+    container_name: mediart_db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - mediart-network
+
+  backend:
+    build: .
+    container_name: mediart_backend
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - PORT=3000
+      - POSTGRES_DB_URL=${DOCKER_POSTGRES_URL}
+      # Seguridad y Autenticación
+      - API_KEY=${API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      # Configuración de Email
+      - PASSWORD_APP=${PASSWORD_APP}
+      - EMAIL_TESTING=${EMAIL_TESTING}
+      # Claves de APIs Externas
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      - GOOGLE_BOOKS_API_KEY=${GOOGLE_BOOKS_API_KEY}
+      - GOOGLE_GEMINI_API_KEY=${GOOGLE_GEMINI_API_KEY}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      # Videogames API
+      - VIDEOGAMES_CLIENT_ID=${VIDEOGAMES_CLIENT_ID}
+      - VIDEOGAMES_CLIENT_SECRET=${VIDEOGAMES_CLIENT_SECRET}
+    depends_on:
+      - postgres
+    networks:
+      - mediart-network
+
+networks:
+  mediart-network:
+    driver: bridge

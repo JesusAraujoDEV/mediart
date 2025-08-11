@@ -126,7 +126,6 @@ onMounted(() => {
 #logoNavbar {
   filter: brightness(0) invert(1);
 }
-
 /* Mejorar la accesibilidad táctil en móvil */
 @media (max-width: 768px) {
 
