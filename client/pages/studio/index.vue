@@ -239,4 +239,4 @@ const searchInput = ref<HTMLInputElement | null>(null);
   opacity: 0;
   transform: translateY(-10px);
 }
-<style/>
+</style>
