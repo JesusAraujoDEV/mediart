@@ -1,0 +1,39 @@
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules/
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+
+# Local env files
+.env
+.env.*
+!.env.example
+.output/
+dist/
+# Logs
+logs/
+npm-debug.log*
+# Dependency directories
+jspm_packages/
+# Optional npm cache directory
+.npm/
+# Optional eslint cache
+.eslintcache
+# Optional REPL history
+.repl_history
+# Optional VS Code directories
+.vscode/

@@ -21,38 +21,14 @@ useHead({
 </script>
 
 <template>
-  <div
-    id="layout"
-    class="w-full h-fit text-white font-[Raleway] overflow-hidden relative"
-  >
+  <div id="layout" class="w-full h-fit text-white font-[Raleway] overflow-hidden relative">
     <slot />
-    <img
-      class="absolute -left-30 top-1/7 max-md:w-1/3 w-1/3 rotate-12 floating-object"
-      src="/resources/backgroundHeadset.webp"
-      alt="hand"
-      v-once
-      width="300"
-      height="300"
-      loading="lazy"
-    />
-    <img
-      class="absolute right-0 top-1/7 max-md:w-1/3 w-1/4 floating-object"
-      src="/resources/backgroundHand.webp"
-      alt="hand"
-      v-once
-      width="300"
-      height="200"
-      loading="lazy"
-    />
-    <img
-      class="absolute right-45 -bottom-30 max-md:w-1/3 w-1/7 -rotate-45 floating-object"
-      src="/resources/backgroundBook.webp"
-      alt="Book"
-      v-once
-      width="300"
-      height="300"
-      loading="lazy"
-    />
+    <img class="absolute -left-30 top-1/7 max-md:w-1/3 w-1/3 rotate-12 floating-object"
+      src="/resources/backgroundHeadset.webp" alt="hand" v-once width="300" height="300" loading="lazy" />
+    <img class="absolute right-0 top-1/7 max-md:w-1/3 w-1/4 floating-object" src="/resources/backgroundHand.webp"
+      alt="hand" v-once width="300" height="200" loading="lazy" />
+    <img class="absolute right-45 -bottom-30 max-md:w-1/3 w-1/7 -rotate-45 floating-object"
+      src="/resources/backgroundBook.webp" alt="Book" v-once width="300" height="300" loading="lazy" />
   </div>
 </template>
 

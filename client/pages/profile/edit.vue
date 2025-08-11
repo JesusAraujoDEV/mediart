@@ -3,53 +3,31 @@
   <main class="w-screen h-[120vh] flex justify-center items-center">
     <NavigationStudio />
     <section
-      class="md:w-2/3 lg:w-1/2 xl:w-2/5 max-md:w-5/6 h-fit gap-6 flex flex-col relative items-center justify-center glassEffect p-8 py-16 rounded-lg text-white"
-    >
+      class="md:w-2/3 lg:w-1/2 xl:w-2/5 max-md:w-5/6 h-fit gap-6 flex flex-col relative items-center justify-center glassEffect p-8 py-16 rounded-lg text-white">
       <h2 class="text-3xl font-bold mb-4">Editar Perfil</h2>
 
       <div class="flex flex-col items-center mb-6">
         <div class="relative mb-4 group">
-          <img
-            :src="getProfilePictureUrl()"
-            alt="Profile"
-            class="size-36 rounded-full object-cover border-2 border-white/50 shadow-md"
-          />
-          <input
-            type="file"
-            @change="handleImageUpload"
-            ref="fileInput"
-            accept="image/*"
-            class="hidden"
-          />
-          <button
-            @click="fileInput?.click()"
+          <img :src="getProfilePictureUrl()" alt="Profile" @error="handleImageError"
+            class="size-36 rounded-full object-cover border-2 border-white/50 shadow-md" />
+          <input type="file" @change="handleImageUpload" ref="fileInput" accept="image/*" class="hidden" />
+          <button @click="fileInput?.click()"
             class="absolute cursor-pointer bottom-0 right-0 bg-white p-2 rounded-full text-black hover:bg-gray-200 transition-colors shadow-lg"
-            title="Cambiar imagen de perfil"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              class="size-5"
-            >
-              <path
-                d="M12 9a3.5 3.5 0 1 0 0 7a3.5 3.5 0 0 0 0-7"
-              />
-              <path
-                fill-rule="evenodd"
+            title="Cambiar imagen de perfil">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
+              <path d="M12 9a3.5 3.5 0 1 0 0 7a3.5 3.5 0 0 0 0-7" />
+              <path fill-rule="evenodd"
                 d="M1.5 6a3 3 0 0 1 3-3h15a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H4.5a3 3 0 0 1-3-3V6Zm12.912 1.613a4.5 4.5 0 0 0-8.736 0L4.5 18h15l-1.588-10.387ZM12 10.5a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3"
-                clip-rule="evenodd"
-              />
+                clip-rule="evenodd" />
             </svg>
           </button>
           <button
             v-if="editableUserProfile.profilePictureUrl && editableUserProfile.profilePictureUrl !== '' && getProfilePictureUrl() !== '/resources/studio/previewProfile.webp'"
             @click="removeProfilePicture"
             class="absolute top-0 right-0 bg-red-600 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
-            title="Eliminar foto de perfil"
-            type="button"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="size-5">
+            title="Eliminar foto de perfil" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+              class="size-5">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -57,56 +35,35 @@
         <h3 class="text-2xl font-semibold">{{ editableUserProfile.username }}</h3>
       </div>
 
-      <form
-        @submit.prevent="updateProfile"
-        class="flex flex-col md:flex-row md:flex-wrap w-full justify-center items-center gap-6"
-      >
+      <form @submit.prevent="updateProfile"
+        class="flex flex-col md:flex-row md:flex-wrap w-full justify-center items-center gap-6">
         <div class="w-full md:w-[calc(50%-12px)]">
           <label for="email" class="block text-sm mb-1">Correo Electrónico</label>
           <div class="flex flex-row w-full relative h-12">
-            <Icon
-              name="material-symbols:mail-outline"
-              size="1.2rem"
-              class="absolute top-1/2 -translate-y-1/2 right-1 mr-1 text-white/70"
-            />
-            <input
-              type="email"
-              id="email"
-              v-model="editableUserProfile.email"
+            <Icon name="material-symbols:mail-outline" size="1.2rem"
+              class="absolute top-1/2 -translate-y-1/2 right-1 mr-1 text-white/70" />
+            <input type="email" id="email" v-model="editableUserProfile.email"
               class="w-full pl-2 rounded bg-white/10 text-white cursor-not-allowed border border-white/20 focus:outline-none"
-              disabled
-              title="El correo electrónico no se puede editar"
-            />
+              disabled title="El correo electrónico no se puede editar" />
           </div>
         </div>
 
         <div class="w-full md:w-[calc(50%-12px)]">
           <label for="username" class="block text-sm mb-1">Nombre de Usuario</label>
           <div class="flex flex-row w-full relative h-12">
-            <Icon
-              name="material-symbols:person-outline"
-              size="1.2rem"
-              class="absolute top-1/2 -translate-y-1/2 right-1 mr-1 text-white/70"
-            />
-            <input
-              type="text"
-              id="username"
-              v-model="editableUserProfile.username"
+            <Icon name="material-symbols:person-outline" size="1.2rem"
+              class="absolute top-1/2 -translate-y-1/2 right-1 mr-1 text-white/70" />
+            <input type="text" id="username" v-model="editableUserProfile.username"
               class="w-full pl-2 rounded bg-white/20 text-white border border-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
-              required
-            />
+              required />
           </div>
         </div>
 
         <div class="w-full">
           <label for="bio" class="block text-sm mb-1">Biografía</label>
-          <textarea
-            id="bio"
-            v-model="editableUserProfile.bio"
-            rows="4"
+          <textarea id="bio" v-model="editableUserProfile.bio" rows="4"
             class="w-full p-2 rounded bg-white/20 text-white border border-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 resize-y"
-            placeholder="Escribe algo sobre ti..."
-          ></textarea>
+            placeholder="Escribe algo sobre ti..."></textarea>
         </div>
 
         <p v-if="successMessage" class="w-full text-green-400 text-center text-sm">
@@ -116,12 +73,9 @@
           {{ errorMessage }}
         </p>
 
-        <button
-          type="submit"
-          :disabled="isUpdating"
+        <button type="submit" :disabled="isUpdating"
           class="w-full bg-white text-black p-3 rounded-md transition-all cursor-pointer"
-          :class="{ 'hover:bg-slate-100': !isUpdating, 'opacity-50 cursor-not-allowed': isUpdating }"
-        >
+          :class="{ 'hover:bg-slate-100': !isUpdating, 'opacity-50 cursor-not-allowed': isUpdating }">
           <span v-if="!isUpdating">Guardar Cambios</span>
           <span v-else>Guardando...</span>
         </button>
@@ -146,7 +100,15 @@ definePageMeta({
   ],
 });
 
+interface EditableUserProfile {
+  username: string;
+  email: string;
+  profilePictureUrl?: string;
+  bio: string;
+}
+
 interface UserProfile {
+  id: number;
   username: string;
   email: string;
   profilePictureUrl?: string;
@@ -154,13 +116,14 @@ interface UserProfile {
 }
 
 const userProfile = ref<UserProfile>({
+  id: -1,
   username: "",
   email: "",
   profilePictureUrl: "/resources/studio/previewProfile.webp",
   bio: "",
 });
 
-const editableUserProfile = ref<UserProfile>({
+const editableUserProfile = ref<EditableUserProfile>({
   username: "",
   email: "",
   profilePictureUrl: "/resources/studio/previewProfile.webp",
@@ -179,6 +142,7 @@ const route = useRoute();
 const router = useRouter();
 
 const defaultProfile: UserProfile = {
+  id: -1,
   username: "Usuario Anónimo",
   email: "anonimo@example.com",
   profilePictureUrl: "/resources/studio/previewProfile.webp",
@@ -205,6 +169,12 @@ function getProfilePictureUrl() {
     return editableUserProfile.value.profilePictureUrl;
   }
   return config.public.backend + editableUserProfile.value.profilePictureUrl;
+}
+
+// Función para manejar el error de carga de imagen
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  img.src = '/resources/studio/previewProfile.webp';
 }
 
 const fetchUserProfile = async () => {
@@ -245,12 +215,20 @@ const fetchUserProfile = async () => {
 
     if (data.value) {
       userProfile.value = {
-        ...data.value,
+        id: data.value.id || -1,
+        username: data.value.username,
+        email: data.value.email,
         profilePictureUrl:
           data.value.profilePictureUrl ||
           "/resources/studio/previewProfile.webp",
+        bio: data.value.bio || "",
       };
-      editableUserProfile.value = { ...userProfile.value };
+      editableUserProfile.value = {
+        username: userProfile.value.username,
+        email: userProfile.value.email,
+        bio: userProfile.value.bio,
+        profilePictureUrl: userProfile.value.profilePictureUrl,
+      };
     } else {
       throw new Error("No se encontró el perfil del usuario.");
     }
@@ -311,8 +289,7 @@ const updateProfile = async () => {
       formData = new FormData();
       formData.append("username", editableUserProfile.value.username);
       formData.append("bio", editableUserProfile.value.bio);
-      formData.append("profilePictureUrl", fileToUpload!);
-      console.log(formData);  
+      formData.append("profilePicture", fileToUpload!);
       requestOptions = {
         method: "PATCH",
         headers: {
@@ -361,7 +338,15 @@ const updateProfile = async () => {
 
     if (data.value) {
       successMessage.value = "Perfil actualizado exitosamente!";
-      userProfile.value = { ...data.value, email: userProfile.value.email };
+      userProfile.value = {
+        id: data.value.id || -1,
+        username: data.value.username,
+        email: data.value.email,
+        profilePictureUrl:
+          data.value.profilePictureUrl ||
+          "/resources/studio/previewProfile.webp",
+        bio: data.value.bio || "",
+      };
 
       // Actualizar el almacenamiento local si los datos del usuario se guardan allí
       if (storedUser.username === userProfile.value.username) {

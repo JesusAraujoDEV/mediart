@@ -3,18 +3,16 @@
   <NuxtLayout>
     <NuxtPage />
     <main
-      class="w-screen h-fit md:h-dvh flex gap-4 justify-center items-center p-10 max-md:my-20 max-md:p-5 max-md:flex-col"
-    >
+      class="w-screen h-fit md:h-dvh flex gap-4 justify-center items-center p-10 max-md:my-20 max-md:p-5 max-md:flex-col">
       <NavigationStudio />
-      
+
       <!-- Vista de Amigos -->
-      <section class="w-2/3 glassEffect overflow-y-scroll h-full rounded-lg max-md:min-h-screen max-md:w-full p-6 custom-main-scroll">
+      <section
+        class="w-2/3 glassEffect overflow-y-scroll h-full rounded-lg max-md:min-h-screen max-md:w-full p-6 custom-main-scroll">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-4xl font-extrabold text-center">Amigos</h2>
-          <NuxtLink 
-            :to="`/profile/${username}`" 
-            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full shadow-md transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
-          >
+          <NuxtLink :to="`/profile/${username}`"
+            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full shadow-md transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-gray-500">
             ← Volver al perfil
           </NuxtLink>
         </div>
@@ -22,24 +20,18 @@
         <!-- Buscador optimizado -->
         <div class="mb-6">
           <div class="relative">
-            <input
-              v-model.trim="searchQuery"
-              type="text"
-              placeholder="Buscar amigo..."
+            <input v-model.trim="searchQuery" type="text" placeholder="Buscar amigo..."
               class="w-full bg-gray-800/70 border border-gray-600 rounded-lg px-4 py-3 pl-12 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-              @input="handleSearchInput"
-            />
+              @input="handleSearchInput" />
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
             </div>
-            <button
-              v-if="searchQuery"
-              @click="clearSearch"
-              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors"
-              aria-label="Limpiar búsqueda"
-            >
+            <button v-if="searchQuery" @click="clearSearch"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors cursor-pointer"
+              aria-label="Limpiar búsqueda">
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
@@ -51,9 +43,12 @@
         <div v-if="loading" class="flex flex-col items-center text-center">
           <p class="text-xl mb-4 text-gray-300">Cargando amigos...</p>
           <div class="relative">
-            <svg class="animate-spin h-10 w-10 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-10 w-10 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
             </svg>
           </div>
         </div>
@@ -61,65 +56,47 @@
         <!-- Error state optimizado -->
         <div v-else-if="error" class="text-red-400 text-center flex flex-col items-center">
           <p class="text-xl mb-4">{{ error }}</p>
-          <button 
-            @click="fetchFollowing" 
-            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
+          <button @click="fetchFollowing"
+            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
             Reintentar
           </button>
         </div>
 
         <!-- Lista de amigos optimizada -->
         <div v-else-if="filteredFollowing.length > 0" class="w-full flex flex-col gap-4 pb-4 px-2">
-          <TransitionGroup 
-            name="friend-list" 
-            tag="div" 
-            class="flex flex-col gap-4"
-          >
-            <div
-              v-for="friend in visibleFriends"
-              :key="friend.id"
-              class="bg-gray-800/70 rounded-xl p-4 shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:bg-gray-700/80 border border-gray-600 flex items-center"
-            >
+          <TransitionGroup name="friend-list" tag="div" class="flex flex-col gap-4">
+            <div v-for="friend in visibleFriends" :key="friend.id"
+              class="bg-gray-800/70 rounded-xl p-4 shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:bg-gray-700/80 border border-gray-600 flex items-center">
               <img
-                :src="(friend.profilePictureUrl ? config.public.backend + friend.profilePictureUrl : '/resources/studio/previewProfile.webp')"
-                :alt="friend.username"
-                class="w-16 h-16 object-cover rounded-full mr-4 flex-shrink-0 shadow-md border border-gray-500"
-                loading="lazy"
-                @error="handleImageError"
-              />
+                :src="(friend.profilePictureUrl ? (friend.profilePictureUrl.startsWith('http') ? friend.profilePictureUrl : config.public.backend + friend.profilePictureUrl) : '/avatar-default.svg')"
+                :alt="friend.username" @error="handleImageError" class="w-12 h-12 rounded-full object-cover" />
               <div class="flex-grow min-w-0">
                 <h3 class="text-xl font-bold text-white mb-1 truncate">{{ friend.username }}</h3>
                 <p v-if="friend.bio" class="text-gray-300 text-sm mb-2 line-clamp-2">{{ friend.bio }}</p>
                 <p class="text-xs text-gray-400 truncate">{{ friend.email }}</p>
               </div>
-              <NuxtLink
-                :to="`/profile/${friend.username}`"
-                class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full shadow-md transition-colors text-sm flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              >
+              <NuxtLink :to="`/profile/${friend.username}`"
+                class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full shadow-md transition-colors text-sm flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-purple-500">
                 Ver perfil
               </NuxtLink>
             </div>
           </TransitionGroup>
-          
+
           <!-- Load more button -->
           <div v-if="hasMoreFriends" class="flex justify-center mt-6">
-            <button
-              @click="loadMoreFriends"
-              class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
+            <button @click="loadMoreFriends"
+              class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-gray-500 cursor-pointer">
               Cargar más
             </button>
           </div>
         </div>
 
         <!-- Empty states optimizados -->
-        <div v-else-if="searchQuery && following.length > 0" class="text-center text-gray-400 text-2xl flex flex-col items-center">
+        <div v-else-if="searchQuery && following.length > 0"
+          class="text-center text-gray-400 text-2xl flex flex-col items-center">
           <p class="mb-4">No se encontraron amigos que coincidan con "{{ searchQuery }}"</p>
-          <button 
-            @click="clearSearch" 
-            class="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
+          <button @click="clearSearch"
+            class="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-colors text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer">
             Limpiar búsqueda
           </button>
         </div>
@@ -140,6 +117,7 @@ definePageMeta({
 });
 
 import { ref, computed, onMounted, watch, nextTick } from "vue";
+import { getCache, setCache } from "~/utils/cache";
 import { useRoute } from "vue-router";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 
@@ -162,9 +140,9 @@ const filteredFollowing = computed(() => {
   if (!searchQuery.value.trim()) {
     return following.value;
   }
-  
+
   const query = searchQuery.value.toLowerCase().trim();
-  return following.value.filter(friend => 
+  return following.value.filter(friend =>
     friend.username.toLowerCase().includes(query) ||
     friend.bio?.toLowerCase().includes(query) ||
     friend.email.toLowerCase().includes(query)
@@ -186,7 +164,7 @@ const handleSearchInput = () => {
   if (searchDebounceTimeout.value) {
     clearTimeout(searchDebounceTimeout.value);
   }
-  
+
   searchDebounceTimeout.value = setTimeout(() => {
     currentPage.value = 1; // Reset pagination on search
   }, 300);
@@ -194,7 +172,7 @@ const handleSearchInput = () => {
 
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement;
-  img.src = '/resources/studio/previewProfile.webp';
+  img.src = '/avatar-default.svg';
 };
 
 const clearSearch = () => {
@@ -208,7 +186,7 @@ const loadMoreFriends = () => {
 
 const fetchFollowing = async () => {
   if (loading.value) return; // Prevent multiple requests
-  
+
   loading.value = true;
   error.value = null;
   following.value = [];
@@ -220,6 +198,12 @@ const fetchFollowing = async () => {
     }
 
     // Obtener el perfil del usuario específico
+    const cacheKey = `following:${username}`;
+    const cached = getCache<any[]>(cacheKey);
+    if (cached) {
+      following.value = cached;
+    }
+
     const response = await fetch(`${config.public.backend}/api/users/by-username/${username}`, {
       method: "GET",
       headers: {
@@ -235,6 +219,7 @@ const fetchFollowing = async () => {
 
     const data = await response.json();
     following.value = data.followingUsers || [];
+    setCache(cacheKey, following.value, 2 * 60 * 1000);
     console.log("Amigos cargados:", following.value);
 
   } catch (error: any) {

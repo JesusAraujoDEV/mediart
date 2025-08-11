@@ -1,15 +1,19 @@
-interface User {
-  id: number;
-  username: string;
-  email: string;
-}
-
-interface UserProfile {
+export interface User {
   id: number;
   username: string;
   email: string;
   profilePictureUrl?: string;
-  bio: string;
+  bio?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export type { User, UserProfile };
+export interface UserProfile {
+  id: number;
+  username: string;
+  email: string;
+  profilePictureUrl?: string;
+  bio?: string;
+  followersUsers?: any[];
+  followingUsers?: any[];
+}

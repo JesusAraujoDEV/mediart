@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Recuperación de Contraseña de Mediart</title>
+    <style type="text/css">
+        body { margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif; }
+        table { border-collapse: collapse; }
+        td { padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .header { background-color: #4CAF50; padding: 20px; text-align: center; color: #ffffff; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .content { padding: 30px; text-align: center; color: #333333; }
+        .content p { line-height: 1.6; font-size: 16px; margin-bottom: 20px; }
+        .button-container { text-align: center; padding-bottom: 30px; }
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: #2196F3; /* Azul vibrante */
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .footer { background-color: #eeeeee; padding: 20px; text-align: center; color: #777777; font-size: 14px; }
+        .footer p { margin: 0; }
+        a { color: #2196F3; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td align="center" style="padding: 20px 0;">
+                <table class="container" width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td class="header">
+                            <h1>Mediart</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="content">
+                            <p>¡Hola!</p>
+                            <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta Mediart. Si fuiste tú, por favor haz clic en el botón de abajo para continuar:</p>
+                            <div class="button-container">
+                                <a href="{{recoveryLink}}" class="button">Restablecer Contraseña</a>
+                            </div>
+                            <p>Este enlace es válido por **15 minutos**.</p>
+                            <p>Si no solicitaste un restablecimiento de contraseña, puedes ignorar este correo.</p>
+                            <p>Saludos,<br>El equipo de Mediart</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="footer">
+                            <p>&copy; {{currentYear}} Mediart. Todos los derechos reservados.</p>
+                            <p>Si tienes alguna pregunta, por favor contacta a soporte.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1,37 +1,45 @@
 <template>
   <nav
-    class="absolute top-0 left-0 w-fit z-40 glassEffect p-2 m-3 rounded-lg flex items-center gap-4"
-  >
-    <NuxtLink class="flex items-center justify-center" to="/studio">
-      <img
-        id="logoNavbar"
-        class="icon"
-        src="/mediart/mediartLogo.webp"
-        alt="Logo"
-      />
-    </NuxtLink>
-    <NuxtLink class="flex items-center justify-center" :to="`/profile/${actualUser ? actualUser : 'anonymous'}`">
-      <img
-        v-if="isLoading"
-        class="icon rounded-full animate-pulse"
-        src="/resources/studio/previewProfile.webp"
-        alt="Cargando perfil..."
-      />
-      <img
-        v-else
-        class="icon rounded-full object-cover"
-        :src="(userProfile.profilePictureUrl ? config.public.backend + userProfile.profilePictureUrl : '/resources/studio/previewProfile.webp')"
-        alt="Profile Preview"
-      />
-    </NuxtLink>
-    <NuxtLink class="flex items-center cursor-pointer" :to="`/studio/help`">
-      <Icon name="material-symbols:help" size="2em" />
-    </NuxtLink>
-    <NuxtLink class="flex items-center cursor-pointer" :to="`/studio/search`">
-      <Icon name="material-symbols:search" size="2em" />
-    </NuxtLink>
-    <div @click="logout" class="flex items-center cursor-pointer">
-      <Icon name="material-symbols:logout" size="2em" />
+    class="fixed top-0 left-0 right-0 z-40 glassEffect p-3 md:p-2 md:m-3 md:rounded-lg md:w-fit md:right-auto flex items-center justify-between md:justify-start gap-2 md:gap-4">
+    <!-- Logo y perfil en móvil -->
+    <div class="flex items-center gap-3 md:gap-4">
+      <NuxtLink class="flex items-center justify-center hover:scale-110 transition-transform duration-200 ease-in-out"
+        to="/studio">
+        <img id="logoNavbar" class="w-8 h-8 md:w-10 md:h-10" src="/mediart/mediartLogo.webp" alt="Logo" />
+      </NuxtLink>
+      <NuxtLink class="flex items-center justify-center hover:scale-110 transition-transform duration-200 ease-in-out"
+        :to="`/profile/${actualUser ? actualUser : 'anonymous'}`">
+        <img v-if="isLoading" class="w-8 h-8 md:w-10 md:h-10 rounded-full animate-pulse object-cover"
+          src="/resources/studio/previewProfile.webp" alt="Cargando perfil..." />
+        <img v-else class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover"
+          :src="(userProfile?.profilePictureUrl ? (userProfile?.profilePictureUrl.startsWith('http') ? userProfile?.profilePictureUrl : config.public.backend + userProfile?.profilePictureUrl) : '/avatar-default.svg')"
+          @error="handleImageError" alt="Profile Preview" />
+      </NuxtLink>
+    </div>
+
+    <!-- Acciones en móvil -->
+    <div class="flex items-center gap-3 md:gap-4">
+      <NuxtLink
+        class="flex items-center cursor-pointer rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out"
+        :to="`/studio/help`">
+        <Icon name="material-symbols:help" size="2em" class="md:text-2xl" />
+      </NuxtLink>
+      <NuxtLink
+        class="flex items-center cursor-pointer rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out"
+        :to="`/studio/search`">
+        <Icon name="material-symbols:search" size="2em" class="md:text-2xl" />
+      </NuxtLink>
+      <NuxtLink
+        class="px-3 py-1.5 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs md:text-sm cursor-pointer flex items-center"
+        :to="`/studio/create`"
+        aria-label="Crear Playlist"
+      >
+        Crear Playlist
+      </NuxtLink>
+      <div @click="logout"
+        class="flex items-center cursor-pointer rounded-full hover:bg-white/10 hover:scale-110 transition-all duration-200 ease-in-out">
+        <Icon name="material-symbols:logout" size="2em" class="md:text-2xl" />
+      </div>
     </div>
   </nav>
 </template>
@@ -51,7 +59,7 @@ const config = useRuntimeConfig();
 const userProfile = ref<UserProfile>({
   username: "",
   email: "",
-  profilePictureUrl: "/resources/studio/previewProfile.webp",
+  profilePictureUrl: "/avatar-default.svg",
   bio: "",
   id: -1,
 });
@@ -84,7 +92,7 @@ const loadUserProfile = async () => {
     if (data.value) {
       userProfile.value = {
         ...data.value,
-        profilePictureUrl: data.value.profilePictureUrl || "/resources/studio/previewProfile.webp",
+        profilePictureUrl: data.value.profilePictureUrl || "/avatar-default.svg",
       };
     }
   } catch (err) {
@@ -103,6 +111,12 @@ const logout = () => {
   console.log("Redirecting to homepage.");
 };
 
+// Función para manejar el error de carga de imagen
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  img.src = '/avatar-default.svg';
+}
+
 onMounted(() => {
   loadUserProfile();
 });
@@ -111,5 +125,14 @@ onMounted(() => {
 <style scoped>
 #logoNavbar {
   filter: brightness(0) invert(1);
+}
+/* Mejorar la accesibilidad táctil en móvil */
+@media (max-width: 768px) {
+
+  nav a,
+  nav div {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 </style>
