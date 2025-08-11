@@ -49,6 +49,7 @@
         </NuxtLink>
       </div>
     </main>
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">
