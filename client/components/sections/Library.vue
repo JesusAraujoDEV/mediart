@@ -295,7 +295,7 @@ const handleImageError = (event: Event) => {
   const isSafeUrl = alt && (
     alt.startsWith('http://') ||
     alt.startsWith('https://') ||
-    (/^[/.a-zA-Z0-9_-]+$/.test(alt) && !alt.startsWith('javascript:') && !alt.startsWith('data:'))
+    (/^[/.a-zA-Z0-9_-]+$/.test(alt) && !alt.startsWith('javascript:') && !alt.startsWith('data:') && !alt.startsWith('vbscript:'))
   )
   if (isSafeUrl && img.src !== alt) {
     img.src = alt
