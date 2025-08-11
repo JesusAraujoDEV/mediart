@@ -98,50 +98,46 @@ const neatHost = ref(null)
 onMounted(() => {
   if (neatHost.value) {
     neat = new NeatGradient({
-      ref: neatHost.value,
-      colors: [
-        {
-          color: '#FF5373',
-          enabled: true,
-        },
-        {
-          color: '#17E7FF',
-          enabled: true,
-        },
-        {
-          color: '#FFC858',
-          enabled: true,
-        },
-        {
-          color: '#6D3BFF',
-          enabled: true,
-        },
-        {
-          color: '#f5e1e5',
-          enabled: false,
-        },
-      ],
-      speed: 6,
-      horizontalPressure: 7,
-      verticalPressure: 8,
-      waveFrequencyX: 2,
-      waveFrequencyY: 1,
-      waveAmplitude: 8,
-      shadows: 5,
-      highlights: 5,
-      colorBrightness: 0.95,
-      colorSaturation: -5,
-      wireframe: false,
-      colorBlending: 10,
-      backgroundColor: '#003FFF',
-      backgroundAlpha: 1,
-      grainScale: 4,
-      grainSparsity: 0,
-      grainIntensity: 0.25,
-      grainSpeed: 1,
-      resolution: 1,
-      yOffset: 0,
-    });
+  ref: neatHost.value,
+  colors: [
+    {
+      color: '#FF5373',
+      enabled: true,
+    },
+    {
+      color: '#17E7FF',
+      enabled: true,
+    },
+    {
+      color: '#FFC858',
+      enabled: true,
+    },
+    {
+      color: '#6D3BFF',
+      enabled: true,
+    },
+  ],
+  speed: 4, // Reducido para menor carga
+  horizontalPressure: 7,
+  verticalPressure: 8,
+  waveFrequencyX: 2,
+  waveFrequencyY: 1,
+  waveAmplitude: 5, // Reducido para menor complejidad
+  shadows: 0, // Desactivado
+  highlights: 0, // Desactivado
+  colorBrightness: 0.95,
+  colorSaturation: -5,
+  wireframe: false, // Puedes probar 'true' si quieres un cambio drástico
+  colorBlending: 10,
+  backgroundColor: '#003FFF',
+  backgroundAlpha: 1,
+  grainScale: 4,
+  grainSparsity: 1, // Reducido
+  grainIntensity: 0, // Desactivado
+  grainSpeed: 1,
+  resolution: 0.75, // Reducido para mejorar el rendimiento
+  yOffset: 0,
+});
   }
 })
 

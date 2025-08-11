@@ -5,7 +5,7 @@
   >
     <div class="absolute inset-0 -z-10">
       <img
-        src="../../public/landingImages/backgroundCommunity.png"
+        src="../../public/landingImages/backgroundCommunity.webp"
         alt=""
         class="h-full w-full object-cover opacity-90"
       />
@@ -90,7 +90,7 @@
           <div class="testimonial-card">
             <div class="image-wrapper">
               <img
-                src="../../public/landingImages/UserMediart1.jpeg"
+                src="../../public/landingImages/UserMediart1.webp"
                 alt="Testimonio de un usuario de Mediart"
                 class="testimonial-image"
               />
@@ -126,7 +126,7 @@
           <div class="testimonial-card">
             <div class="image-wrapper">
               <img
-                src="../../public/landingImages/UserMediart2.jpeg"
+                src="../../public/landingImages/UserMediart2.webp"
                 alt="Tercer testimonio de un usuario de Mediart"
                 class="testimonial-image"
               />
@@ -154,7 +154,7 @@
                 class="absolute inset-0 bg-neutral-200 rounded-t-full rounded-b-[4rem] overflow-hidden shadow-lg ring-1 ring-black/5"
               >
                 <img
-                  src="../../public/landingImages/UserMediart1.jpeg"
+                  src="../../public/landingImages/UserMediart1.webp"
                   alt="Testimonio de un usuario de Mediart"
                   class="h-full w-full object-cover"
                 />
@@ -198,7 +198,7 @@
                 class="absolute inset-0 bg-neutral-200 rounded-t-full rounded-b-[4rem] overflow-hidden shadow-lg ring-1 ring-black/5"
               >
                 <img
-                  src="../../public/landingImages/UserMediart2.jpeg"
+                  src="../../public/landingImages/UserMediart2.webp"
                   alt="Tercer testimonio de un usuario de Mediart"
                   class="h-full w-full object-cover"
                 />
