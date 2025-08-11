@@ -53,14 +53,14 @@
         </NuxtLink>
       </div>
     </main>
-  </NuxtLayout>
 </template>
 
 <script setup lang="ts">
 import { useAuthRegister } from '~/composables/useAuthRegister';
 
 definePageMeta({
-  layout: 'default',
+  layout: "default",
+  title: "Mediart - Registro",
 });
 
 const { email, username, password, loading, error, handleRegister } = useAuthRegister();
