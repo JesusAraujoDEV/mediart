@@ -9,7 +9,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "push-client": "git push & git push gitlab devClient",
-    "push-server": "git push & git push gitlab devServer"
+    "push-server": "git push & git push gitlab devServer",
+    "push-main": "git push & git push gitlab main"
   },
   "dependencies": {
     "@nuxt/icon": "^1.13.0",

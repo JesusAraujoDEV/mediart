@@ -12,7 +12,7 @@
         <img v-if="isLoading" class="w-8 h-8 md:w-10 md:h-10 rounded-full animate-pulse object-cover"
           src="/resources/studio/previewProfile.webp" alt="Cargando perfil..." />
         <img v-else class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover"
-          :src="(userProfile.profilePictureUrl ? (userProfile.profilePictureUrl.startsWith('http') ? userProfile.profilePictureUrl : config.public.backend + userProfile.profilePictureUrl) : '/avatar-default.svg')"
+          :src="(userProfile?.profilePictureUrl ? (userProfile?.profilePictureUrl.startsWith('http') ? userProfile?.profilePictureUrl : config.public.backend + userProfile?.profilePictureUrl) : '/avatar-default.svg')"
           @error="handleImageError" alt="Profile Preview" />
       </NuxtLink>
     </div>

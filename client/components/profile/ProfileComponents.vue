@@ -1,15 +1,15 @@
 <template>
   <section class="w-full md:w-1/3 h-auto md:h-auto rounded-lg p-6 sm:p-8 md:p-12 flex flex-col items-center gap-6 sm:gap-8 md:gap-10 profile-section">
     <ProfileAvatar 
-      :avatar-url="userProfile.profilePictureUrl" 
+      :avatar-url="userProfile?.profilePictureUrl" 
       :backend-base="runtimeConfig.public.backend"
       :loading="isLoading" 
     />
     
     <ProfileInfo 
-      :username="userProfile.username" 
-      :bio="userProfile.bio" 
-      :email="userProfile.email"
+      :username="userProfile?.username" 
+      :bio="userProfile?.bio" 
+      :email="userProfile?.email"
       :created-at="(userProfile as any).createdAt" 
     />
     
@@ -36,6 +36,9 @@
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useProfile } from '~/composables/useProfile';
+
+// Recibe username como prop
+const props = defineProps<{ username?: string }>();
 
 // Components
 import ProfileAvatar from '~/components/profile/parts/ProfileAvatar.vue';
@@ -91,8 +94,7 @@ const handleFriendAction = async (action: 'add' | 'remove') => {
 
 // Lifecycle
 onMounted(async () => {
-  const usernameFromUrl = route.params.username as string;
-  const targetUsername = usernameFromUrl || getUserFromStorage().username;
+  const targetUsername = props.username || getUserFromStorage().username;
   
   if (targetUsername) {
     await refreshProfile(targetUsername);
