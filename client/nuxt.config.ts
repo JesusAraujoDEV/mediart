@@ -4,6 +4,15 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false,
   modules: ['@nuxt/icon', '@nuxt/image', '@nuxtjs/tailwindcss'],
+  css: ['~/assets/css/main.css'],
+  image: {
+    domains: [
+      'image.tmdb.org',
+      'i.scdn.co',
+      'images.igdb.com',
+      'i.ibb.co'
+    ],
+  },
   runtimeConfig: {
     public: {
       backend: process.env.BACKEND_URL || 'http://localhost:3000',

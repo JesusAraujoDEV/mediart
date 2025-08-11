@@ -1,17 +1,16 @@
 .floating-object {
-    transform-origin: center center; 
-    animation: float 3s ease-in-out infinite; /* Nombre, duración, tipo de easing, repeticiones */
+  transform-origin: center center;
+  animation: float 3s ease-in-out infinite;
 }
 
-/* Definición de la animación */
 @keyframes float {
-    0% {
-        transform: translateY(0px); /* Posición inicial */
-    }
-    50% {
-        transform: translateY(-30px); /* Sube 30px */
-    }
-    100% {
-        transform: translateY(0px); /* Vuelve a la posición inicial */
-    }
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-30px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
 }

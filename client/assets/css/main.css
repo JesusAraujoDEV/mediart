@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* Custom styles */
+.glassEffect {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Import existing styles */
+@import '../../styles/float.css';

@@ -1,118 +1,76 @@
 <template>
   <section
-    class="w-1/3 glassEffect h-full rounded-lg max-md:h-fit p-4 max-md:w-full flex justify-center items-center flex-col gap-4"
-  >
-    <img
-      v-if="isLoading"
-      class="size-36 animate-pulse"
-      src="~/assets/resources/studio/previewProfile.webp"
-      alt="Cargando perfil..."
-    />
-    <img
-      v-else
-      :src="userProfile.profilePictureUrl || '/_nuxt/assets/resources/studio/previewProfile.webp'"
-      alt="Profile"
-      class="size-36 rounded-full object-cover"
-    />
+    class="w-1/3 glassEffect h-full rounded-lg max-md:h-fit p-4 max-md:w-full flex justify-center items-center flex-col gap-4">
+    <img v-if="isLoading" class="size-36 animate-pulse rounded-full object-cover"
+      :src="(userProfile.profilePictureUrl ? (userProfile.profilePictureUrl.startsWith('http') ? userProfile.profilePictureUrl : config.public.backend + userProfile.profilePictureUrl) : '/resources/studio/previewProfile.webp')"
+      @error="handleImageError" alt="Cargando perfil..." />
+    <img v-else
+      :src="(userProfile.profilePictureUrl ? (userProfile.profilePictureUrl.startsWith('http') ? userProfile.profilePictureUrl : config.public.backend + userProfile.profilePictureUrl) : '/resources/studio/previewProfile.webp')"
+      @error="handleImageError" alt="Profile" class="size-36 rounded-full object-cover" />
 
     <h1 class="text-2xl font-bold">{{ userProfile.username }}</h1>
-    <p class="text-center">{{ userProfile.bio }}</p>
+    <p class="text-center w-2/3">{{ userProfile.bio }}</p>
     <p class="text-center text-sm text-gray-500">{{ userProfile.email }}</p>
 
-    <NuxtLink to="/studio/profile/create" class="btn btn-primary"
-      >Crear Perfil</NuxtLink
-    >
-    <NuxtLink to="/studio/profile/edit" class="btn btn-secondary"
-      >Editar Perfil</NuxtLink
-    >
+    <div class="flex gap-6 my-2">
+      <button
+        class="flex flex-col items-center focus:outline-none hover:text-purple-500 transition-colors cursor-pointer"
+        @click="goToFollowing" :disabled="isLoading" style="background: none; border: none;">
+        <span class="text-lg font-bold">{{ userProfile.followingUsers?.length || 0 }}</span>
+        <span class="text-xs text-gray-400">Amigos</span>
+      </button>
+      <button
+        class="flex flex-col items-center focus:outline-none hover:text-purple-500 transition-colors cursor-pointer"
+        @click="goToFollowers" :disabled="isLoading" style="background: none; border: none;">
+        <span class="text-lg font-bold">{{ userProfile.followersUsers?.length || 0 }}</span>
+        <span class="text-xs text-gray-400">Seguidores</span>
+      </button>
+    </div>
+
+    <div v-if="!isOwner">
+      <button v-if="!isFriend" @click="addFriend" :disabled="isFriendActionLoading"
+        class="glassEffect text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 hover:border-white/40 cursor-pointer">
+        {{ isFriendActionLoading ? 'Agregando...' : 'Agregar amigo' }}
+      </button>
+      <button v-else @click="removeFriend" :disabled="isFriendActionLoading"
+        class="glassEffect text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 hover:border-white/40 cursor-pointer">
+        {{ isFriendActionLoading ? 'Eliminando...' : 'Eliminar de amigos' }}
+      </button>
+    </div>
+
+    <NuxtLink v-else to="/profile/edit"
+      class="glassEffect text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer">
+      Editar Perfil
+    </NuxtLink>
+
+    <div v-if="createdPlaylists.length > 0" class="w-full mt-8">
+      <h2 class="text-xl font-bold mb-2 text-center">Playlists creadas</h2>
+      <div class="flex flex-col gap-4">
+        <div v-for="playlist in createdPlaylists" :key="playlist.id"
+          class="bg-gray-800/70 rounded-lg p-4 flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-semibold text-lg">{{ playlist.name }}</div>
+              <div class="text-sm text-gray-400">{{ playlist.description }}</div>
+            </div>
+            <button v-if="!isOwner && !savedPlaylistsIds.includes(playlist.id)"
+              :disabled="isSavingPlaylist[playlist.id]" @click="savePlaylist(playlist.id)"
+              class="glassEffect text-white px-4 py-2 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20 hover:border-white/40 hover:scale-105 transform cursor-pointer">
+              <span v-if="!isSavingPlaylist[playlist.id]">Guardar en mi biblioteca</span>
+              <span v-else>Guardando...</span>
+            </button>
+            <span v-else-if="!isOwner && savedPlaylistsIds.includes(playlist.id)"
+              class="text-green-400 font-semibold">Guardada</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router"; // Import useRoute to get URL parameters
-
-// --- Interfaces ---
-interface UserProfile {
-  username: string;
-  email: string;
-  profilePictureUrl?: string; // Made optional as it might be null/undefined from backend
-  bio: string;
-}
-
-// --- State Variables ---
-const userProfile = ref<UserProfile>({
-  username: "Cargando...",
-  email: "cargando@ejemplo.com",
-  profilePictureUrl: "/_nuxt/assets/resources/studio/previewProfile.webp", // Default local path
-  bio: "Cargando biografía del estudio...",
-});
-
-const isLoading = ref(true);
-
-// --- Nuxt Composables ---
-const config = useRuntimeConfig();
-const route = useRoute(); // Access the current route to get parameters
-
-// --- Default Profile Data ---
-// This is used if a user profile cannot be found or loaded
-const defaultProfile: UserProfile = {
-  username: "Usuario Anónimo",
-  email: "anonimo@example.com",
-  profilePictureUrl: "/_nuxt/assets/resources/studio/previewProfile.webp",
-  bio: "Este es un perfil de estudio predeterminado. Crea o edita tu perfil para mostrar tu trabajo.",
-};
-
-// --- Lifecycle Hook: onMounted ---
-onMounted(async () => {
-  // Get the username from the URL path.
-  // Assuming your route is something like /studio/profile/[username]
-  const usernameFromUrl = route.params.username as string;
-
-  // Use the username from the URL if available, otherwise fallback to local storage or a default
-  const targetUsername = usernameFromUrl || JSON.parse(localStorage.getItem("user") || "{}").username || "anonymous";
-
-  if (!targetUsername || targetUsername === "anonymous") {
-    // If no specific username is found, display the default profile immediately
-    userProfile.value = defaultProfile;
-    isLoading.value = false;
-    console.warn("No specific username found in URL or local storage. Displaying default profile.");
-    return;
-  }
-
-  try {
-    // Use useFetch for Nuxt 3, it's designed for data fetching
-    const { data, error } = await useFetch<UserProfile>(
-      `${config.public.backend}/api/users/by-username/${targetUsername}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    if (error.value) {
-      // Handle fetch errors, e.g., network issues, 404, etc.
-      console.error("Error al cargar el perfil del usuario:", error.value);
-      throw new Error(error.value.message || "No se pudo obtener el perfil del usuario.");
-    }
-
-    if (data.value) {
-      userProfile.value = {
-        ...data.value,
-        // Ensure a fallback for profilePictureUrl if backend doesn't provide it
-        profilePictureUrl: data.value.profilePictureUrl || "/_nuxt/assets/resources/studio/previewProfile.webp"
-      };
-    } else {
-      // No data returned, even without an explicit error. This might mean user not found.
-      throw new Error("No se encontró el perfil del usuario.");
-    }
-  } catch (err) {
-    console.error("No se pudo cargar el perfil del usuario:", err);
-    userProfile.value = defaultProfile; // Fallback to default profile on error
-  } finally {
-    isLoading.value = false; // Always set loading to false after attempt
-  }
-});
+// No es necesario importar ProfileComponents ya que hemos incorporado su contenido.
+// Si esta lógica está en un archivo de composable o similar, el script debería reflejarlo.
+// Aquí se asume que las variables y funciones (como isLoading, userProfile, addFriend, etc.)
+// están definidas en el script del componente padre o a través de un composable.
 </script>
