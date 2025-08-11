@@ -292,11 +292,24 @@ const handleImageError = (event: Event) => {
   if (!img) return
   const alt = img.getAttribute('data-alt-src') || ''
   // Only allow safe URLs (http, https, or relative paths not starting with dangerous schemes)
-  const isSafeUrl = alt && (
-    alt.startsWith('http://') ||
-    alt.startsWith('https://') ||
-    (/^[/.a-zA-Z0-9_-]+$/.test(alt) && !alt.startsWith('javascript:') && !alt.startsWith('data:') && !alt.startsWith('vbscript:'))
-  )
+  let isSafeUrl = false;
+  if (alt) {
+    try {
+      // Allow only http(s) URLs or relative URLs that do not start with dangerous schemes
+      const url = new URL(alt, window.location.origin);
+      if (url.protocol === 'http:' || url.protocol === 'https:') {
+        isSafeUrl = true;
+      } else if (
+        url.origin === window.location.origin &&
+        !/^(\s*)(javascript:|data:|vbscript:)/i.test(alt)
+      ) {
+        isSafeUrl = true;
+      }
+    } catch (e) {
+      // Invalid URL, do not allow
+      isSafeUrl = false;
+    }
+  }
   if (isSafeUrl && img.src !== alt) {
     img.src = alt
     img.setAttribute('data-alt-src', '')
