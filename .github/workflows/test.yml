@@ -1,0 +1,58 @@
+name: Test and Lint
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: test/package-lock.json
+
+    - name: Install test dependencies
+      run: |
+        cd test
+        npm ci
+
+    - name: Run linter
+      run: |
+        cd test
+        npm run lint
+
+    - name: Run type check
+      run: |
+        cd test
+        npm run type-check
+
+    - name: Run tests
+      run: |
+        cd test
+        npm run test:run
+
+    - name: Run tests with coverage
+      run: |
+        cd test
+        npm run test:coverage
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./test/coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false 
