@@ -291,7 +291,13 @@ const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
   if (!img) return
   const alt = img.getAttribute('data-alt-src') || ''
-  if (alt && img.src !== alt) {
+  // Only allow safe URLs (http, https, or relative paths not starting with dangerous schemes)
+  const isSafeUrl = alt && (
+    alt.startsWith('http://') ||
+    alt.startsWith('https://') ||
+    (/^[/.a-zA-Z0-9_-]+$/.test(alt) && !alt.startsWith('javascript:') && !alt.startsWith('data:'))
+  )
+  if (isSafeUrl && img.src !== alt) {
     img.src = alt
     img.setAttribute('data-alt-src', '')
     return
