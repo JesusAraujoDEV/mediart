@@ -105,6 +105,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
                 coverUrl: item.coverUrl ?? item.thumbnail_url ?? null,
                 type: item.type ?? "song",
                 externalId: (item.externalId ?? item.id)?.toString(),
+                externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description:
                   item.description ??
                   (item.artist_name && item.album_name
@@ -123,6 +124,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
                 coverUrl: item.coverUrl ?? item.poster_url ?? null,
                 type: item.type ?? "movie",
                 externalId: (item.externalId ?? item.id)?.toString(),
+                externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? item.overview ?? null,
               }))
             );
@@ -137,6 +139,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
                 coverUrl: item.coverUrl ?? item.poster_url ?? null,
                 type: item.type ?? "tvshow",
                 externalId: (item.externalId ?? item.id)?.toString(),
+                externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? item.overview ?? null,
               }))
             );
@@ -151,6 +154,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
                 coverUrl: item.coverUrl ?? item.image_url ?? null,
                 type: item.type ?? "artist",
                 externalId: (item.externalId ?? item.id)?.toString(),
+                externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? null,
               }))
             );
@@ -165,6 +169,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
                 coverUrl: item.coverUrl ?? item.thumbnail_url ?? null,
                 type: item.type ?? "album",
                 externalId: (item.externalId ?? item.id)?.toString(),
+                externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? item.artist_name ?? null,
               }))
             );
@@ -179,6 +184,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
                 coverUrl: item.coverUrl ?? item.thumbnail_url ?? null,
                 type: item.type ?? "book",
                 externalId: (item.externalId ?? item.id)?.toString(),
+                externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? null,
               }))
             );
@@ -193,6 +199,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
                 coverUrl: item.coverUrl ?? item.cover_url ?? null,
                 type: item.type ?? "videogame",
                 externalId: (item.externalId ?? item.id)?.toString(),
+                externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? null,
               }))
             );
@@ -210,6 +217,7 @@ export function useSuggestions(config = useRuntimeConfig()) {
                   item.coverUrl ?? item.thumbnail_url ?? item.poster_url ?? item.image_url ?? item.cover_url ?? null,
                 type: item.type ?? 'item',
                 externalId: (item.externalId ?? item.id)?.toString?.() ?? undefined,
+                externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? item.overview ?? null,
               }))
             );
@@ -222,28 +230,31 @@ export function useSuggestions(config = useRuntimeConfig()) {
                 coverUrl: item.coverUrl ?? item.poster_url ?? null,
                 type: item.type ?? "movie",
                 externalId: (item.externalId ?? item.id)?.toString(),
+                externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? item.overview ?? null,
               }))
             );
           }
           if (Array.isArray(data.tvshows)) {
             list.push(
-              ...data.tvshows.map((item: any) => ({
+        ...data.tvshows.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.poster_url ?? null,
                 type: item.type ?? "tvshow",
-                externalId: (item.externalId ?? item.id)?.toString(),
+          externalId: (item.externalId ?? item.id)?.toString(),
+          externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? item.overview ?? null,
               }))
             );
           }
           if (Array.isArray(data.songs)) {
             list.push(
-              ...data.songs.map((item: any) => ({
+        ...data.songs.map((item: any) => ({
                 title: item.title,
                 coverUrl: item.coverUrl ?? item.thumbnail_url ?? null,
                 type: item.type ?? "song",
-                externalId: (item.externalId ?? item.id)?.toString(),
+          externalId: (item.externalId ?? item.id)?.toString(),
+          externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description:
                   item.description ??
                   (item.artist_name && item.album_name
@@ -254,44 +265,48 @@ export function useSuggestions(config = useRuntimeConfig()) {
           }
           if (Array.isArray(data.artists)) {
             list.push(
-              ...data.artists.map((item: any) => ({
+        ...data.artists.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.image_url ?? null,
                 type: item.type ?? "artist",
-                externalId: (item.externalId ?? item.id)?.toString(),
+          externalId: (item.externalId ?? item.id)?.toString(),
+          externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? null,
               }))
             );
           }
           if (Array.isArray(data.albums)) {
             list.push(
-              ...data.albums.map((item: any) => ({
+        ...data.albums.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.thumbnail_url ?? null,
                 type: item.type ?? "album",
-                externalId: (item.externalId ?? item.id)?.toString(),
+          externalId: (item.externalId ?? item.id)?.toString(),
+          externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? item.artist_name ?? null,
               }))
             );
           }
           if (Array.isArray(data.books)) {
             list.push(
-              ...data.books.map((item: any) => ({
+        ...data.books.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.thumbnail_url ?? null,
                 type: item.type ?? "book",
-                externalId: (item.externalId ?? item.id)?.toString(),
+          externalId: (item.externalId ?? item.id)?.toString(),
+          externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? null,
               }))
             );
           }
           if (Array.isArray(data.videogames)) {
             list.push(
-              ...data.videogames.map((item: any) => ({
+        ...data.videogames.map((item: any) => ({
                 title: item.title ?? item.name,
                 coverUrl: item.coverUrl ?? item.cover_url ?? null,
                 type: item.type ?? "videogame",
-                externalId: (item.externalId ?? item.id)?.toString(),
+          externalId: (item.externalId ?? item.id)?.toString(),
+          externalUrl: item.externalUrl ?? item.external_url ?? item.url ?? null,
                 description: item.description ?? null,
               }))
             );
