@@ -1,33 +1,26 @@
 <template>
   <div class="relative w-full h-screen bg-black overflow-hidden">
-    <!-- Background Images Container -->
+    <!-- Background Images Container: render only the active slide for performance -->
     <div class="absolute inset-0">
-      <transition-group name="fade">
+      <transition name="fade" mode="out-in">
         <div
-          v-for="(slide, index) in slides"
-          :key="slide.image"
-          v-show="index === currentSlide"
+          v-if="slides[currentSlide]"
+          :key="currentSlide"
           class="absolute inset-0 bg-cover bg-center w-full h-full"
-          :style="{
-            backgroundImage: `url('${slide.image}')`,
-            backgroundPosition: slide.position,
-          }"
+          :style="currentBackgroundStyle"
         />
-      </transition-group>
+      </transition>
     </div>
 
     <div class="absolute inset-0 bg-black/40" />
 
 
     <!-- Hero Content -->
-    <!-- Ajuste del padding para móvil y tamaño de texto -->
     <div class="relative z-10 flex h-full items-center justify-start text-left px-6 sm:px-15 lg:px-18 xl:px-25">
       <div class="text-white max-w-3xl pb-20 pl-0 sm:pl-15">
-        <!-- Ajuste del tamaño del h1 y leading en móvil -->
         <h1 class="text-4xl sm:text-7xl md:text-7xl font-halenoir font-extrabold leading-tight tracking-tight mb-2 sm:mb-4">
           Descubre tu Próxima <br class="hidden sm:inline" />Obsesión Artística
         </h1>
-        <!-- Ajuste del tamaño del párrafo en móvil -->
         <p class="text-sm sm:text-xl md:text-2xl font-light mb-4 sm:mb-8">
           Encuentra películas, música, libros y experiencias culturales que amarás, basadas en lo que ya te apasiona.
         </p>
@@ -79,12 +72,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import LiquidButton from '../ui/LiquidButton.vue';
 
+const router = useRouter();
+
 const currentSlide = ref(0);
-let intervalId: NodeJS.Timeout | null = null;
+let intervalId: number | null = null;
 
 const slides = [
   {
@@ -115,12 +111,15 @@ const prevSlide = () => {
 };
 
 const startAutoPlay = () => {
-  intervalId = setInterval(nextSlide, 8000);
+  const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const interval = prefersReduced ? 15000 : 8000;
+  intervalId = window.setInterval(nextSlide, interval);
 };
 
 const stopAutoPlay = () => {
-  if (intervalId) {
-    clearInterval(intervalId);
+  if (intervalId !== null) {
+    window.clearInterval(intervalId);
+    intervalId = null;
   }
 };
 
@@ -130,11 +129,37 @@ const resetAutoPlay = () => {
 };
 
 const goToRegister = () => {
-  window.location.href = '/register';
+  router.push('/register');
 };
+
+const currentBackgroundStyle = computed(() => {
+  const slide = slides[currentSlide.value];
+  if (!slide) return {} as Record<string, string>;
+  return {
+    backgroundImage: `url('${slide.image}')`,
+    backgroundPosition: slide.position,
+    backgroundSize: 'cover',
+    backgroundRepeat: 'no-repeat',
+    willChange: 'opacity',
+    WebkitBackfaceVisibility: 'hidden',
+  } as Record<string, string>;
+});
+
+// Preload next image when slide changes
+watch(currentSlide, (val) => {
+  const next = (val + 1) % slides.length;
+  const img = new Image();
+  img.src = slides[next].image;
+});
 
 onMounted(() => {
   startAutoPlay();
+  // Preload current & next
+  const img = new Image();
+  img.src = slides[currentSlide.value].image;
+  const next = (currentSlide.value + 1) % slides.length;
+  const img2 = new Image();
+  img2.src = slides[next].image;
 });
 
 onUnmounted(() => {
