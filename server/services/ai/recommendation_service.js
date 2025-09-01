@@ -93,10 +93,6 @@ class RecommendationService {
       const initialSearchResult = await this.searchService.searchSpotify(itemName, 'track');
       const baseSong = initialSearchResult?.[0];
       let itemContext = '';
-      if (baseSong && baseSong.description) {
-        const artistMatch = baseSong.description.match(/Artista\(s\): ([^ ]+)/);
-        if (artistMatch && artistMatch[1]) itemContext = `del artista ${artistMatch[1]}`;
-      }
 
       const queries = await this._getRecommendedQueries('canciones', itemName, itemContext);
       const items = await this.songStrategy.recommend(itemName, queries, limit);
