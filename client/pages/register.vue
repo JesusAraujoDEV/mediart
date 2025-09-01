@@ -1,9 +1,8 @@
 <template>
   <title>Mediart - Registro</title>
-  <NuxtLayout>
-    <main class="w-screen h-dvh flex justify-center items-center">
-      <div
-        class="md:w-1/3 max-md:w-full h-fit gap-6 flex flex-col relative items-center justify-center glassEffect p-8 py-16 rounded-lg">
+  <main class="w-screen h-dvh flex justify-center items-center">
+    <div
+      class="md:w-1/3 max-md:w-full h-fit gap-6 flex flex-col relative items-center justify-center glassEffect p-8 py-16 rounded-lg">
         <h2 class="text-3xl text-center">Registro de Nueva Cuenta</h2>
         <form class="flex flex-col w-2/3 h-3/4 max-md:w-5/6 justify-center items-center" id="registerForm"
           @submit.prevent="handleRegister">
@@ -52,8 +51,7 @@
             src="/mediart/mediartCompleto.webp" alt="Mediart Logo" />
         </NuxtLink>
       </div>
-    </main>
-  </NuxtLayout>
+  </main>
 </template>
 
 <script setup lang="ts">

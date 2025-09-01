@@ -4,13 +4,7 @@
     aria-labelledby="categories-title"
     class="relative w-full min-h-screen py-16 md:py-24 overflow-hidden"
   >
-    <!-- Fondo NEAT (3D gradient con tres.js) -> render only when ready -->
-    <canvas
-      v-if="neatReady && !prefersReduced"
-      ref="neatHost"
-      class="absolute inset-0 z-0 pointer-events-none w-full h-full"
-      aria-hidden="true"
-    />
+  <BackgroundVideo src="/landingImages/colorBackground.mp4" :brightness="0.8" z-index="-z-10" />
     <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Header con CTA a la derecha para distribución propia -->
       <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-14">
@@ -94,127 +88,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
+import { ref, defineAsyncComponent } from 'vue'
+import BackgroundVideo from '~/components/ui/BackgroundVideo.vue'
 const CategoryCard = defineAsyncComponent(() => import('../ui/CategoryCard.vue'));
 
-let neat: any = null
-const neatHost = ref<HTMLCanvasElement | null>(null)
 const sectionRef = ref<HTMLElement | null>(null)
-const neatReady = ref(false)
-const neatActive = ref(false)
-const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-async function createNeat() {
-  if (typeof window === 'undefined') return;
-  if (!neatHost.value || neat) return;
-
-  const defaultConfig = {
-    colors: [
-      { color: '#FF5373', enabled: true },
-      { color: '#17E7FF', enabled: true },
-      { color: '#FFC858', enabled: true },
-      { color: '#6D3BFF', enabled: true },
-    ],
-    // tuned for lower CPU/GPU
-    speed: 2,
-    horizontalPressure: 3,
-    verticalPressure: 3,
-    waveFrequencyX: 1.5,
-    waveFrequencyY: 1,
-    waveAmplitude: 4,
-    shadows: 0,
-    highlights: 0,
-    colorBrightness: 0.95,
-    colorSaturation: 0,
-    wireframe: false,
-    colorBlending: 6,
-    backgroundColor: '#003FFF',
-    backgroundAlpha: 1,
-    grainScale: 3,
-    grainSparsity: 1,
-    grainIntensity: 0,
-    grainSpeed: 0.8,
-    resolution: 0.7,
-    yOffset: 0,
-  };
-
-  const init = async () => {
-    try {
-      const mod = await import('@firecms/neat');
-      const NeatGradientCtor = (mod && (mod.NeatGradient || mod.default)) as any;
-      if (!NeatGradientCtor) return;
-      neat = new NeatGradientCtor({ ref: neatHost.value as HTMLCanvasElement, ...defaultConfig } as any);
-    } catch (e) {
-      // ignore errors in client init
-    }
-  }
-
-  if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(() => init(), { timeout: 500 });
-  } else {
-    setTimeout(() => init(), 200);
-  }
-}
-
-function destroyNeat() {
-  try {
-    neat?.destroy();
-  } catch (e) {
-    // ignore
-  }
-  neat = null;
-}
-
-let io: IntersectionObserver | null = null
 onMounted(() => {
-  if (prefersReduced) return;
-
-  io = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      const visible = entry.intersectionRatio >= 0.25
-      neatActive.value = visible
-      if (visible) {
-        neatReady.value = true
-        createNeat()
-      } else {
-        destroyNeat()
-        setTimeout(() => { if (!neat) neatReady.value = false }, 300)
-      }
-    })
-  }, { threshold: [0, 0.25, 0.5] })
-
-  if (sectionRef.value && io) io.observe(sectionRef.value)
-
-  // if already visible on mount, init
-  try {
-    if (sectionRef.value) {
-      const rect = sectionRef.value.getBoundingClientRect()
-      const vh = window.innerHeight || document.documentElement.clientHeight
-      if (rect.top < vh * 0.9) {
-        neatActive.value = true
-        neatReady.value = true
-        createNeat()
-      }
-    }
-  } catch (e) {}
+  // No se necesita lógica adicional para el video
 })
 
 onUnmounted(() => {
-  if (io && sectionRef.value) io.unobserve(sectionRef.value)
-  if (io) io.disconnect()
-  destroyNeat()
+  // No se necesita cleanup para el video
 });
-
-// Expose force init for debugging
-(function expose() {
-  try {
-    (window as any).__mediart_forceInitNeat = () => {
-      if (prefersReduced) return
-      neatReady.value = true
-      createNeat()
-    }
-  } catch (e) {}
-})();
 
 const categories = [
   {
