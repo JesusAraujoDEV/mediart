@@ -3,20 +3,7 @@
     aria-labelledby="how-it-works-title"
     class="relative w-full min-h-screen py-16 md:py-24 overflow-hidden text-white"
   >
-    <!-- Video de fondo optimizado -->
-    <video
-      autoplay
-      muted
-      loop
-      playsinline
-      preload="auto"
-      class="absolute inset-0 -z-10 pointer-events-none w-full h-full object-cover"
-      style="filter: brightness(0.8);"
-      @loadeddata="onVideoLoaded"
-    >
-      <source src="/landingImages/redBackground.mp4" type="video/mp4" />
-      Tu navegador no soporta videos.
-    </video>
+  <BackgroundVideo src="/landingImages/redBackground.mp4" :brightness="0.8" z-index="-z-10" />
 
     <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Header -->
@@ -119,16 +106,7 @@ import HowItWorksStep1 from './how-it-works/HowItWorksStep1.vue';
 import HowItWorksStep2 from './how-it-works/HowItWorksStep2.vue';
 import HowItWorksStep3 from './how-it-works/HowItWorksStep3.vue';
 import { hexA, pillStyle, colors } from '../../utils/styleUtils';
-
-// Función para manejar la carga del video
-function onVideoLoaded(event: Event) {
-  const video = event.target as HTMLVideoElement
-  console.log('Video loaded in HowItWorksSection:', video.src)
-  // Asegurar que el video se reproduzca
-  video.play().catch((error) => {
-    console.log('Error playing video:', error)
-  })
-}
+import BackgroundVideo from '~/components/ui/BackgroundVideo.vue';
 
 // Lógica del componente (sin Neat Gradient)
 

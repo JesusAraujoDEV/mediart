@@ -4,22 +4,7 @@
     aria-labelledby="categories-title"
     class="relative w-full min-h-screen py-16 md:py-24 overflow-hidden"
   >
-    <!-- Video de fondo optimizado -->
-    <video
-      v-if="!prefersReduced"
-      autoplay
-      muted
-      loop
-      playsinline
-      preload="auto"
-      class="absolute inset-0 -z-10 pointer-events-none w-full h-full object-cover"
-      style="filter: brightness(0.8);"
-      @loadeddata="onVideoLoaded"
-      aria-hidden="true"
-    >
-      <source src="/landingImages/colorBackground.mp4" type="video/mp4" />
-      Tu navegador no soporta videos.
-    </video>
+  <BackgroundVideo src="/landingImages/colorBackground.mp4" :brightness="0.8" z-index="-z-10" />
     <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Header con CTA a la derecha para distribución propia -->
       <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-14">
@@ -103,20 +88,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
+import { ref, defineAsyncComponent } from 'vue'
+import BackgroundVideo from '~/components/ui/BackgroundVideo.vue'
 const CategoryCard = defineAsyncComponent(() => import('../ui/CategoryCard.vue'));
 
 const sectionRef = ref<HTMLElement | null>(null)
-const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-function onVideoLoaded(event: Event) {
-  const video = event.target as HTMLVideoElement
-  console.log('Video loaded in CategoriesSection:', video.src)
-  // Asegurar que el video se reproduzca
-  video.play().catch((error) => {
-    console.log('Error playing video:', error)
-  })
-}
 
 onMounted(() => {
   // No se necesita lógica adicional para el video

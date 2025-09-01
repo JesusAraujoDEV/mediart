@@ -78,7 +78,7 @@
   height: 4px;
   background: rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  animation: float 8s ease-in-out infinite;
+  animation: particlesFloat 8s ease-in-out infinite;
 }
 
 .floating-particles::before {
@@ -93,7 +93,7 @@
   animation-delay: 4s;
 }
 
-@keyframes float {
+@keyframes particlesFloat {
 
   0%,
   100% {
