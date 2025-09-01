@@ -75,14 +75,42 @@ async function deleteImageFromImgBB(deleteHash) {
   }
 
   // Detect which service the delete URL belongs to
-  if (deleteHash.includes('ibb.co') || deleteHash.includes('imgbb.com')) {
+  let deleteHost = null;
+  let isImgBBUrl = false;
+
+  // If deleteHash looks like a URL, try to parse the host
+  try {
+    // Check if value starts with http(s)://
+    if (/^https?:\/\//i.test(deleteHash)) {
+      const urlObj = new URL(deleteHash);
+      deleteHost = urlObj.hostname.toLowerCase();
+      // Allowed ImgBB domains
+      const allowedImgBBHosts = ['ibb.co', 'imgbb.com', 'www.imgbb.com', 'www.ibb.co'];
+      if (allowedImgBBHosts.includes(deleteHost)) {
+        isImgBBUrl = true;
+      }
+    }
+  } catch (err) {
+    // Malformed URL, treat it as hash
+    deleteHost = null;
+  }
+  
+  // Proceed if it's an ImgBB URL or if it's a plausible plain hash
+  if (isImgBBUrl || /^[a-zA-Z0-9]{8,}$/.test(deleteHash)) {
     // ImgBB deletion
     if (!IMGBB_API_KEY) {
       console.warn('ImgBB API Key is not configured. Skipping image deletion.');
       return { message: 'ImgBB API Key not configured, deletion skipped.' };
     }
 
-    const hash = deleteHash.split('/').pop();
+    // If it's a URL, extract the hash from pathname; else, use as is
+    let hash;
+    if (isImgBBUrl) {
+      const urlObj = new URL(deleteHash);
+      hash = urlObj.pathname.split('/').pop();
+    } else {
+      hash = deleteHash;
+    }
     const maxRetries = 3;
     let lastError;
 
@@ -120,8 +148,8 @@ async function deleteImageFromImgBB(deleteHash) {
     return { message: 'Failed to delete image from ImgBB after all retries.', error: lastError?.response?.data || lastError?.message };
 
   } else {
-    console.warn('Unknown image hosting service for delete URL:', deleteHash);
-    return { message: 'Unknown image hosting service, deletion skipped.' };
+    console.warn('Unknown image hosting service or invalid delete hash:', deleteHash);
+    return { message: 'Unknown image hosting service or invalid hash, deletion skipped.' };
   }
 }
 
