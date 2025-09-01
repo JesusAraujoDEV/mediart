@@ -93,10 +93,9 @@ class AuthService{
                 throw boom.unauthorized('Invalid recovery token. Please request a new one.');
             }
 
-            const hash = await bcrypt.hash(newPassword, 10);
             await service.update(user.id, {
                 recoveryToken: null,
-                passwordHash: hash
+                passwordHash: newPassword
             });
             return { message: 'Password changed!' }
         }
