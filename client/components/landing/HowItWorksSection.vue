@@ -3,8 +3,20 @@
     aria-labelledby="how-it-works-title"
     class="relative w-full min-h-screen py-16 md:py-24 overflow-hidden text-white"
   >
-    <!-- El Neat Gradient está fuera de la lógica v-if para evitar recargas -->
-    <canvas ref="neatHost" class="absolute inset-0 -z-10 pointer-events-none w-full h-full" />
+    <!-- Video de fondo optimizado -->
+    <video
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      class="absolute inset-0 -z-10 pointer-events-none w-full h-full object-cover"
+      style="filter: brightness(0.8);"
+      @loadeddata="onVideoLoaded"
+    >
+      <source src="/landingImages/redBackground.mp4" type="video/mp4" />
+      Tu navegador no soporta videos.
+    </video>
 
     <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Header -->
@@ -106,48 +118,19 @@ import { onMounted, onBeforeUnmount, ref, computed } from 'vue';
 import HowItWorksStep1 from './how-it-works/HowItWorksStep1.vue';
 import HowItWorksStep2 from './how-it-works/HowItWorksStep2.vue';
 import HowItWorksStep3 from './how-it-works/HowItWorksStep3.vue';
-import { NeatGradient } from '@firecms/neat';
 import { hexA, pillStyle, colors } from '../../utils/styleUtils';
 
-// Lógica del Neat Gradient
-const neatHost = ref<HTMLCanvasElement | null>(null);
-let neat: NeatGradient | null = null;
+// Función para manejar la carga del video
+function onVideoLoaded(event: Event) {
+  const video = event.target as HTMLVideoElement
+  console.log('Video loaded in HowItWorksSection:', video.src)
+  // Asegurar que el video se reproduzca
+  video.play().catch((error) => {
+    console.log('Error playing video:', error)
+  })
+}
 
-onMounted(() => {
-  if (!neatHost.value) return;
-    const defaultConfig = {
-        colors: [
-            { color: '#e01e2f', enabled: true },
-            { color: '#1c6abd', enabled: true },
-        ],
-        speed: 4,
-        horizontalPressure: 3,
-        verticalPressure: 4,
-        waveFrequencyX: 3,
-        waveFrequencyY: 3,
-        waveAmplitude: 8,
-        shadows: 1,
-        highlights: 5,
-        colorBrightness: 1,
-        colorSaturation: 7,
-        wireframe: false,
-        colorBlending: 8,
-        backgroundColor: '#0b1418',
-        backgroundAlpha: 1,
-        grainScale: 3,
-        grainIntensity: 0.3,
-        grainSpeed: 1,
-    };
-
-  neat = new NeatGradient({
-    ref: neatHost.value,
-    ...defaultConfig,
-  });
-});
-
-onBeforeUnmount(() => {
-  if (neat) neat.destroy();
-});
+// Lógica del componente (sin Neat Gradient)
 
 // Lógica del modo Demo
 const isDemoMode = ref(false);
