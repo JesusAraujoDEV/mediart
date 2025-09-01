@@ -18,11 +18,16 @@ class UserService {
     let imgbbDeleteUrl = null;
 
     if (profilePictureBuffer) {
-      // Usar la función importada de imgbb_uploader
-      const uploadResult = await uploadImageToImgBB(profilePictureBuffer, data.username ? `${data.username}-profile` : 'user-profile');
-      if (uploadResult) {
-        profilePictureUrl = uploadResult.url;
-        imgbbDeleteUrl = uploadResult.deleteUrl;
+      try {
+        // Usar la función de ImgBB para subir imagen
+        const uploadResult = await uploadImageToImgBB(profilePictureBuffer, data.username ? `${data.username}-profile` : 'user-profile');
+        if (uploadResult) {
+          profilePictureUrl = uploadResult.url;
+          imgbbDeleteUrl = uploadResult.deleteUrl;
+        }
+      } catch (error) {
+        console.error('Failed to upload profile picture to ImgBB:', error.message);
+        // Continue without profile picture
       }
     }
 
@@ -389,7 +394,7 @@ class UserService {
       // Si se envió un nuevo archivo, primero intentar borrar el antiguo de ImgBB
       if (user.imgbbDeleteUrl) {
         try {
-          // Usar la función importada de imgbb_uploader
+          // Usar la función de ImgBB para eliminar imagen
           await deleteImageFromImgBB(user.imgbbDeleteUrl);
           console.log(`Old profile picture deleted from ImgBB: ${user.imgbbDeleteUrl}`);
         } catch (error) {
@@ -399,17 +404,22 @@ class UserService {
       }
 
       // Subir el nuevo archivo a ImgBB
-      // Usar la función importada de imgbb_uploader
-      const uploadResult = await uploadImageToImgBB(profilePictureBuffer, user.username ? `${user.username}-profile` : `user-${id}-profile`);
-      if (uploadResult) {
-        updatedChanges.profilePictureUrl = uploadResult.url;
-        updatedChanges.imgbbDeleteUrl = uploadResult.deleteUrl; // Guarda la nueva delete_url
+      try {
+        // Usar la función de ImgBB para subir imagen
+        const uploadResult = await uploadImageToImgBB(profilePictureBuffer, user.username ? `${user.username}-profile` : `user-${id}-profile`);
+        if (uploadResult) {
+          updatedChanges.profilePictureUrl = uploadResult.url;
+          updatedChanges.imgbbDeleteUrl = uploadResult.deleteUrl; // Guarda la nueva delete_url
+        }
+      } catch (error) {
+        console.error('Failed to upload new profile picture to ImgBB:', error.message);
+        // Continue without updating profile picture
       }
     } else if (updatedChanges.profilePictureUrl === '') {
       // Si el frontend envió profilePictureUrl como cadena vacía, significa que se quiere eliminar la imagen
       if (user.profilePictureUrl && user.imgbbDeleteUrl) { // Solo si hay una URL existente y su delete_url
         try {
-          // Usar la función importada de imgbb_uploader
+          // Usar la función de ImgBB para eliminar imagen
           await deleteImageFromImgBB(user.imgbbDeleteUrl);
           console.log(`Profile picture deleted from ImgBB upon explicit removal: ${user.imgbbDeleteUrl}`);
         } catch (error) {
@@ -443,7 +453,7 @@ class UserService {
     // Si el usuario tiene una imagen de perfil y su delete_url, intentar eliminarla de ImgBB
     if (user.profilePictureUrl && user.imgbbDeleteUrl) {
       try {
-        // Usar la función importada de imgbb_uploader
+        // Usar la función de ImgBB para eliminar imagen
         await deleteImageFromImgBB(user.imgbbDeleteUrl);
         console.log(`Profile picture deleted from ImgBB for user ${id}: ${user.imgbbDeleteUrl}`);
       } catch (error) {

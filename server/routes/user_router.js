@@ -30,7 +30,6 @@ router.get('/',
 router.post(
     '/',
     generalWriteLimiter, // <-- Aplicar limitador general de escritura aquí
-    checkMasterApiKey,
     uploadProfilePicture.single('profilePicture'),
     validatorHandler(createUserSchema, 'body'),
     async (req, res, next) => {
