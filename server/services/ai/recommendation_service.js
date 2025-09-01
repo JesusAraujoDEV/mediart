@@ -134,10 +134,6 @@ class RecommendationService {
       const initialSearchResult = await this.searchService.searchSpotify(itemName, 'album');
       const baseAlbum = initialSearchResult?.[0];
       let itemContext = '';
-      if (baseAlbum && baseAlbum.description) {
-        const artistMatch = baseAlbum.description.match(/Artista\(s\): ([^.]+\.)/);
-        if (artistMatch && artistMatch[1]) itemContext = `del artista ${artistMatch[1].replace(/\.$/, '')}`;
-      }
 
       const queries = await this._getRecommendedQueries('álbumes', itemName, itemContext);
       const items = await this.albumStrategy.recommend(itemName, queries, limit);
