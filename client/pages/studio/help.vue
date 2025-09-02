@@ -18,14 +18,6 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <button @click="startInteractiveTour"
-          class="glassEffect px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center gap-2 action-button">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-            <path d="M8 5v14l11-7z"/>
-          </svg>
-          Tour Interactivo
-        </button>
-
         <button @click="toggleLanguage"
           class="glassEffect px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 action-button"
           :class="{
@@ -390,22 +382,6 @@
           </div>
 
           <div class="space-y-6">
-            <div class="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg p-6 border border-purple-500/30">
-              <h3 class="text-xl font-semibold mb-3 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                </svg>
-                {{ currentContent.contact.tourTitle }}
-              </h3>
-              <p class="text-gray-300 mb-4">{{ currentContent.contact.tourDescription }}</p>
-              <button @click="startInteractiveTour" class="bg-gradient-to-r from-purple-500 to-pink-600 px-6 py-3 rounded-full font-semibold flex items-center gap-2 action-button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-                {{ currentContent.contact.tourButton }}
-              </button>
-            </div>
-
             <div class="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-lg p-6 border border-orange-500/30">
               <h3 class="text-xl font-semibold mb-3 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -572,12 +548,6 @@ const faqs = computed(() => [
 // Consumimos el composable para obtener el estado y las funciones
 const { currentLanguage, toggleLanguage, currentContent } = useHelpContent();
 
-// Función para iniciar tour interactivo
-const startInteractiveTour = () => {
-  // Aquí iría la lógica para iniciar un tour interactivo
-  // Por ahora, solo mostramos una alerta
-  alert('¡Tour interactivo próximamente! Mientras tanto, explora las diferentes secciones de ayuda.');
-};
 </script>
 
 <style scoped>

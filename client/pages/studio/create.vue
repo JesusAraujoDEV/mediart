@@ -1,7 +1,7 @@
 <template>
     <title>MediartStudio - Crear Playlist</title>
     <main class="w-screen h-fit min-h-dvh flex flex-col items-center justify-start p-4 text-white overflow-x-hidden">
-      <NavigationStudio />
+      <NavigationStudio data-tutorial="navbar" />
         
       <div class="flex flex-col flex-grow w-full max-w-5xl mt-24 md:mt-28 pb-8 gap-8 md:gap-10">
         
@@ -14,6 +14,14 @@
               <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Detalles de la Playlist</h1>
               <p class="text-sm text-gray-400">Dale un nombre y personalidad a tu nueva creación.</p>
             </div>
+            <button @click="startTutorial" 
+              class="glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center gap-2 text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm py-2 px-4 rounded-full font-semibold text-sm ml-auto"
+              data-tutorial="tutorial-button">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
+              Tutorial
+            </button>
           </div>
   
           <div class="glassEffect bg-gray-800/60 rounded-xl p-6 shadow-2xl border border-gray-700">
@@ -22,6 +30,7 @@
                 <label for="playlistName" class="block text-sm font-semibold text-gray-200 mb-2">Nombre *</label>
                 <input id="playlistName" v-model="playlistForm.name" type="text" placeholder="Ej. Noches de Lofi para programar"
                   class="w-full px-4 py-3 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder-gray-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  data-tutorial="playlist-name"
                 />
               </div>
               
@@ -36,7 +45,8 @@
               <div class="md:col-span-3">
                 <label for="playlistDesc" class="block text-sm font-semibold text-gray-200 mb-2">Descripción</label>
                 <textarea id="playlistDesc" v-model="playlistForm.description" rows="3" placeholder="Describe el ambiente o propósito de esta playlist..."
-                  class="w-full px-4 py-3 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder-gray-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"></textarea>
+                  class="w-full px-4 py-3 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder-gray-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                  data-tutorial="playlist-description"></textarea>
               </div>
             </div>
           </div>
@@ -64,7 +74,8 @@
                   <input id="searchInput" type="text" v-model="inputValue" @input="handleInput" @focus="showDatalist = true" @blur="hideDatalist"
                     @keydown.enter.prevent="addTagFromInput" @keydown.tab.prevent="addTagFromInput"
                     :placeholder="getSearchPlaceholder()"
-                    class="w-full pl-11 pr-4 py-3 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder-gray-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" />
+                    class="w-full pl-11 pr-4 py-3 rounded-lg bg-gray-700/80 border border-gray-600 text-white placeholder-gray-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    data-tutorial="search-input" />
                 </div>
   
                 <Transition name="fade-slide-down">
@@ -110,7 +121,8 @@
                 <label for="itemType" class="block text-sm font-semibold text-gray-200 mb-2">Filtrar por tipo</label>
                 <select id="itemType" v-model="searchType" @change="onChangeSearchType"
                   class="w-full p-3 rounded-lg bg-gray-700/80 text-white border border-gray-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 cursor-pointer appearance-none bg-no-repeat bg-right-3"
-                  style="background-image: url('data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%239CA3AF%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22/%3E%3C/svg%3E');">
+                  style="background-image: url('data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%239CA3AF%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22/%3E%3C/svg%3E');"
+                  data-tutorial="item-type">
                   <option value="general">Todo</option>
                   <option value="song">Canciones</option>
                   <option value="artist">Artistas</option>
@@ -123,7 +135,7 @@
               </div>
             </div>
   
-            <div>
+            <div data-tutorial="selected-items">
               <h3 class="text-lg font-semibold mb-4 border-b border-gray-700 pb-2 flex items-center gap-3">
                 <span>Ítems en tu playlist</span>
                 <span v-if="selectedItems.length > 0" class="px-3 py-1 bg-purple-600/20 text-purple-300 text-sm font-bold rounded-full border border-purple-500/30">
@@ -180,7 +192,8 @@
         <div class="flex justify-end items-center gap-4 mt-4">
           <NuxtLink to="/studio" class="px-6 py-3 rounded-full text-white font-medium transition-colors duration-300 hover:bg-gray-700/80">Cancelar</NuxtLink>
           <button :disabled="!canCreate" @click="createPlaylist"
-            class="px-6 py-3 rounded-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold cursor-pointer flex items-center gap-2 transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100">
+            class="px-6 py-3 rounded-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold cursor-pointer flex items-center gap-2 transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100"
+            data-tutorial="create-button">
             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
             Crear Playlist
           </button>
@@ -193,6 +206,7 @@
 <script setup lang="ts">
 import NavigationStudio from '~/components/navigation/NavigationStudio.vue'
 import { useSuggestions } from '~/composables/useSuggestions'
+import { useStudioTutorial } from '~/composables/useStudioTutorial'
 import type { SearchSuggestion } from '~/types/Recommendations'
 
 // @ts-ignore
@@ -212,6 +226,9 @@ const playlistForm = reactive({
 
 const selectedItems = ref<SearchSuggestion[]>([])
 const isAddingItem = ref(false)
+
+// Composable para el tutorial interactivo
+const { startTutorial } = useStudioTutorial()
 
 // Reutilizar buscador (genérico)
 const {

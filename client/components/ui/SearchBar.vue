@@ -18,7 +18,7 @@
 
     <!-- Input -->
     <input :value="modelValue" @input="onInput" type="text" :placeholder="placeholder"
-      class="flex-grow p-3 w-full rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+      class="flex-grow p-3 w-full min-w-[500px] max-md:min-w-[300px] rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
       autocomplete="off" spellcheck="false" ref="inputEl" />
 
     <!-- Action button -->
