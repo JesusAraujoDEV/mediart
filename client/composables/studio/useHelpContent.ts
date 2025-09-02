@@ -7,6 +7,33 @@ interface Content {
   pageTitle: string;
   title: string;
   intro: string;
+  tabs: {
+    gettingStarted: string;
+    newFeatures: string;
+    advancedTips: string;
+    faq: string;
+    contact: string;
+  };
+  sections: {
+    newFeaturesDescription: string;
+    advancedTipsDescription: string;
+    faqDescription: string;
+    contactDescription: string;
+  };
+  faq: {
+    question1: string;
+    answer1: string;
+    question2: string;
+    answer2: string;
+    question3: string;
+    answer3: string;
+    question4: string;
+    answer4: string;
+    question5: string;
+    answer5: string;
+    question6: string;
+    answer6: string;
+  };
   step1: {
     heading: string;
     paragraph1: string;
@@ -75,6 +102,19 @@ interface Content {
     paragraph3: string;
   };
   outro: string;
+  contact: {
+    reportIssuesTitle: string;
+    reportIssuesDescription: string;
+    reportIssuesButton: string;
+    suggestionsTitle: string;
+    suggestionsDescription: string;
+    suggestionsButton: string;
+    tourTitle: string;
+    tourDescription: string;
+    tourButton: string;
+    contactTitle: string;
+    contactDescription: string;
+  };
 }
 
 // Define todo el contenido de ayuda en ambos idiomas
@@ -84,6 +124,33 @@ const contentData = {
     title: "How to Use MediartStudio",
     intro:
       "Welcome to MediartStudio! Here's how you can easily generate and save your personalized playlists:",
+    tabs: {
+      gettingStarted: "Getting Started",
+      newFeatures: "New Features",
+      advancedTips: "Advanced Tips",
+      faq: "FAQ",
+      contact: "Contact",
+    },
+    sections: {
+      newFeaturesDescription: "Discover the latest improvements in MediartStudio",
+      advancedTipsDescription: "Maximize your experience with MediartStudio",
+      faqDescription: "Answers to the most common questions",
+      contactDescription: "Need help? We're here for you",
+    },
+    faq: {
+      question1: "How does the recommendation system work?",
+      answer1: "MediartStudio uses advanced machine learning algorithms to analyze your tastes and generate personalized recommendations based on patterns from other users. The system learns from your selections to continuously improve suggestions.",
+      question2: "Can I create collaborative playlists?",
+      answer2: "Yes, MediartStudio allows creating collaborative playlists where multiple users can contribute recommendations. This feature is perfect for groups of friends or work teams who share similar interests.",
+      question3: "Is the data secure?",
+      answer3: "Absolutely. We use enterprise-level encryption and comply with the strictest data protection regulations. Your personal preferences and playlists are completely protected.",
+      question4: "Is there a limit on the number of playlists?",
+      answer4: "There are no limits on the number of playlists you can create. Organize your content as you wish and access all your creations from your personal profile.",
+      question5: "Can I export my playlists?",
+      answer5: "Yes, you can export your playlists in multiple formats including JSON, CSV and shareable links. This allows you to use your playlists on other platforms or share them easily.",
+      question6: "How does the smart cache work?",
+      answer6: "The system temporarily saves your recent searches to speed up future similar queries. This means that if you search for something you've searched for before, the results will appear instantly.",
+    },
     step1: {
       heading: "1. Express Your Tastes",
       paragraph1: "At the bottom of the screen, you'll find a",
@@ -160,12 +227,52 @@ const contentData = {
       paragraph3: "ready for you to enjoy anytime.",
     },
     outro: "Enjoy creating your personalized playlists with MediartStudio!",
+    contact: {
+      reportIssuesTitle: "Report Issues",
+      reportIssuesDescription: "Found a bug or error? Let us know so we can fix it quickly.",
+      reportIssuesButton: "Report Problem",
+      suggestionsTitle: "Suggestions",
+      suggestionsDescription: "Do you have ideas to improve MediartStudio? We'd love to hear them!",
+      suggestionsButton: "Send Suggestion",
+      tourTitle: "Interactive Tour",
+      tourDescription: "Prefer to learn step by step? Start our guided tour.",
+      tourButton: "Start Tour",
+      contactTitle: "Direct Contact",
+      contactDescription: "For specific queries, contact us directly.",
+    },
   },
   es: {
     pageTitle: "Ayuda",
     title: "¿Cómo Usar MediartStudio?",
     intro:
       "¡Bienvenido a MediartStudio! Aquí te explicamos cómo puedes generar y guardar tus playlists personalizadas de manera sencilla:",
+    tabs: {
+      gettingStarted: "Primeros Pasos",
+      newFeatures: "Nuevas Funcionalidades",
+      advancedTips: "Consejos Avanzados",
+      faq: "Preguntas Frecuentes",
+      contact: "Contacto",
+    },
+    sections: {
+      newFeaturesDescription: "Descubre las últimas mejoras de MediartStudio",
+      advancedTipsDescription: "Maximiza tu experiencia con MediartStudio",
+      faqDescription: "Respuestas a las dudas más comunes",
+      contactDescription: "¿Necesitas ayuda? Estamos aquí para ti",
+    },
+    faq: {
+      question1: "¿Cómo funciona el sistema de recomendaciones?",
+      answer1: "MediartStudio utiliza algoritmos avanzados de machine learning para analizar tus gustos y generar recomendaciones personalizadas basadas en patrones similares de otros usuarios. El sistema aprende de tus selecciones para mejorar continuamente las sugerencias.",
+      question2: "¿Puedo crear playlists colaborativas?",
+      answer2: "Sí, MediartStudio permite crear playlists colaborativas donde varios usuarios pueden contribuir con recomendaciones. Esta función es perfecta para grupos de amigos o equipos de trabajo que comparten intereses similares.",
+      question3: "¿Los datos están seguros?",
+      answer3: "Absolutamente. Utilizamos encriptación de nivel empresarial y cumplimos con las normativas de protección de datos más estrictas. Tus preferencias y playlists personales están completamente protegidas.",
+      question4: "¿Hay límite en el número de playlists?",
+      answer4: "No hay límites en la cantidad de playlists que puedes crear. Organiza tu contenido como prefieras y accede a todas tus creaciones desde tu perfil personal.",
+      question5: "¿Puedo exportar mis playlists?",
+      answer5: "Sí, puedes exportar tus playlists en múltiples formatos incluyendo JSON, CSV y enlaces compartibles. Esto te permite usar tus playlists en otras plataformas o compartirlas fácilmente.",
+      question6: "¿Cómo funciona el caché inteligente?",
+      answer6: "El sistema guarda temporalmente tus búsquedas recientes para acelerar futuras consultas similares. Esto significa que si buscas algo que ya has buscado antes, los resultados aparecerán instantáneamente.",
+    },
     step1: {
       heading: "1. Expresa Tus Gustos",
       paragraph1: "En la parte inferior de la pantalla, encontrarás un",
@@ -244,6 +351,19 @@ const contentData = {
       paragraph3: "lista para que la disfrutes en cualquier momento.",
     },
     outro: "¡Disfruta creando tus playlists personalizadas con MediartStudio!",
+    contact: {
+      reportIssuesTitle: "Reportar Problemas",
+      reportIssuesDescription: "¿Encontraste un bug o error? Háznoslo saber para solucionarlo rápidamente.",
+      reportIssuesButton: "Reportar Problema",
+      suggestionsTitle: "Sugerencias",
+      suggestionsDescription: "¿Tienes ideas para mejorar MediartStudio? ¡Queremos escucharlas!",
+      suggestionsButton: "Enviar Sugerencia",
+      tourTitle: "Tour Interactivo",
+      tourDescription: "¿Prefieres aprender paso a paso? Inicia nuestro tour guiado.",
+      tourButton: "Iniciar Tour",
+      contactTitle: "Contacto Directo",
+      contactDescription: "Para consultas específicas, contáctanos directamente.",
+    },
   },
 };
 
@@ -254,7 +374,7 @@ const contentData = {
  * @returns {object} Un objeto con el idioma actual, la función para cambiarlo y el contenido computado.
  */
 export const useHelpContent = () => {
-  const currentLanguage = ref("en");
+  const currentLanguage = ref("es");
 
   const toggleLanguage = () => {
     currentLanguage.value = currentLanguage.value === "en" ? "es" : "en";
