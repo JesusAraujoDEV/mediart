@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed, nextTick } from 'vue'
 // Update the import path to a relative path if the file exists locally
-import { useReducedMotion } from '../../composables/useReducedMotion'
+import { useReducedMotion } from '@vueuse/motion'
 
 const props = defineProps({
   src: { type: String, required: true },
@@ -32,7 +32,7 @@ const props = defineProps({
   zIndex: { type: String, default: '-z-10' },
 })
 
-const { reduced } = useReducedMotion()
+const reduced = useReducedMotion()
 const root = ref<HTMLElement | null>(null)
 const shouldLoad = ref(false)
 let io: IntersectionObserver | null = null

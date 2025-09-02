@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false,
   modules: ['@nuxt/icon', '@nuxt/image', '@nuxtjs/tailwindcss', '@vueuse/motion/nuxt'],
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/main.css', 'driver.js/dist/driver.css'],
   image: {
     domains: [
       'image.tmdb.org',

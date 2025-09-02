@@ -5,7 +5,7 @@
 
     <div class="flex max-md:flex-col gap-4 items-center justify-center w-full mb-4 px-4 max-w-4xl max-md:mt-20">
       <div class="flex items-center justify-center max-md:w-full">
-        <select v-model="searchType"
+        <select v-model="searchType" data-tutorial="search-type"
           class="p-2 px-6 rounded-full bg-gray-700/80 w-fit text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer">
           <option value="general">Todo</option>
           <option value="song">Canciones</option>
@@ -19,7 +19,7 @@
       </div>
 
       <div class="relative flex-grow mr-3 max-md:mr-0 max-md:w-full">
-        <div
+        <div data-tutorial="search-bar"
           class="glassEffect shadow-xl rounded-full p-3 flex flex-wrap items-center gap-2 min-h-[48px] border border-gray-700 transition-all duration-300"
           :class="{
             'rounded-2xl': selectedTags.length > 2,
@@ -61,7 +61,7 @@
         </Transition>
       </div>
       <div class="flex items-center justify-center max-md:w-full max-md:max-w-4xl">
-        <select v-model="selectedCategory"
+        <select v-model="selectedCategory" data-tutorial="category-selector"
           class="p-2 px-6 rounded-full bg-gray-700/80 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer">
           <option value="mix">Tipo de lista: Mezcla</option>
           <option value="songs">Tipo de lista: Canciones</option>
@@ -72,7 +72,7 @@
           <option value="books">Tipo de lista: Libros</option>
           <option value="videogames">Tipo de lista: Videojuegos</option>
         </select>
-        <button @click="sendData(selectedTags)"
+        <button @click="sendData(selectedTags)" data-tutorial="send-button"
           class="ml-3 p-2 rounded-full cursor-pointer glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm"
           aria-label="Generar recomendaciones">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"
@@ -84,7 +84,7 @@
     </div>
 
     <div class="flex-grow flex w-full max-w-6xl items-center justify-center p-4">
-      <div
+      <div data-tutorial="recommendations-area"
         class="w-full h-full glassEffect max-h-[80vh] bg-gray-800/50 rounded-lg p-6 flex flex-col items-center justify-center text-white text-xl shadow-2xl overflow-y-auto relative custom-main-scroll">
         <div v-if="recommendationsLoading" class="flex flex-col items-center text-center">
           <p class="text-xl mb-4 text-gray-300">Generando recomendaciones...</p>
@@ -142,7 +142,7 @@
               </div>
             </div>
           </div>
-          <div class="flex max-md:flex-col justify-center gap-6 mt-8 pb-4">
+          <div data-tutorial="action-buttons" class="flex max-md:flex-col justify-center gap-6 mt-8 pb-4">
             <button @click="showPlaylistModal = true" :disabled="recommendations.length === 0"
               class="bg-green-600 cursor-pointer hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg disabled:opacity-50 disabled:cursor-not-allowed">
               Aceptar ({{ recommendations.length }} items)
@@ -154,11 +154,26 @@
           </div>
         </div>
         <div v-else class="text-center text-gray-400 text-2xl flex flex-col items-center">
-          <p class="mb-4">¡Descubre algo nuevo!</p>
-          <p class="text-lg">
-            Usa la barra de búsqueda y el botón de enviar para generar
-            recomendaciones.
-          </p>
+          <div class="mb-6">
+            <svg class="w-16 h-16 text-purple-400 mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            <p class="mb-4 text-3xl font-bold text-white">¡Descubre algo nuevo!</p>
+            <p class="text-lg mb-6 max-w-md">
+              Usa la barra de búsqueda y el botón de enviar para generar
+              recomendaciones personalizadas basadas en tus intereses.
+            </p>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-4 items-center">
+            <button @click="startTutorial"
+              class="glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center gap-2 text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm py-3 px-6 rounded-full font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
+              Ver Tutorial Interactivo
+            </button>
+            <p class="text-sm text-gray-500">¿Necesitas ayuda? Inicia el tutorial</p>
+          </div>
         </div>
       </div>
     </div>
@@ -174,6 +189,7 @@ import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 import PlaylistModal from "~/components/ui/PlaylistModal.vue";
 import { useSuggestions } from "~/composables/studio/useSuggestions";
 import { useRecommendations } from "~/composables/studio/useRecommendations";
+import { useStudioTutorial } from "~/composables/useStudioTutorial";
 
 // @ts-ignore
 definePageMeta({
@@ -210,6 +226,9 @@ const {
   createPlaylist,
 } = useRecommendations();
 
+// Composable para el tutorial interactivo
+const { startTutorial } = useStudioTutorial();
+
 const searchInput = ref<HTMLInputElement | null>(null);
 
 </script>
@@ -238,5 +257,97 @@ const searchInput = ref<HTMLInputElement | null>(null);
 .fade-slide-down-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+</style>
+
+<style>
+/* Estilos personalizados para el tutorial Driver.js */
+.driver-popover-custom {
+  background: rgba(31, 41, 55, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(147, 51, 234, 0.3) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.driver-popover-custom .driver-popover-title {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.driver-popover-custom .driver-popover-description {
+  color: #e5e7eb !important;
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+}
+
+.driver-popover-custom .driver-popover-next-btn,
+.driver-popover-custom .driver-popover-prev-btn,
+.driver-popover-custom .driver-popover-close-btn,
+.driver-popover-custom .driver-popover-done-btn {
+  background: rgba(139, 92, 246, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.1) !important;
+}
+
+.driver-popover-custom .driver-popover-next-btn:hover,
+.driver-popover-custom .driver-popover-prev-btn:hover,
+.driver-popover-custom .driver-popover-close-btn:hover,
+.driver-popover-custom .driver-popover-done-btn:hover {
+  background: rgba(139, 92, 246, 0.2) !important;
+  border-color: rgba(139, 92, 246, 0.5) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 8px -1px rgba(139, 92, 246, 0.2) !important;
+}
+
+.driver-popover-custom .driver-popover-progress-text {
+  color: #9ca3af !important;
+  font-weight: 500 !important;
+}
+
+.driver-popover-custom .driver-popover-progress-bar {
+  background: rgba(139, 92, 246, 0.2) !important;
+}
+
+.driver-popover-custom .driver-popover-progress-bar-fill {
+  background: linear-gradient(90deg, #8b5cf6, #ec4899) !important;
+  border-radius: 4px !important;
+}
+
+/* Animación de entrada suave */
+.driver-popover-custom {
+  animation: fadeInUp 0.4s ease-out !important;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Estilos para el overlay */
+.driver-overlay {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(2px) !important;
+}
+
+/* Resaltar elementos durante el tutorial */
+.driver-highlighted-element {
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.6) !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
 }
 </style>
