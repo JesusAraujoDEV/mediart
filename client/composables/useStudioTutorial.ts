@@ -13,6 +13,15 @@ export function useStudioTutorial() {
 
     const steps: DriveStep[] = [
       {
+        element: '[data-tutorial="navbar"]',
+        popover: {
+          title: '🧭 Navegación de Mediart Studio',
+          description: 'Aquí tienes acceso a tu perfil, ayuda, búsqueda y opciones para crear playlists. En móvil, toca el menú hamburguesa para ver más opciones. En escritorio, usa la flecha para expandir o contraer los íconos del menú completo.',
+          side: 'bottom' as const,
+          align: 'center' as const
+        }
+      },
+      {
         element: '[data-tutorial="search-type"]',
         popover: {
           title: '🎯 Tipo de Búsqueda',
@@ -114,6 +123,7 @@ export function useStudioTutorial() {
       const btn = target.closest('.driver-popover-next-btn, .driver-popover-done-btn, .driver-popover-close-btn') as HTMLElement | null
       if (btn) {
         const txt = (btn.textContent || '').trim().toLowerCase()
+        const isCloseBtn = btn.classList.contains('driver-popover-close-btn')
         // Check progress text (e.g. "3 de 6") to know if we're on the last step
         const progressEl = document.querySelector('.driver-popover-progress-text')
         let isLast = false
@@ -129,12 +139,13 @@ export function useStudioTutorial() {
         // Conditions to force close:
         // - button text contains 'entendido' OR
         // - progress indicates last step OR
-        // - button has attribute data-driver-action="done" (defensive)
+        // - button has attribute data-driver-action="done" (defensive) OR
+        // - button is the close button
         const hasDoneAttr = btn.getAttribute('data-driver-action') === 'done'
-        if (txt.includes('entendido') || isLast || hasDoneAttr) {
+        if (txt.includes('entendido') || isLast || hasDoneAttr || isCloseBtn) {
           try { e.preventDefault() } catch {}
           try { e.stopPropagation() } catch {}
-          console.log('Delegated listener: detected final action — closing tutorial', { txt, isLast, hasDoneAttr })
+          console.log('Delegated listener: detected final action or close — closing tutorial', { txt, isLast, hasDoneAttr, isCloseBtn })
           forceStopTutorial()
           try { document.removeEventListener('click', onDocumentClick, true) } catch {}
           try { delete (window as any).__mediart_driver_done_listener } catch {}
@@ -156,12 +167,13 @@ export function useStudioTutorial() {
             const buttons = Array.from(node.querySelectorAll('button')) as HTMLElement[]
             for (const b of buttons) {
               const txt = (b.textContent || '').trim().toLowerCase()
-              if ((txt.includes('entendido') || txt.includes('entender')) && !(b as any).__mediart_listener) {
+              const isCloseBtn = b.classList.contains('driver-popover-close-btn')
+              if ((txt.includes('entendido') || txt.includes('entender') || isCloseBtn) && !(b as any).__mediart_listener) {
                 ;(b as any).__mediart_listener = true
                 b.addEventListener('click', (ev) => {
                   try { ev.preventDefault() } catch {}
                   try { ev.stopPropagation() } catch {}
-                  console.log('Popover observer: Entendido clicked — closing tutorial')
+                  console.log('Popover observer: Entendido or Close clicked — closing tutorial')
                   forceStopTutorial()
                 })
               }

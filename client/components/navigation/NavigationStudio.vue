@@ -1,5 +1,6 @@
 <template>
   <nav
+    data-tutorial="navbar"
     class="fixed top-0 left-0 right-0 z-40 glassEffect p-4 md:p-2 md:m-3 md:rounded-lg md:w-fit md:right-auto flex items-center justify-between md:justify-start gap-2 md:gap-4 transition-all duration-300 ease-in-out bg-black/10 md:bg-transparent">
     <!-- Logo y perfil en móvil -->
     <div class="flex items-center gap-3 md:gap-4">
@@ -64,6 +65,7 @@
     <!-- Menú desplegable en móvil -->
     <div
       v-show="isMenuOpen"
+      data-tutorial="navbar-menu"
       class="md:hidden absolute top-full left-0 right-0 bg-gradient-to-b from-white via-gray-50 to-gray-100 backdrop-blur-lg shadow-2xl rounded-b-2xl border-t border-gray-200 transition-all duration-300 ease-in-out transform"
       :class="{ 'opacity-100 translate-y-0 scale-100': isMenuOpen, 'opacity-0 -translate-y-4 scale-95': !isMenuOpen }"
     >

@@ -172,7 +172,7 @@
               </svg>
               Ver Tutorial Interactivo
             </button>
-            <p class="text-sm text-gray-500">¿Necesitas ayuda? Inicia el tutorial</p>
+            <p class="text-sm text-white">¿Necesitas ayuda? Inicia el tutorial</p>
           </div>
         </div>
       </div>
@@ -268,24 +268,48 @@ const searchInput = ref<HTMLInputElement | null>(null);
   border: 1px solid rgba(147, 51, 234, 0.3) !important;
   border-radius: 12px !important;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1) !important;
+  padding: 1.5rem !important; /* Aumentar padding general para mejor espaciado */
+  padding-top: 2.5rem !important; /* Espacio extra arriba para evitar superposición con la x */
+  max-width: 320px !important; /* Limitar ancho para mejor legibilidad */
 }
 
 .driver-popover-custom .driver-popover-title {
   color: #ffffff !important;
   font-weight: 700 !important;
   font-size: 1.25rem !important;
-  margin-bottom: 0.5rem !important;
+  margin-bottom: 0.75rem !important; /* Más margen inferior */
+  line-height: 1.4 !important; /* Mejor line-height */
 }
 
 .driver-popover-custom .driver-popover-description {
   color: #e5e7eb !important;
   font-size: 1rem !important;
   line-height: 1.6 !important;
+  margin-bottom: 1rem !important; /* Más margen inferior */
+}
+
+.driver-popover-custom .driver-popover-close-btn {
+  top: 0.75rem !important; /* Ajustar posición vertical del botón de cerrar */
+  right: 0.75rem !important; /* Ajustar posición horizontal */
+  width: 24px !important; /* Tamaño consistente */
+  height: 24px !important;
+  background: rgba(139, 92, 246, 0.2) !important; /* Fondo más visible */
+  border-radius: 50% !important; /* Circular para mejor UX */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important; /* Tamaño del ícono */
+  opacity: 0.8 !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.driver-popover-custom .driver-popover-close-btn:hover {
+  opacity: 1 !important;
+  background: rgba(139, 92, 246, 0.4) !important;
 }
 
 .driver-popover-custom .driver-popover-next-btn,
 .driver-popover-custom .driver-popover-prev-btn,
-.driver-popover-custom .driver-popover-close-btn,
 .driver-popover-custom .driver-popover-done-btn {
   background: rgba(139, 92, 246, 0.1) !important;
   backdrop-filter: blur(10px) !important;
@@ -296,11 +320,11 @@ const searchInput = ref<HTMLInputElement | null>(null);
   padding: 0.5rem 1rem !important;
   transition: all 0.3s ease !important;
   box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.1) !important;
+  margin: 0 0.25rem !important; /* Espaciado entre botones */
 }
 
 .driver-popover-custom .driver-popover-next-btn:hover,
 .driver-popover-custom .driver-popover-prev-btn:hover,
-.driver-popover-custom .driver-popover-close-btn:hover,
 .driver-popover-custom .driver-popover-done-btn:hover {
   background: rgba(139, 92, 246, 0.2) !important;
   border-color: rgba(139, 92, 246, 0.5) !important;
@@ -311,15 +335,19 @@ const searchInput = ref<HTMLInputElement | null>(null);
 .driver-popover-custom .driver-popover-progress-text {
   color: #9ca3af !important;
   font-weight: 500 !important;
+  margin-bottom: 0.5rem !important; /* Espacio antes de la barra */
 }
 
 .driver-popover-custom .driver-popover-progress-bar {
   background: rgba(139, 92, 246, 0.2) !important;
+  height: 6px !important; /* Altura más visible */
+  border-radius: 3px !important;
 }
 
 .driver-popover-custom .driver-popover-progress-bar-fill {
   background: linear-gradient(90deg, #8b5cf6, #ec4899) !important;
-  border-radius: 4px !important;
+  border-radius: 3px !important;
+  transition: width 0.3s ease !important; /* Transición suave */
 }
 
 /* Animación de entrada suave */
