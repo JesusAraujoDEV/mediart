@@ -20,6 +20,10 @@ export const useSuggestions = () => {
   const showDatalist = ref(false);
   const searchType = ref('general');
 
+  // Simple cache para mejorar latencia percibida: key = `${type}:${query}`
+  const suggestionsCache = new Map<string, { ts: number; data: SearchItem[] }>();
+  const CACHE_TTL = 1000 * 60 * 5; // 5 minutos
+
   const getSearchPlaceholder = () => {
     switch (searchType.value) {
       case 'general': return 'Busca un título (canción, película, etc.)';
@@ -73,6 +77,13 @@ export const useSuggestions = () => {
           suggestions.value = [];
         }
       }
+      // almacenar resultado en cache
+      try {
+        const key = `${searchType.value}:${query.toLowerCase()}`;
+        suggestionsCache.set(key, { ts: Date.now(), data: suggestions.value.slice() });
+      } catch (_) {
+        // ignore cache errors
+      }
     } catch (e) {
       console.error("Error fetching suggestions:", e);
       suggestions.value = [];
@@ -80,12 +91,24 @@ export const useSuggestions = () => {
   };
 
   const onInput = () => {
+    const q = inputValue.value.trim();
     if (debounceHandle) clearTimeout(debounceHandle);
-    if (inputValue.value.trim().length < 2) {
+    if (q.length < 2) {
       suggestions.value = [];
       return;
     }
-    debounceHandle = setTimeout(() => fetchSuggestions(inputValue.value.trim()), 300);
+
+    const key = `${searchType.value}:${q.toLowerCase()}`;
+    const cached = suggestionsCache.get(key);
+    if (cached && (Date.now() - cached.ts) < CACHE_TTL) {
+      // respuesta inmediata desde cache
+      suggestions.value = cached.data.slice();
+      showDatalist.value = true;
+      return;
+    }
+
+    // reducir debounce para mejorar sensación de velocidad
+    debounceHandle = setTimeout(() => fetchSuggestions(q), 150);
   };
 
   const selectSuggestion = (suggestion: SearchItem) => {

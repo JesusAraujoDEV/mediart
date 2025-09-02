@@ -5,18 +5,29 @@
 
     <div class="flex max-md:flex-col gap-4 items-center justify-center w-full mb-4 px-4 max-w-4xl max-md:mt-20">
       <div class="flex items-center justify-center max-md:w-full">
-        <select v-model="searchType" data-tutorial="search-type"
-          class="p-2 px-6 rounded-full bg-gray-700/80 w-fit text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer">
-          <option value="general">Todo</option>
-          <option value="song">Canciones</option>
-          <option value="artist">Artistas</option>
-          <option value="album">Álbumes</option>
-          <option value="movie">Películas</option>
-          <option value="tvshow">Series</option>
-          <option value="book">Libros</option>
-          <option value="videogame">Videojuegos</option>
-        </select>
-      </div>
+          <div class="select-wrapper relative">
+            <select ref="searchTypeRef" v-model="searchType" data-tutorial="search-type"
+              @focus="searchTypeOpen = true" @blur="searchTypeOpen = false"
+              class="p-2 pl-6 pr-12 rounded-full bg-gray-700/80 w-fit text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer">
+              <option value="general">Todo</option>
+              <option value="song">Canciones</option>
+              <option value="artist">Artistas</option>
+              <option value="album">Álbumes</option>
+              <option value="movie">Películas</option>
+              <option value="tvshow">Series</option>
+              <option value="book">Libros</option>
+              <option value="videogame">Videojuegos</option>
+            </select>
+            <button type="button" aria-label="Abrir selector" class="select-arrow absolute right-3 top-1/2 -translate-y-1/2 text-white/90"
+              @click="focusSearchType"
+              :aria-expanded="searchTypeOpen">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"
+                :class="{ 'rotate-180': searchTypeOpen }" class="transition-transform duration-200">
+                <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+              </svg>
+            </button>
+          </div>
+        </div>
 
       <div class="relative flex-grow mr-3 max-md:mr-0 max-md:w-full">
         <div data-tutorial="search-bar"
@@ -61,17 +72,28 @@
         </Transition>
       </div>
       <div class="flex items-center justify-center max-md:w-full max-md:max-w-4xl">
-        <select v-model="selectedCategory" data-tutorial="category-selector"
-          class="p-2 px-6 rounded-full bg-gray-700/80 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer">
-          <option value="mix">Tipo de lista: Mezcla</option>
-          <option value="songs">Tipo de lista: Canciones</option>
-          <option value="artists">Tipo de lista: Artistas</option>
-          <option value="albums">Tipo de lista: Álbumes</option>
-          <option value="movies">Tipo de lista: Películas</option>
-          <option value="tvshows">Tipo de lista: Series TV</option>
-          <option value="books">Tipo de lista: Libros</option>
-          <option value="videogames">Tipo de lista: Videojuegos</option>
-        </select>
+        <div class="select-wrapper relative w-full">
+          <select ref="categoryRef" v-model="selectedCategory" data-tutorial="category-selector"
+            @focus="categoryOpen = true" @blur="categoryOpen = false"
+            class="p-2 pl-6 pr-12 rounded-full bg-gray-700/80 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer">
+            <option value="mix">Tipo de lista: Mezcla</option>
+            <option value="songs">Tipo de lista: Canciones</option>
+            <option value="artists">Tipo de lista: Artistas</option>
+            <option value="albums">Tipo de lista: Álbumes</option>
+            <option value="movies">Tipo de lista: Películas</option>
+            <option value="tvshows">Tipo de lista: Series TV</option>
+            <option value="books">Tipo de lista: Libros</option>
+            <option value="videogames">Tipo de lista: Videojuegos</option>
+          </select>
+          <button type="button" aria-label="Abrir selector" class="select-arrow absolute right-3 top-1/2 -translate-y-1/2 text-white/90"
+            @click="focusCategory"
+            :aria-expanded="categoryOpen">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"
+              :class="{ 'rotate-180': categoryOpen }" class="transition-transform duration-200">
+              <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+            </svg>
+          </button>
+        </div>
         <button @click="sendData(selectedTags)" data-tutorial="send-button"
           class="ml-3 p-2 rounded-full cursor-pointer glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm"
           aria-label="Generar recomendaciones">
@@ -114,7 +136,7 @@
                 <Icon name="material-symbols:close" size="1.2em" />
               </button>
 
-              <img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title || 'Cover'"
+              <img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title || 'Cover'" loading="lazy" decoding="async"
                 class="w-32 h-32 object-cover rounded-lg mb-4 sm:mb-0 sm:mr-4 flex-shrink-0 shadow-md border border-gray-500" />
               <div v-else
                 class="w-32 h-32 bg-gray-600 rounded-lg mb-4 sm:mb-0 sm:mr-4 flex-shrink-0 flex items-center justify-center text-gray-400 text-sm border border-gray-500">
@@ -231,6 +253,20 @@ const { startTutorial } = useStudioTutorial();
 
 const searchInput = ref<HTMLInputElement | null>(null);
 
+// Refs y estados para selects interactivos
+const searchTypeRef = ref<HTMLSelectElement | null>(null);
+const categoryRef = ref<HTMLSelectElement | null>(null);
+const searchTypeOpen = ref<boolean>(false);
+const categoryOpen = ref<boolean>(false);
+
+function focusSearchType() {
+  if (searchTypeRef.value) searchTypeRef.value.focus();
+}
+
+function focusCategory() {
+  if (categoryRef.value) categoryRef.value.focus();
+}
+
 </script>
 
 <style scoped>
@@ -257,6 +293,20 @@ const searchInput = ref<HTMLInputElement | null>(null);
 .fade-slide-down-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+select::after {
+  content: '▼';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: transform 0.3s;
+}
+
+select:focus::after {
+  transform: translateY(-50%) rotate(180deg);
 }
 </style>
 

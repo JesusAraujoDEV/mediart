@@ -1,4 +1,3 @@
-// Tu archivo actual `composables/useRecommendations.ts`
 import { ref, reactive, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
@@ -6,7 +5,7 @@ import type { SearchItem } from './useSuggestions';
 
 interface RecommendationItem extends SearchItem {
   releaseDate?: string;
-  avgRating?: string;
+  avgRating?: string | number;
 }
 
 interface NewPlaylist {
@@ -26,22 +25,20 @@ export const useRecommendations = () => {
 
   const selectedCategory = ref('mix');
 
-  // Estado para el modal de playlist
+  // Cache en memoria para respuestas por payload (category + seed ids)
+  const recommendationsCache = new Map<string, { ts: number; data: RecommendationItem[] }>();
+  const REC_CACHE_TTL = 1000 * 60 * 5; // 5 minutos
+
   const showPlaylistModal = ref(false);
-  const newPlaylist = reactive<NewPlaylist>({
-    name: '',
-    description: '',
-    isCollaborative: false,
-    items: [],
-  });
+  const newPlaylist = reactive<NewPlaylist>({ name: '', description: '', isCollaborative: false, items: [] });
   const playlistSaving = ref(false);
 
   /**
-   * Envía los datos para generar las recomendaciones.
-   * @param {SearchItem[]} tags Las etiquetas (ítems) seleccionadas por el usuario.
+   * Genera recomendaciones para los tags seleccionados.
+   * Usa cache en memoria para respuestas recientes para reducir latencia de render.
    */
   const sendData = async (tags: SearchItem[]) => {
-    if (tags.length === 0) {
+    if (!tags || tags.length === 0) {
       Swal.fire('Atención', 'Por favor, selecciona al menos un elemento para generar recomendaciones.', 'warning');
       return;
     }
@@ -50,113 +47,87 @@ export const useRecommendations = () => {
     recommendationsError.value = null;
 
     try {
-      // Construir la URL basada en el tipo de recomendación seleccionado
-      const recommendationUrl = `${config.public.backend}/api/recommendation/${selectedCategory.value}`;
-      const token = localStorage.getItem("token");
+      const keyParts = tags.map(t => t.externalId ?? t.title ?? '').filter(Boolean);
+      const payloadKey = `${selectedCategory.value}:${keyParts.join(',')}`;
 
-      const response = await fetch(recommendationUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          seedItems: tags.map(tag => ({
-            externalId: tag.externalId,
-            type: tag.type,
-          })),
-          itemName: tags.map(tag => tag.title).join(', '),
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al generar recomendaciones.');
+      const cached = recommendationsCache.get(payloadKey);
+      if (cached && (Date.now() - cached.ts) < REC_CACHE_TTL) {
+        // devolver copia para evitar enlaces mutables
+        recommendations.value = cached.data.slice();
+        recommendationsLoading.value = false;
+        return;
       }
 
-      const data = await response.json();
-      // Extraer el array correcto basado en el tipo de recomendación seleccionado
-      recommendations.value = data[selectedCategory.value] || data[selectedCategory.value + 's'] || [];
+      const url = `${config.public.backend}/api/recommendation/${selectedCategory.value}`;
+      const token = localStorage.getItem('token');
+
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ seedItems: tags.map(t => ({ externalId: t.externalId, type: t.type })), itemName: tags.map(t => t.title).join(', ') }),
+      });
+
+      if (!resp.ok) {
+        const errBody = await resp.json().catch(() => ({}));
+        throw new Error(errBody.message || 'Error al generar recomendaciones.');
+      }
+
+      const payload = await resp.json().catch(() => ({}));
+      const raw: any[] = payload[selectedCategory.value] || payload[`${selectedCategory.value}s`] || [];
+
+      // Mapear sólo los campos que usamos en la UI para reducir trabajo del renderer
+      const mapped: RecommendationItem[] = (raw || []).map((item: any) => ({
+        title: item.title || item.name || '',
+        type: item.type || selectedCategory.value,
+        coverUrl: item.coverUrl || item.image || item.poster_path || null,
+        externalSource: item.externalSource || item.source || '',
+        externalId: item.externalId || item.id || item._id || null,
+        externalUrl: item.externalUrl || item.url || '',
+        description: item.description || item.overview || '',
+        releaseDate: item.releaseDate || item.release_date || item.year || '',
+        avgRating: item.avgRating ?? item.vote_average ?? item.rating ?? '',
+      }));
+
+      recommendations.value = mapped;
+      try { recommendationsCache.set(payloadKey, { ts: Date.now(), data: mapped.slice() }); } catch (e) { /* ignore cache errors */ }
     } catch (error: any) {
-      console.error('Error generando recomendaciones:', error);
-      recommendationsError.value = error.message || 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.';
+      console.error('useRecommendations: sendData error', error);
+      recommendationsError.value = error?.message || 'Ocurrió un error inesperado.';
     } finally {
       recommendationsLoading.value = false;
     }
   };
 
-  /**
-   * Elimina una recomendación de la lista.
-   * @param {number} index El índice del elemento a eliminar.
-   */
-  const removeRecommendation = (index: number) => {
-    recommendations.value.splice(index, 1);
-  };
+  const removeRecommendation = (index: number) => { recommendations.value.splice(index, 1); };
 
-  /**
-   * Crea una nueva playlist con las recomendaciones actuales.
-   */
   const createPlaylist = async (playlistData?: { name: string; description: string; isCollaborative: boolean }) => {
-    // Usar los datos del modal si se proporcionan, de lo contrario usar el estado interno
     const name = playlistData?.name?.trim() || newPlaylist.name?.trim() || '';
     const description = playlistData?.description || newPlaylist.description || '';
     const isCollaborative = playlistData?.isCollaborative ?? newPlaylist.isCollaborative ?? false;
-    
-    if (!name) {
-      console.warn('Playlist name is empty:', { name, playlistData, newPlaylist });
-      Swal.fire('Error', 'El nombre de la playlist no puede estar vacío.', 'error');
-      return;
-    }
 
-    if (recommendations.value.length === 0) {
-      Swal.fire('Error', 'No hay recomendaciones para crear la playlist.', 'error');
-      return;
-    }
+    if (!name) { Swal.fire('Error', 'El nombre de la playlist no puede estar vacío.', 'error'); return; }
+    if (!recommendations.value || recommendations.value.length === 0) { Swal.fire('Error', 'No hay recomendaciones para crear la playlist.', 'error'); return; }
 
     playlistSaving.value = true;
-
     try {
-      const createPlaylistUrl = `${config.public.backend}/api/playlists`;
-      const token = localStorage.getItem("token");
+      const url = `${config.public.backend}/api/playlists`;
+      const token = localStorage.getItem('token');
+      const body = { name, description, isCollaborative, items: recommendations.value };
 
-      const requestData = {
-        name: name,
-        description: description,
-        isCollaborative: isCollaborative,
-        items: recommendations.value,
-      };
+      const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body) });
+      if (!resp.ok) { const err = await resp.json().catch(() => ({})); throw new Error(err.message || 'Error al crear la playlist.'); }
 
-      console.log('Creating playlist with data:', requestData);
-      
-      const response = await fetch(createPlaylistUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al crear la playlist.');
-      }
-      
       Swal.fire('Éxito', 'Playlist creada exitosamente!', 'success');
       showPlaylistModal.value = false;
-      recommendations.value = []; // Limpiar las recomendaciones
+      recommendations.value = [];
 
-      // Redirigir al perfil del usuario usando el username del localStorage
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const username = user.username || user.email?.split('@')[0] || 'user';
       router.push(`/profile/${username}`);
-
     } catch (error: any) {
-      console.error('Error creando playlist:', error);
-      Swal.fire('Error', error.message || 'Ocurrió un error inesperado al crear la playlist.', 'error');
-    } finally {
-      playlistSaving.value = false;
-    }
+      console.error('useRecommendations: createPlaylist error', error);
+      Swal.fire('Error', error?.message || 'Ocurrió un error inesperado al crear la playlist.', 'error');
+    } finally { playlistSaving.value = false; }
   };
 
   return {
