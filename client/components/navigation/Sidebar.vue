@@ -45,28 +45,66 @@
       <!-- Menú de navegación -->
       <nav class="flex-grow overflow-y-auto">
         <ul class="space-y-2">
-          <li v-for="(item, index) in menuItems" :key="index">
-            <NuxtLink :to="item.path" :class="[
-              'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 cursor-pointer group',
-              {
-                'bg-sky-500 text-white shadow-lg': isActive(item),
-                'text-slate-600 hover:bg-slate-100': !isActive(item),
-              },
-              !isSidebarOpen ? 'justify-center' : ''
-            ]">
+          <li v-for="(category, categoryIndex) in accordionItems" :key="categoryIndex">
+            <!-- Accordion Header -->
+            <div
+              @click="toggleAccordion(category)"
+              :class="[
+                'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 cursor-pointer group',
+                {
+                  'bg-slate-100 text-slate-800': category.isOpen,
+                  'text-slate-600 hover:bg-slate-100': !category.isOpen,
+                },
+                !isSidebarOpen ? 'justify-center' : ''
+              ]"
+            >
               <div class="flex-none">
-                <component :is="item.icon" class="w-5 h-5" />
+                <component :is="category.icon" class="w-5 h-5" />
               </div>
-              <!-- Solo muestra el texto si el sidebar está abierto -->
-              <span v-if="isSidebarOpen"
-                    class="flex-grow font-medium overflow-hidden"
-                    :class="{
-                      'text-white': isActive(item),
-                      'text-slate-800 group-hover:text-slate-900': !isActive(item),
-                    }">
-                {{ item.text }}
+              <span v-if="isSidebarOpen" class="flex-grow font-medium text-slate-800 group-hover:text-slate-900">
+                {{ category.category }}
               </span>
-            </NuxtLink>
+              <div v-if="isSidebarOpen" class="flex-none">
+                <ChevronDown
+                  :class="{ 'rotate-180': category.isOpen }"
+                  class="w-5 h-5 text-gray-500 transition-transform duration-200"
+                />
+              </div>
+            </div>
+
+            <!-- Accordion Content -->
+            <div v-if="category.isOpen" class="ml-4 mt-2 space-y-1">
+              <NuxtLink
+                v-for="(item, itemIndex) in category.items"
+                :key="itemIndex"
+                :to="item.path"
+                :target="category.category === 'Redes' ? '_blank' : '_self'"
+                :rel="category.category === 'Redes' ? 'noopener noreferrer' : ''"
+                :class="[
+                  'flex items-center gap-3 px-4 py-2 rounded-xl transition-colors duration-200 cursor-pointer group',
+                  {
+                    'bg-sky-500 text-white shadow-lg': isActive(item),
+                    'text-slate-600 hover:bg-slate-100': !isActive(item),
+                  },
+                  !isSidebarOpen ? 'justify-center' : ''
+                ]"
+              >
+                <div v-if="category.category !== 'Redes'" class="flex-none">
+                  <component :is="item.icon || category.icon" class="w-5 h-5" />
+                </div>
+                <div v-else :class="item.socialIconClass">
+                  <div v-html="item.icon"></div>
+                </div>
+                <span v-if="isSidebarOpen"
+                      class="flex-grow font-medium overflow-hidden"
+                      :class="{
+                        'text-white': isActive(item),
+                        'text-slate-800 group-hover:text-slate-900': !isActive(item),
+                      }">
+                  {{ item.text }}
+                </span>
+              </NuxtLink>
+            </div>
           </li>
         </ul>
       </nav>
@@ -76,33 +114,136 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { ChevronDown, Home, Folder, Users, Settings, Tag, MessageSquare, Book } from 'lucide-vue-next';
+import { ChevronDown, Building2, UsersRound, Footprints, BadgeQuestionMark, Podcast, Library, FileMusic, NotebookPen, HandHelping, ReceiptText, Cookie, GlobeLock, Compass, Share2, Scale } from 'lucide-vue-next';
+
 
 const route = useRoute();
 const isSidebarOpen = ref(true);
 
-const menuItems = [
-  { text: 'Página Principal', icon: Home, path: '/' },
-  { text: 'Sobre Nosotros', icon: Users, path: '/about-us' },
-  { text: 'Cómo Funciona', icon: Settings, path: '/how-it-work' },
-  { text: 'Por Qué Elegirnos', icon: Tag, path: '/why-choose-us' },
-  { text: 'Testimonios', icon: MessageSquare, path: '/testimonials' },
-  { text: 'Contacto', icon: Users, path: '/contact' },
-  { text: 'Categorías', icon: Folder, path: '/categories' },
-  { text: 'Blog', icon: Book, path: '/blog' },
-  { text: 'Centro de Ayuda', icon: MessageSquare, path: '/help' },
-];
+const accordionItems = ref([
+  {
+    category: 'Empresa',
+    icon: Building2,
+    isOpen: false,
+    items: [
+      { text: 'Sobre Nosotros', icon: UsersRound, path: '/about-us' },
+      { text: 'Cómo Funciona', icon: Footprints, path: '/how-it-work' },
+      { text: 'Por Qué Elegirnos', icon: BadgeQuestionMark, path: '/why-choose-us' },
+      { text: 'Testimonios', icon: Podcast, path: '/testimonials' },
+    ],
+  },
+  {
+    category: 'Navegación',
+    icon: Compass,
+    isOpen: false,
+    items: [
+      { text: 'Categorías',icon: Library, path: '/categories' },
+      { text: 'Recomendaciones', icon: FileMusic, path: '/recommendations' },
+      { text: 'Blog', icon: NotebookPen, path: '/blog' },
+      { text: 'Centro de Ayuda', icon: HandHelping, path: '/help' },
+    ],
+  },
+  {
+    category: 'Redes',
+    icon: Share2,
+    isOpen: false,
+    items: [
+      {
+        text: 'Instagram',
+        icon: `<svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
+                </svg>`,
+        socialIconClass: 'w-10 h-10 bg-purple-100 hover:bg-purple-200 rounded-full flex items-center justify-center transition-colors duration-200',
+        svgClass: 'w-5 h-5 text-blue-600',
+        path: 'https://www.instagram.com/mediart.ai?igsh=MW51emNqNjJrMHdnZA=='
+      },
+      {
+        text: 'LinkedIn',
+        icon: `<svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>`,
+        socialIconClass: 'w-10 h-10 bg-purple-100 hover:bg-purple-200 rounded-full flex items-center justify-center transition-colors duration-200',
+        svgClass: 'w-5 h-5 text-blue-600',
+        path: '#'
+      },
+      {
+        text: 'Pinterest',
+        icon: `<svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24c6.624 0 11.99-5.367 11.99-11.987C24.007 5.367 18.641.001 12.017.001z"/>
+                </svg>`,
+        socialIconClass: 'w-10 h-10 bg-purple-100 hover:bg-purple-200 rounded-full flex items-center justify-center transition-colors duration-200',
+        svgClass: 'w-5 h-5 text-blue-600',
+        path: 'https://es.pinterest.com/mediartstudio/'
+      },
+      {
+        text: 'Spotify',
+        icon: `<svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12.01 2.019c-5.495 0-9.991 4.496-9.991 9.991 0 5.494 4.496 9.99 9.991 9.99 5.494 0 9.99-4.496 9.99-9.99 0-5.495-4.446-9.991-9.99-9.991zm4.595 14.436c-.199.299-.549.4-.85.201-2.349-1.45-5.296-1.75-8.793-.951-.348.102-.648-.148-.748-.449-.101-.35.149-.648.45-.749 3.795-.85 7.093-.499 9.69 1.1.35.149.4.548.251.848zm1.2-2.747c-.251.349-.7.499-1.051.249-2.697-1.646-6.792-2.148-9.939-1.148-.398.101-.85-.1-.949-.498-.101-.402.1-.852.499-.952 3.646-1.098 8.143-.548 11.239 1.351.3.149.45.648.201.998zm.099-2.799c-3.197-1.897-8.542-2.097-11.59-1.146a.938.938 0 0 1-1.148-.6.937.937 0 0 1 .599-1.151c3.547-1.049 9.392-.85 13.089 1.351.449.249.599.849.349 1.298-.25.35-.849.498-1.299.248z"/>
+                </svg>`,
+        socialIconClass: 'w-10 h-10 bg-purple-100 hover:bg-purple-200 rounded-full flex items-center justify-center transition-colors duration-200',
+        svgClass: 'w-5 h-5 text-blue-600',
+        path: '#'
+      },
+      {
+        text: 'Twitter',
+        icon: `<svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                </svg>`,
+        socialIconClass: 'w-10 h-10 bg-purple-100 hover:bg-purple-200 rounded-full flex items-center justify-center transition-colors duration-200',
+        svgClass: 'w-5 h-5 text-blue-600',
+        path: 'https://x.com/Mediart_AI?t=RkM1Vpr1tKEizr3FNqif6A&s=08'
+      },
+      {
+        text: 'YouTube',
+        icon: `<svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>`,
+        socialIconClass: 'w-10 h-10 bg-purple-100 hover:bg-purple-200 rounded-full flex items-center justify-center transition-colors duration-200',
+        svgClass: 'w-5 h-5 text-blue-600',
+        path: '#'
+      },
+    ],
+  },
+  {
+    category: 'Legal',
+    icon: Scale,
+    isOpen: false,
+    items: [
+      { text: 'Términos y Condiciones', icon: ReceiptText, path: '/terms' },
+      { text: 'Política de Privacidad', icon: GlobeLock,  path: '/privacy' },
+      { text: 'Política de Cookies', icon: Cookie ,path: '/cookies' },
+    ],
+  },
+]);
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
 };
 
-const isActive = (item) => {
-  // Comprueba si la ruta actual coincide con la ruta del elemento
-  return route.path === item.path;
+const toggleAccordion = (category) => {
+  category.isOpen = !category.isOpen;
 };
+
+const isActive = (item) => {
+  // Comprueba si la ruta actual coincide con la ruta del elemento o es una subruta
+  return route.path === item.path || route.path.startsWith(item.path + '/');
+};
+
+const updateAccordionState = () => {
+  accordionItems.value.forEach(category => {
+    category.isOpen = category.items.some(item => route.path === item.path || route.path.startsWith(item.path + '/'));
+  });
+};
+
+onMounted(() => {
+  updateAccordionState();
+});
+
+watch(() => route.path, () => {
+  updateAccordionState();
+});
 </script>
 
 <style scoped>

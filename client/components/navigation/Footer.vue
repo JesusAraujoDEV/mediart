@@ -31,7 +31,6 @@
               <li><NuxtLink to="/how-it-work" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Cómo Funciona</NuxtLink></li>
               <li><NuxtLink to="/why-choose-us" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Por Qué Elegirnos</NuxtLink></li>
               <li><NuxtLink to="/testimonials" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Testimonios</NuxtLink></li>
-              <li><NuxtLink to="/contact" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Contacto</NuxtLink></li>
             </ul>
           </div>
 
@@ -41,7 +40,6 @@
             <ul class="space-y-3">
               <li><NuxtLink to="/categories" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Categorías</NuxtLink></li>
               <li><NuxtLink to="/recomendaciones" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Recomendaciones</NuxtLink></li>
-              <li><NuxtLink to="/comunidad" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Comunidad</NuxtLink></li>
               <li><NuxtLink to="/blog" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Blog</NuxtLink></li>
               <li><NuxtLink to="/ayuda" class="text-gray-600 hover:text-blue-600 transition-colors duration-200">Centro de Ayuda</NuxtLink></li>
             </ul>
