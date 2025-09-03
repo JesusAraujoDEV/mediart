@@ -128,7 +128,7 @@
             <NuxtLink to="/terms" class="text-gray-500 hover:text-purple-600 transition-colors duration-200">
               Términos y Condiciones
             </NuxtLink>
-            <NuxtLink to="/privacidad" class="text-gray-500 hover:text-purple-600 transition-colors duration-200">
+            <NuxtLink to="/privacy" class="text-gray-500 hover:text-purple-600 transition-colors duration-200">
               Política de Privacidad
             </NuxtLink>
             <NuxtLink to="/cookies" class="text-gray-500 hover:text-purple-600 transition-colors duration-200">

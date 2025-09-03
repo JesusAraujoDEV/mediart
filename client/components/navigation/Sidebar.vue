@@ -45,6 +45,45 @@
       <!-- Menú de navegación -->
       <nav class="flex-grow overflow-y-auto">
         <ul class="space-y-2">
+          <!-- Quick access single links (not in accordion) -->
+          <li>
+            <NuxtLink
+              :to="'/'"
+              :class="[
+                'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 cursor-pointer group',
+                isActive({ path: '/' }) ? 'bg-sky-500 text-white shadow-lg' : 'text-slate-600 hover:bg-slate-100',
+                !isSidebarOpen ? 'justify-center' : ''
+              ]"
+            >
+              <div class="flex-none">
+                <Home class="w-5 h-5" />
+              </div>
+              <span v-if="isSidebarOpen"
+                    class="flex-grow font-medium overflow-hidden"
+                    :class="{ 'text-white': isActive({ path: '/' }), 'text-slate-800 group-hover:text-slate-900': !isActive({ path: '/' }) }">
+                Inicio
+              </span>
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink
+              :to="'/login'"
+              :class="[
+                'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 cursor-pointer group',
+                isActive({ path: '/login' }) ? 'bg-sky-500 text-white shadow-lg' : 'text-slate-600 hover:bg-slate-100',
+                !isSidebarOpen ? 'justify-center' : ''
+              ]"
+            >
+              <div class="flex-none">
+                <LogIn class="w-5 h-5" />
+              </div>
+              <span v-if="isSidebarOpen"
+                    class="flex-grow font-medium overflow-hidden"
+                    :class="{ 'text-white': isActive({ path: '/login' }), 'text-slate-800 group-hover:text-slate-900': !isActive({ path: '/login' }) }">
+                Iniciar Sesión
+              </span>
+            </NuxtLink>
+          </li>
           <li v-for="(category, categoryIndex) in accordionItems" :key="categoryIndex">
             <!-- Accordion Header -->
             <div
@@ -116,7 +155,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { ChevronDown, Building2, UsersRound, Footprints, BadgeQuestionMark, Podcast, Library, FileMusic, NotebookPen, HandHelping, ReceiptText, Cookie, GlobeLock, Compass, Share2, Scale } from 'lucide-vue-next';
+import { ChevronDown, Building2, UsersRound, Footprints, BadgeQuestionMark, Podcast, Library, FileMusic, NotebookPen, HandHelping, ReceiptText, Cookie, GlobeLock, Compass, Share2, Scale, Home, LogIn } from 'lucide-vue-next';
 
 
 const route = useRoute();

@@ -9,8 +9,8 @@
             <ul class="flex flex-wrap gap-6 text-sm">
               <li><span class="px-2 py-1 rounded-md bg-slate-100 text-slate-700">Legal</span></li>
               <li><NuxtLink to="/terms" class="font-semibold text-slate-900 px-2 py-1 rounded-md bg-slate-200">Términos y Condiciones de Uso</NuxtLink></li>
-              <li><NuxtLink to="/privacy" class="text-slate-600 hover:text-emerald-600">Política de Privacidad</NuxtLink></li>
-              <li><NuxtLink to="/cookies" class="text-slate-600 hover:text-emerald-600">Política de Cookies</NuxtLink></li>
+              <li><NuxtLink to="/privacy" class="text-slate-600 hover:text-sky-600">Política de Privacidad</NuxtLink></li>
+              <li><NuxtLink to="/cookies" class="text-slate-600 hover:text-sky-600">Política de Cookies</NuxtLink></li>
             </ul>
           </nav>
 
@@ -20,7 +20,7 @@
           <!-- Table of contents -->
           <div class="border border-slate-200 rounded-xl p-4 md:p-6 mb-10">
             <h2 class="text-lg font-semibold mb-3">Índice</h2>
-            <ol class="space-y-2 list-decimal list-inside text-emerald-700">
+            <ol class="space-y-2 list-decimal list-inside text-sky-600">
               <li><a href="#introduccion" class="hover:underline">Introducción</a></li>
               <li><a href="#servicio" class="hover:underline">Descripción del Servicio y Naturaleza del Proyecto</a></li>
               <li><a href="#licencia" class="hover:underline">Licencia de uso y Código Abierto</a></li>
@@ -85,7 +85,7 @@
           <section id="cuentas" class="scroll-mt-24">
             <h2 class="text-2xl font-bold mb-3">8. Cuentas, Seguridad y Privacidad</h2>
             <p class="mb-3">Cuando corresponda, eres responsable de mantener la confidencialidad de las credenciales de tu cuenta y de las actividades realizadas desde ella.</p>
-            <p class="mb-3">El tratamiento de datos personales se describe en la <NuxtLink to="/privacy" class="text-emerald-700 underline">Política de Privacidad</NuxtLink>. Al usar Mediart aceptas dichas prácticas.</p>
+            <p class="mb-3">El tratamiento de datos personales se describe en la <NuxtLink to="/privacy" class="text-sky-500 underline">Política de Privacidad</NuxtLink>. Al usar Mediart aceptas dichas prácticas.</p>
             <p class="mb-4">Adoptamos medidas razonables de seguridad, pero ningún sistema es completamente seguro.</p>
           </section>
 
@@ -103,7 +103,7 @@
             <h2 class="text-2xl font-bold mb-3">11. Contacto</h2>
             <p class="mb-2">Si tienes preguntas, comentarios o reclamos, puedes escribirnos a:</p>
             <ul class="list-disc list-inside mb-4">
-              <li>Correo: <a class="text-emerald-700 underline" href="mailto:mediart.noreply@gmail.com">mediart.noreply@gmail.com</a></li>
+              <li>Correo: <a class="text-sky-500 underline" href="mailto:mediart.noreply@gmail.com">mediart.noreply@gmail.com</a></li>
               <li>Ubicación: Valencia, Carabobo, Venezuela</li>
             </ul>
             <a href="#top" class="text-slate-500 hover:text-slate-800 text-sm">Volver al inicio</a>
@@ -113,7 +113,7 @@
           <button
             @click="scrollToTop"
             :class="[
-              'fixed bottom-6 right-6 z-50 p-3 rounded-full bg-emerald-600 text-white shadow-lg transition-all duration-300 hover:bg-emerald-700 hover:scale-110',
+              'fixed bottom-6 right-6 z-50 p-3 rounded-full bg-sky-500 text-white shadow-lg transition-all duration-300 hover:bg-sky-600 hover:scale-110',
               showBackToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
             ]"
             aria-label="Volver al inicio"
