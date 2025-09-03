@@ -125,7 +125,7 @@
             © 2025 Mediart. Todos los derechos reservados.
           </p>
           <div class="flex space-x-6 text-sm">
-            <NuxtLink to="/terminos" class="text-gray-500 hover:text-purple-600 transition-colors duration-200">
+            <NuxtLink to="/terms" class="text-gray-500 hover:text-purple-600 transition-colors duration-200">
               Términos y Condiciones
             </NuxtLink>
             <NuxtLink to="/privacidad" class="text-gray-500 hover:text-purple-600 transition-colors duration-200">
