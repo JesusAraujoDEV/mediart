@@ -266,13 +266,20 @@ const toggleAccordion = (category) => {
 };
 
 const isActive = (item) => {
-  // Comprueba si la ruta actual coincide con la ruta del elemento o es una subruta
+  // Activo si coincide exactamente, es subruta, o si estamos en /blogs (mapea a Blog)
+  if (item.path === '/blog') {
+    return (
+      route.path === '/blog' ||
+      route.path.startsWith('/blog/') ||
+      route.path.startsWith('/blogs')
+    );
+  }
   return route.path === item.path || route.path.startsWith(item.path + '/');
 };
 
 const updateAccordionState = () => {
-  accordionItems.value.forEach(category => {
-    category.isOpen = category.items.some(item => route.path === item.path || route.path.startsWith(item.path + '/'));
+  accordionItems.value.forEach((category) => {
+    category.isOpen = category.items.some((item) => isActive(item));
   });
 };
 
