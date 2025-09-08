@@ -1,4 +1,27 @@
 module.exports = {
+    Playlist: {
+      type: 'object',
+      properties: {
+        id: { type: 'integer', example: 1 },
+        name: { type: 'string', example: 'Películas Épicas' },
+        description: { type: 'string', example: 'Mis películas favoritas.' },
+        isCollaborative: { type: 'boolean', example: true },
+        thumbnailUrl: { type: 'string', example: '/uploads/playlist_pictures/imagen.jpg' },
+        createdAt: { type: 'string', format: 'date-time', example: '2025-06-25T10:00:00.000Z' },
+        updatedAt: { type: 'string', format: 'date-time', example: '2025-06-26T11:00:00.000Z' },
+        owner: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            username: { type: 'string', example: 'usuario1' }
+          }
+        },
+        items: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/PlaylistItem' }
+        }
+      }
+    },
     PlaylistItem: {
       type: 'object',
       required: ['type', 'externalSource', 'title', 'externalId'],
