@@ -54,7 +54,7 @@
             {{ playlist.name }}
           </h1>
           <p class="text-lg text-gray-300 mb-2">{{ playlist.description }}</p>
-          <p class="text-sm text-gray-400 mb-1">
+          <p class="text-sm text-gray-200 mb-1">
             Creada por: <span class="font-semibold">{{ playlist.owner?.username || 'Desconocido' }}</span>
           </p>
           <p class="text-xs text-white">

@@ -15,16 +15,16 @@
         </span>
       </p>
 
-      <p v-if="item.description" class="text-sm text-gray-400 mb-3 leading-relaxed">
+      <p v-if="item.description" class="text-sm text-white mb-3 leading-relaxed">
         {{ item.description }}
       </p>
 
-      <p v-if="item.releaseDate" class="text-sm text-gray-400 mb-1">
+      <p v-if="item.releaseDate" class="text-sm text-gray-200 mb-1">
         Fecha de Lanzamiento:
         <span class="font-medium">{{ formatDate(item.releaseDate) }}</span>
       </p>
 
-      <p v-if="item.avgRating !== null && item.avgRating !== undefined" class="text-sm text-gray-400 mb-3">
+      <p v-if="item.avgRating !== null && item.avgRating !== undefined" class="text-sm text-gray-200 mb-3">
         Valoración Promedio:
         <span class="font-medium">
           {{ parseFloat(item.avgRating.toString()).toFixed(1) }} / 10
@@ -41,7 +41,7 @@
         </svg>
       </a>
 
-      <div class="text-xs text-gray-500 mt-4 border-t border-gray-700 pt-3">
+      <div class="text-xs text-white mt-4 border-t border-gray-700 pt-3">
         <p>Creado: {{ formatDateTime(item.createdAt) }}</p>
         <p>Actualizado: {{ formatDateTime(item.updatedAt) }}</p>
       </div>
