@@ -32,14 +32,30 @@ export const useRecommendations = () => {
   const showPlaylistModal = ref(false);
   const newPlaylist = reactive<NewPlaylist>({ name: '', description: '', isCollaborative: false, items: [] });
   const playlistSaving = ref(false);
+  // Último payload enviado (seedItems, itemName, category) para permitir "regenerar" exactamente la misma petición
+  let lastPayload: { seedItems: Array<{ externalId: string | null; type: string | undefined }>; itemName: string; category: string } | null = null;
 
   /**
    * Genera recomendaciones para los tags seleccionados.
    * Usa cache en memoria para respuestas recientes para reducir latencia de render.
    */
-  const sendData = async (tags: SearchItem[]) => {
-    if (!tags || tags.length === 0) {
-      Swal.fire('Atención', 'Por favor, selecciona al menos un elemento para generar recomendaciones.', 'warning');
+  const sendData = async (tags?: SearchItem[]) => {
+  // Si se llama sin argumentos y existe lastPayload, lo reutilizamos exactamente
+    const useLastPayload = typeof tags === 'undefined' && lastPayload !== null;
+
+  console.debug('[useRecommendations] sendData called, useLastPayload=', useLastPayload, 'tagsLen=', tags ? tags.length : 0);
+
+    // Si no estamos reutilizando lastPayload, generamos effectiveTags desde los tags pasados o desde las recomendaciones actuales
+    const effectiveTags: SearchItem[] = useLastPayload
+      ? []
+      : (tags && tags.length > 0)
+        ? tags
+        : (recommendations.value && recommendations.value.length > 0)
+          ? recommendations.value.map(r => ({ title: r.title, externalId: r.externalId, type: r.type }))
+          : [];
+
+    if (!useLastPayload && (!effectiveTags || effectiveTags.length === 0)) {
+      Swal.fire('Atención', 'Por favor, selecciona al menos un elemento o genera recomendaciones primero.', 'warning');
       return;
     }
 
@@ -47,8 +63,21 @@ export const useRecommendations = () => {
     recommendationsError.value = null;
 
     try {
-      const keyParts = tags.map(t => t.externalId ?? t.title ?? '').filter(Boolean);
-      const payloadKey = `${selectedCategory.value}:${keyParts.join(',')}`;
+      let categoryToUse = selectedCategory.value;
+      let seedItemsForRequest: Array<{ externalId: string | null; type: string | undefined }> = [];
+      let itemNameForRequest = '';
+
+      if (useLastPayload && lastPayload) {
+        categoryToUse = lastPayload.category;
+        seedItemsForRequest = lastPayload.seedItems;
+        itemNameForRequest = lastPayload.itemName;
+      } else {
+        seedItemsForRequest = effectiveTags.map(t => ({ externalId: t.externalId ?? null, type: t.type }));
+        itemNameForRequest = effectiveTags.map(t => t.title).join(', ');
+      }
+
+      const keyParts = seedItemsForRequest.map(t => t.externalId ?? '').filter(Boolean);
+      const payloadKey = `${categoryToUse}:${keyParts.join(',')}`;
 
       const cached = recommendationsCache.get(payloadKey);
       if (cached && (Date.now() - cached.ts) < REC_CACHE_TTL) {
@@ -57,14 +86,16 @@ export const useRecommendations = () => {
         recommendationsLoading.value = false;
         return;
       }
-
-      const url = `${config.public.backend}/api/recommendation/${selectedCategory.value}`;
+      const url = `${config.public.backend}/api/recommendation/${categoryToUse}`;
       const token = localStorage.getItem('token');
+
+      // Guardar el payload para permitir regenerar exactamente la misma petición posteriormente
+      lastPayload = { seedItems: seedItemsForRequest.slice(), itemName: itemNameForRequest, category: categoryToUse };
 
       const resp = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ seedItems: tags.map(t => ({ externalId: t.externalId, type: t.type })), itemName: tags.map(t => t.title).join(', ') }),
+        body: JSON.stringify({ seedItems: seedItemsForRequest, itemName: itemNameForRequest }),
       });
 
       if (!resp.ok) {

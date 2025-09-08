@@ -272,8 +272,12 @@
                 <span class="max-md:hidden">Aceptar ({{ recommendations.length }} items)</span>
                 <span class="md:hidden">Aceptar ({{ recommendations.length }})</span>
               </button>
-              <button @click="sendData(selectedTags)"
-                class="bg-red-600 hover:bg-red-700 cursor-pointer text-white font-bold py-3 px-6 md:px-8 rounded-full shadow-lg transition-all duration-300 text-base md:text-lg hover:scale-105 transform"
+              <button type="button" @click="regenerate()"
+                :disabled="recommendationsLoading"
+                :class="[
+                  'py-3 px-6 md:px-8 rounded-full transition-all duration-300 text-base md:text-lg',
+                  recommendationsLoading ? 'bg-gray-500 cursor-not-allowed text-white' : 'bg-red-600 hover:bg-red-700 cursor-pointer text-white font-bold hover:scale-105 transform shadow-lg'
+                ]"
                 title="Generar nuevas recomendaciones con los mismos criterios">
                 Regenerar
               </button>
@@ -416,6 +420,12 @@ function scrollDown() {
 // Función para alternar el modo de visualización
 function toggleViewMode(mode: 'horizontal' | 'pinterest') {
   viewMode.value = mode;
+}
+
+// Wrapper local para el botón Regenerar (garantiza scope y logging)
+function regenerate() {
+  console.debug('[studio] regenerate triggered');
+  sendData();
 }
 
 // Event listener para clics fuera del dropdown
