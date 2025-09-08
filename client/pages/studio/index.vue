@@ -425,7 +425,14 @@ function toggleViewMode(mode: 'horizontal' | 'pinterest') {
 // Wrapper local para el botón Regenerar (garantiza scope y logging)
 function regenerate() {
   console.debug('[studio] regenerate triggered');
-  sendData();
+  console.debug('[studio] recommendations length:', recommendations.value.length);
+  console.debug('[studio] recommendationsLoading:', recommendationsLoading.value);
+  if (recommendations.value.length === 0) {
+    console.warn('[studio] No recommendations to regenerate from');
+    return;
+  }
+  // Usar los mismos tags seleccionados que el botón de enviar
+  sendData(selectedTags.value);
 }
 
 // Event listener para clics fuera del dropdown

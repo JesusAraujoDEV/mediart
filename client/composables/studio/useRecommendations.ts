@@ -44,6 +44,8 @@ export const useRecommendations = () => {
     const useLastPayload = typeof tags === 'undefined' && lastPayload !== null;
 
   console.debug('[useRecommendations] sendData called, useLastPayload=', useLastPayload, 'tagsLen=', tags ? tags.length : 0);
+  console.debug('[useRecommendations] lastPayload exists:', lastPayload !== null);
+  console.debug('[useRecommendations] recommendations length:', recommendations.value.length);
 
     // Si no estamos reutilizando lastPayload, generamos effectiveTags desde los tags pasados o desde las recomendaciones actuales
     const effectiveTags: SearchItem[] = useLastPayload
@@ -55,9 +57,12 @@ export const useRecommendations = () => {
           : [];
 
     if (!useLastPayload && (!effectiveTags || effectiveTags.length === 0)) {
+      console.warn('[useRecommendations] No effectiveTags and not using lastPayload, showing alert');
       Swal.fire('Atención', 'Por favor, selecciona al menos un elemento o genera recomendaciones primero.', 'warning');
       return;
     }
+
+    console.debug('[useRecommendations] Proceeding with request, effectiveTags length:', effectiveTags.length, 'useLastPayload:', useLastPayload);
 
     recommendationsLoading.value = true;
     recommendationsError.value = null;
@@ -89,14 +94,22 @@ export const useRecommendations = () => {
       const url = `${config.public.backend}/api/recommendation/${categoryToUse}`;
       const token = localStorage.getItem('token');
 
+      console.debug('[useRecommendations] Token present:', !!token);
+
       // Guardar el payload para permitir regenerar exactamente la misma petición posteriormente
       lastPayload = { seedItems: seedItemsForRequest.slice(), itemName: itemNameForRequest, category: categoryToUse };
+
+      console.debug('[useRecommendations] lastPayload set:', lastPayload);
+      console.debug('[useRecommendations] Fetching URL:', url);
+      console.debug('[useRecommendations] Request body:', { seedItems: seedItemsForRequest, itemName: itemNameForRequest });
 
       const resp = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ seedItems: seedItemsForRequest, itemName: itemNameForRequest }),
       });
+
+      console.debug('[useRecommendations] Response status:', resp.status, resp.statusText);
 
       if (!resp.ok) {
         const errBody = await resp.json().catch(() => ({}));

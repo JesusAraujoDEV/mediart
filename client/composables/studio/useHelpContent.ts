@@ -187,7 +187,7 @@ const contentData = {
       listItem4: "Based on albums.",
       list5Strong: "Movies",
       listItem5: "For movie-related playlists.",
-      list6Strong: "Tvshows",
+      list6Strong: "TV Shows",
       listItem6: "For TV show content.",
       list7Strong: "Books",
       listItem7: "Generates playlists inspired by books.",
@@ -276,28 +276,28 @@ const contentData = {
     step1: {
       heading: "1. Expresa Tus Gustos",
       paragraph1: "En la parte inferior de la pantalla, encontrarás un",
-      strong1: "campo de texto",
+      strong1: "campo de texto. ",
       paragraph2:
         "Aquí es donde comenzarás a expresar tus preferencias. Puedes escribir nombres de",
       strong2:
-        "canciones, artistas, álbumes, películas, series de televisión, libros o videojuegos",
+        "canciones, artistas, álbumes, películas, series de televisión, libros o videojuegos ",
       paragraph3: "A medida que escribes, el sistema te ofrecerá",
-      strong3: "sugerencias",
+      strong3: "sugerencias ",
       paragraph4: "para ayudarte a seleccionar tus intereses.",
     },
     step2: {
       heading: "2. Selecciona Tus Etiquetas (Tags)",
       paragraph1: "Una vez que las sugerencias aparezcan, puedes",
-      strong1: "seleccionar la cantidad de gustos (etiquetas) que desees",
+      strong1: "seleccionar la cantidad de gustos (etiquetas) que desees ",
       paragraph2:
         'haciendo clic en ellas. Cada selección se añadirá como una "etiqueta" visible en el mismo campo. Si cambias de opinión, puedes',
-      strong2: "eliminar una etiqueta",
+      strong2: "eliminar una etiqueta ",
       paragraph3: "haciendo clic en el ícono '✕' junto a ella.",
     },
     step3: {
       heading: "3. Elige la Categoría",
       paragraph1: "A la derecha del campo de texto, verás un",
-      strong1: "menú desplegable (select)",
+      strong1: "menú desplegable (select) ",
       paragraph2:
         "Este te permite especificar la categoría de contenido que deseas que el sistema considere al generar tu playlist. Las opciones incluyen:",
       list1Strong: "Mix (por defecto)",
@@ -324,9 +324,9 @@ const contentData = {
       heading: "4. Genera Tu Playlist",
       paragraph1:
         "Una vez que hayas seleccionado tus gustos y la categoría, haz clic en el",
-      strong1: "botón de enviar (el ícono de avión de papel)",
+      strong1: "botón de enviar (el ícono de avión de papel) ",
       paragraph2: "MediartStudio procesará tu solicitud y",
-      strong2: "generará una playlist",
+      strong2: "generará una playlist ",
       paragraph3: "basada en tus preferencias.",
     },
     step5: {
