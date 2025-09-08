@@ -154,27 +154,27 @@ const contentData = {
     step1: {
       heading: "1. Express Your Tastes",
       paragraph1: "At the bottom of the screen, you'll find a",
-      strong1: "text input field",
+      strong1: "text input field ",
       paragraph2:
         "This is where you'll start expressing your preferences. You can type in names of",
-      strong2: "songs, artists, albums, movies, TV shows, books, or video games",
+      strong2: "songs, artists, albums, movies, TV shows, books, or video games ",
       paragraph3: "As you type, the system will offer",
-      strong3: "suggestions",
+      strong3: "suggestions ",
       paragraph4: "to help you select your interests.",
     },
     step2: {
       heading: "2. Select Your Tags",
       paragraph1: "Once suggestions appear, you can",
-      strong1: "select as many tastes (tags) as you wish",
+      strong1: "select as many tastes (tags) as you wish ",
       paragraph2:
         'by clicking on them. Each selection will be added as a visible "tag" in the same field. If you change your mind, you can',
-      strong2: "remove a tag",
+      strong2: "remove a tag ",
       paragraph3: "by clicking the '✕' icon next to it.",
     },
     step3: {
       heading: "3. Choose the Category",
       paragraph1: "To the right of the text field, you'll see a",
-      strong1: "dropdown menu (select)",
+      strong1: "dropdown menu (select) ",
       paragraph2:
         "This allows you to specify the content category you want the system to consider when generating your playlist. Options include:",
       list1Strong: "Mix (default)",
@@ -200,9 +200,9 @@ const contentData = {
       heading: "4. Generate Your Playlist",
       paragraph1:
         "Once you've selected your tastes and the category, click the",
-      strong1: "send button (the paper airplane icon)",
+      strong1: "send button (the paper airplane icon) ",
       paragraph2: "MediartStudio will process your request and",
-      strong2: "generate a playlist",
+      strong2: "generate a playlist ",
       paragraph3: "based on your preferences.",
     },
     step5: {

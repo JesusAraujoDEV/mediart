@@ -43,9 +43,12 @@ export const useRecommendations = () => {
   // Si se llama sin argumentos y existe lastPayload, lo reutilizamos exactamente
     const useLastPayload = typeof tags === 'undefined' && lastPayload !== null;
 
-  console.debug('[useRecommendations] sendData called, useLastPayload=', useLastPayload, 'tagsLen=', tags ? tags.length : 0);
-  console.debug('[useRecommendations] lastPayload exists:', lastPayload !== null);
-  console.debug('[useRecommendations] recommendations length:', recommendations.value.length);
+  console.info('[useRecommendations] sendData called, useLastPayload=', useLastPayload, 'tagsLen=', tags ? tags.length : 0);
+  console.info('[useRecommendations] lastPayload exists:', lastPayload !== null);
+  if (lastPayload) {
+    console.info('[useRecommendations] lastPayload content:', lastPayload);
+  }
+  console.info('[useRecommendations] recommendations length:', recommendations.value.length);
 
     // Si no estamos reutilizando lastPayload, generamos effectiveTags desde los tags pasados o desde las recomendaciones actuales
     const effectiveTags: SearchItem[] = useLastPayload
@@ -56,13 +59,20 @@ export const useRecommendations = () => {
           ? recommendations.value.map(r => ({ title: r.title, externalId: r.externalId, type: r.type }))
           : [];
 
+  console.info('[useRecommendations] effectiveTags logic:');
+  console.info('  - useLastPayload:', useLastPayload);
+  console.info('  - tags provided:', !!tags);
+  console.info('  - tags length:', tags ? tags.length : 0);
+  console.info('  - recommendations available:', recommendations.value.length > 0);
+  console.info('  - effectiveTags length:', effectiveTags.length);
+
     if (!useLastPayload && (!effectiveTags || effectiveTags.length === 0)) {
       console.warn('[useRecommendations] No effectiveTags and not using lastPayload, showing alert');
       Swal.fire('Atención', 'Por favor, selecciona al menos un elemento o genera recomendaciones primero.', 'warning');
       return;
     }
 
-    console.debug('[useRecommendations] Proceeding with request, effectiveTags length:', effectiveTags.length, 'useLastPayload:', useLastPayload);
+  console.info('[useRecommendations] Proceeding with request, effectiveTags length:', effectiveTags.length, 'useLastPayload:', useLastPayload);
 
     recommendationsLoading.value = true;
     recommendationsError.value = null;
@@ -76,53 +86,76 @@ export const useRecommendations = () => {
         categoryToUse = lastPayload.category;
         seedItemsForRequest = lastPayload.seedItems;
         itemNameForRequest = lastPayload.itemName;
+  console.info('[useRecommendations] Using lastPayload:');
+  console.info('  - categoryToUse:', categoryToUse);
+  console.info('  - seedItemsForRequest:', seedItemsForRequest);
+  console.info('  - itemNameForRequest:', itemNameForRequest);
       } else {
         seedItemsForRequest = effectiveTags.map(t => ({ externalId: t.externalId ?? null, type: t.type }));
         itemNameForRequest = effectiveTags.map(t => t.title).join(', ');
+  console.info('[useRecommendations] Generated from effectiveTags:');
+  console.info('  - seedItemsForRequest:', seedItemsForRequest);
+  console.info('  - itemNameForRequest:', itemNameForRequest);
       }
 
-      const keyParts = seedItemsForRequest.map(t => t.externalId ?? '').filter(Boolean);
-      const payloadKey = `${categoryToUse}:${keyParts.join(',')}`;
+  // Usar itemName como clave de cache (más consistente con backend que recibe solo itemName)
+  const payloadKey = `${categoryToUse}:${(itemNameForRequest || '').toLowerCase().trim()}`;
 
       const cached = recommendationsCache.get(payloadKey);
       if (cached && (Date.now() - cached.ts) < REC_CACHE_TTL) {
+  console.info('[useRecommendations] Using cached data, cache age:', (Date.now() - cached.ts) / 1000, 'seconds');
         // devolver copia para evitar enlaces mutables
         recommendations.value = cached.data.slice();
         recommendationsLoading.value = false;
         return;
       }
-      const url = `${config.public.backend}/api/recommendation/${categoryToUse}`;
+  console.info('[useRecommendations] Cache miss or expired, making API request');
+  const url = `${config.public.backend}/api/recommendation/${categoryToUse}`;
+  console.info('[useRecommendations] Backend URL:', config.public.backend);
+  console.info('[useRecommendations] Full API URL:', url);
       const token = localStorage.getItem('token');
 
-      console.debug('[useRecommendations] Token present:', !!token);
+  console.info('[useRecommendations] Token present:', !!token);
+      if (!token) {
+        console.warn('[useRecommendations] No authentication token found');
+      }
 
       // Guardar el payload para permitir regenerar exactamente la misma petición posteriormente
       lastPayload = { seedItems: seedItemsForRequest.slice(), itemName: itemNameForRequest, category: categoryToUse };
 
-      console.debug('[useRecommendations] lastPayload set:', lastPayload);
-      console.debug('[useRecommendations] Fetching URL:', url);
-      console.debug('[useRecommendations] Request body:', { seedItems: seedItemsForRequest, itemName: itemNameForRequest });
+  console.info('[useRecommendations] lastPayload set:', lastPayload);
+  console.info('[useRecommendations] Fetching URL:', url);
+  console.info('[useRecommendations] Request body:', { itemName: itemNameForRequest });
 
       const resp = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ seedItems: seedItemsForRequest, itemName: itemNameForRequest }),
+        body: JSON.stringify({ itemName: itemNameForRequest }),
       });
 
-      console.debug('[useRecommendations] Response status:', resp.status, resp.statusText);
+  console.info('[useRecommendations] Response status:', resp.status, resp.statusText);
 
       if (!resp.ok) {
         const errBody = await resp.json().catch(() => ({}));
-        throw new Error(errBody.message || 'Error al generar recomendaciones.');
+        console.error('[useRecommendations] API Error:', errBody);
+        throw new Error(errBody.message || `Error ${resp.status}: ${resp.statusText}`);
       }
 
       const payload = await resp.json().catch(() => ({}));
-      const raw: any[] = payload[selectedCategory.value] || payload[`${selectedCategory.value}s`] || [];
+  console.info('[useRecommendations] API Response payload:', payload);
+  console.info('[useRecommendations] Payload keys:', Object.keys(payload));
+  console.info('[useRecommendations] Payload type:', typeof payload);
+
+  const raw: any[] = payload[categoryToUse] || payload[`${categoryToUse}s`] || [];
+  console.info('[useRecommendations] Raw items found:', raw.length, 'for category:', categoryToUse);
+  console.info('  - payload keys:', Object.keys(payload));
+  console.info('  - raw items sample:', raw.slice(0, 3));
+  console.info('  - first raw item keys:', raw.length > 0 ? Object.keys(raw[0]) : 'no items');
 
       // Mapear sólo los campos que usamos en la UI para reducir trabajo del renderer
       const mapped: RecommendationItem[] = (raw || []).map((item: any) => ({
         title: item.title || item.name || '',
-        type: item.type || selectedCategory.value,
+        type: item.type || categoryToUse,
         coverUrl: item.coverUrl || item.image || item.poster_path || null,
         externalSource: item.externalSource || item.source || '',
         externalId: item.externalId || item.id || item._id || null,
@@ -132,12 +165,34 @@ export const useRecommendations = () => {
         avgRating: item.avgRating ?? item.vote_average ?? item.rating ?? 0,
       }));
 
+  console.info('[useRecommendations] Mapped items:', mapped.length);
+  console.info('  - mapped sample:', mapped.slice(0, 2));
+
       recommendations.value = mapped;
-      try { recommendationsCache.set(payloadKey, { ts: Date.now(), data: mapped.slice() }); } catch (e) { /* ignore cache errors */ }
+      console.info('[useRecommendations] Recommendations updated with', mapped.length, 'items');
+      console.info('[useRecommendations] Current recommendations.value:', recommendations.value);
+
+      // Si no hay resultados, informar al UI para mostrar la opción de reintentar
+      if (!mapped || mapped.length === 0) {
+        console.info('[useRecommendations] No recommendations returned by API for this request');
+        recommendationsError.value = 'No se encontraron recomendaciones para los criterios seleccionados.';
+      }
+
+      try { 
+        recommendationsCache.set(payloadKey, { ts: Date.now(), data: mapped.slice() });
+  console.info('[useRecommendations] Cached data for key:', payloadKey);
+      } catch (e) { 
+        console.warn('[useRecommendations] Cache error:', e);
+      }
     } catch (error: any) {
-      console.error('useRecommendations: sendData error', error);
+  console.error('[useRecommendations] Error occurred:', error);
+  console.error('[useRecommendations] Error message:', error?.message);
+  console.error('[useRecommendations] Error stack:', error?.stack);
+  console.error('[useRecommendations] Error type:', error?.constructor?.name);
+  console.error('[useRecommendations] Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
       recommendationsError.value = error?.message || 'Ocurrió un error inesperado.';
     } finally {
+  console.info('[useRecommendations] Request finished, loading set to false');
       recommendationsLoading.value = false;
     }
   };

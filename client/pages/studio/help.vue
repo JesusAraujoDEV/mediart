@@ -317,7 +317,7 @@
         <div class="space-y-4">
           <div v-for="faq in faqs" :key="faq.id"
             class="bg-gradient-to-r from-gray-700/50 to-gray-600/50 rounded-lg border border-gray-600/50 faq-item">
-            <button @click="faq.open = !faq.open"
+            <button @click="toggleFaq(faq.id)"
               class="w-full p-6 text-left flex items-center justify-between hover:bg-gray-600/30 transition-colors duration-300 faq-button">
               <span class="font-semibold text-lg">{{ faq.question }}</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"
@@ -425,35 +425,6 @@ definePageMeta({
 // Estado para navegación por tabs
 const activeTab = ref('getting-started');
 
-// Definición de tabs
-const tabs = computed(() => [
-  {
-    id: 'getting-started',
-    title: currentContent.value.tabs.gettingStarted,
-    icon: 'StarIcon'
-  },
-  {
-    id: 'new-features',
-    title: currentContent.value.tabs.newFeatures,
-    icon: 'SparklesIcon'
-  },
-  {
-    id: 'advanced-tips',
-    title: currentContent.value.tabs.advancedTips,
-    icon: 'LightBulbIcon'
-  },
-  {
-    id: 'faq',
-    title: currentContent.value.tabs.faq,
-    icon: 'QuestionMarkCircleIcon'
-  },
-  {
-    id: 'contact',
-    title: currentContent.value.tabs.contact,
-    icon: 'MailIcon'
-  }
-]);
-
 // Componentes de íconos inline
 const StarIcon = () => h('svg', {
   xmlns: 'http://www.w3.org/2000/svg',
@@ -505,43 +476,80 @@ const MailIcon = () => h('svg', {
   h('path', { d: 'M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z' })
 ]);
 
+// Definición de tabs
+const tabs = computed(() => [
+  {
+    id: 'getting-started',
+    title: currentContent.value.tabs.gettingStarted,
+    icon: StarIcon
+  },
+  {
+    id: 'new-features',
+    title: currentContent.value.tabs.newFeatures,
+    icon: SparklesIcon
+  },
+  {
+    id: 'advanced-tips',
+    title: currentContent.value.tabs.advancedTips,
+    icon: LightBulbIcon
+  },
+  {
+    id: 'faq',
+    title: currentContent.value.tabs.faq,
+    icon: QuestionMarkCircleIcon
+  },
+  {
+    id: 'contact',
+    title: currentContent.value.tabs.contact,
+    icon: MailIcon
+  }
+]);
+
+// Estado para controlar qué FAQ están abiertas
+const openFaqs = ref<Record<number, boolean>>({});
+
+// Función para alternar el estado de una FAQ
+const toggleFaq = (faqId: number) => {
+  openFaqs.value[faqId] = !openFaqs.value[faqId];
+};
+
 // FAQ data
 const faqs = computed(() => [
   {
     id: 1,
     question: currentContent.value.faq.question1,
     answer: currentContent.value.faq.answer1,
-    open: false
+    open: openFaqs.value[1] || false
   },
   {
     id: 2,
     question: currentContent.value.faq.question2,
     answer: currentContent.value.faq.answer2,
-    open: false
+    open: openFaqs.value[2] || false
   },
   {
     id: 3,
     question: currentContent.value.faq.question3,
     answer: currentContent.value.faq.answer3,
-    open: false
+    open: openFaqs.value[3] || false
   },
   {
     id: 4,
     question: currentContent.value.faq.question4,
     answer: currentContent.value.faq.answer4,
-    open: false
+    open: openFaqs.value[4] || false
   },
   {
     id: 5,
     question: currentContent.value.faq.question5,
     answer: currentContent.value.faq.answer5,
-    open: false
+    open: openFaqs.value[5] || false
   },
   {
     id: 6,
     question: currentContent.value.faq.question6,
     answer: currentContent.value.faq.answer6,
-    open: false
+    open: openFaqs.value[6] || false
   }
 ]);
 

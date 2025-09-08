@@ -142,13 +142,17 @@
         </div>
         <div v-else-if="recommendationsError" class="text-red-400 text-center flex flex-col items-center">
           <p class="text-xl mb-4">{{ recommendationsError }}</p>
-          <button @click="sendData(selectedTags)"
+          <button @click="retryGenerateRecommendations"
             class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg cursor-pointer"
             title="Reintentar generar recomendaciones">
             Reintentar
           </button>
         </div>
         <div v-else-if="recommendations.length > 0" class="w-full h-full flex flex-col items-center relative pb-20">
+          <!-- Debug info (temporal) -->
+          <div class="text-xs text-gray-500 mb-2">
+            Debug: {{ recommendations.length }} recomendaciones, loading: {{ recommendationsLoading }}, error: {{ recommendationsError }}
+          </div>
           <div class="flex items-center justify-between w-full mb-6">
             <h3 class="text-3xl font-extrabold">Tus Recomendaciones</h3>
             <!-- Botones de alternancia de modo -->
@@ -296,6 +300,11 @@
             </p>
           </div>
           <div class="flex flex-col sm:flex-row gap-4 items-center">
+            <button @click="testUI"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg cursor-pointer"
+              title="Probar UI con datos simulados">
+              Probar UI
+            </button>
             <button @click="startTutorial"
               class="glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center gap-2 text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm py-3 px-6 rounded-full font-semibold cursor-pointer"
               title="Inicia un tutorial interactivo para aprender a usar Mediart Studio">
@@ -422,17 +431,77 @@ function toggleViewMode(mode: 'horizontal' | 'pinterest') {
   viewMode.value = mode;
 }
 
+// Función para probar la UI con datos simulados
+function testUI() {
+  console.info('[studio] Testing UI with mock data');
+  recommendations.value = [
+    {
+      title: 'Test Movie',
+      type: 'movie',
+      coverUrl: undefined,
+      externalSource: 'tmdb',
+      externalId: '123',
+      externalUrl: 'https://example.com',
+      description: 'This is a test movie',
+      releaseDate: '2023-01-01',
+      avgRating: 8.5
+    },
+    {
+      title: 'Test Song',
+      type: 'song',
+      coverUrl: undefined,
+      externalSource: 'spotify',
+      externalId: '456',
+      externalUrl: 'https://example.com',
+      description: 'This is a test song',
+      releaseDate: '2023-01-01',
+      avgRating: 9.0
+    }
+  ];
+  console.info('[studio] Mock recommendations set:', recommendations.value.length);
+}
+
+// Función para reintentar generar recomendaciones
+function retryGenerateRecommendations() {
+  console.info('[studio] retry generate recommendations triggered');
+  console.info('[studio] current state:', {
+    recommendationsLength: recommendations.value.length,
+    selectedTagsLength: selectedTags.value.length,
+    recommendationsLoading: recommendationsLoading.value,
+    recommendationsError: recommendationsError.value
+  });
+
+  // Si hay tags seleccionados, usarlos; si no, usar las recomendaciones existentes
+  const tagsToUse = selectedTags.value.length > 0 ? selectedTags.value : recommendations.value;
+  console.info('[studio] Retry using tags from:', selectedTags.value.length > 0 ? 'selectedTags' : 'recommendations');
+  console.info('[studio] tagsToUse length:', tagsToUse.length);
+  console.info('[studio] tagsToUse sample:', tagsToUse.slice(0, 2));
+
+  sendData(tagsToUse);
+}
+
 // Wrapper local para el botón Regenerar (garantiza scope y logging)
 function regenerate() {
-  console.debug('[studio] regenerate triggered');
-  console.debug('[studio] recommendations length:', recommendations.value.length);
-  console.debug('[studio] recommendationsLoading:', recommendationsLoading.value);
+  console.info('[studio] regenerate triggered');
+  console.info('[studio] current state:', {
+    recommendationsLength: recommendations.value.length,
+    selectedTagsLength: selectedTags.value.length,
+    recommendationsLoading: recommendationsLoading.value,
+    recommendationsError: recommendationsError.value
+  });
+
   if (recommendations.value.length === 0) {
     console.warn('[studio] No recommendations to regenerate from');
     return;
   }
-  // Usar los mismos tags seleccionados que el botón de enviar
-  sendData(selectedTags.value);
+
+  // Si hay tags seleccionados, usarlos; si no, usar las recomendaciones existentes
+  const tagsToUse = selectedTags.value.length > 0 ? selectedTags.value : recommendations.value;
+  console.info('[studio] Using tags from:', selectedTags.value.length > 0 ? 'selectedTags' : 'recommendations');
+  console.info('[studio] tagsToUse length:', tagsToUse.length);
+  console.info('[studio] tagsToUse sample:', tagsToUse.slice(0, 2));
+
+  sendData(tagsToUse);
 }
 
 // Event listener para clics fuera del dropdown
