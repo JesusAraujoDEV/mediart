@@ -19,7 +19,7 @@
               <option value="book">Libros</option>
               <option value="videogame">Videojuegos</option>
             </select>
-            <button type="button" aria-label="Abrir selector" class="select-arrow absolute right-3 top-1/2 -translate-y-1/2 text-white/90"
+            <button type="button" aria-label="Abrir selector" class="select-arrow absolute right-3 top-1/2 -translate-y-1/2 text-white/90 cursor-pointer"
               @click="focusSearchType"
               :aria-expanded="searchTypeOpen"
               title="Haz clic para abrir el selector de tipo de búsqueda">
@@ -105,7 +105,7 @@
             <option value="books">Tipo de lista: Libros</option>
             <option value="videogames">Tipo de lista: Videojuegos</option>
           </select>
-          <button type="button" aria-label="Abrir selector" class="select-arrow absolute right-3 top-1/2 -translate-y-1/2 text-white/90"
+          <button type="button" aria-label="Abrir selector" class="select-arrow absolute right-3 top-1/2 -translate-y-1/2 text-white/90 cursor-pointer"
             @click="focusCategory"
             :aria-expanded="categoryOpen"
             title="Haz clic para abrir el selector de tipo de lista">
@@ -129,7 +129,7 @@
 
     <div class="flex-grow flex w-full max-w-6xl items-center justify-center p-4">
       <div data-tutorial="recommendations-area"
-        class="w-full h-full glassEffect max-h-[80vh] bg-gray-800/50 rounded-lg p-6 flex flex-col items-center justify-center text-white text-xl shadow-2xl overflow-y-auto relative custom-main-scroll">
+        class="w-full h-full glassEffect max-h-[80vh] bg-gray-800/50 rounded-lg p-6 flex flex-col items-center justify-center text-white text-xl shadow-2xl overflow-hidden relative custom-main-scroll">
         <div v-if="recommendationsLoading" class="flex flex-col items-center text-center">
           <p class="text-xl mb-4 text-gray-300">Generando recomendaciones...</p>
           <svg class="animate-spin h-10 w-10 text-purple-400 mt-4" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -143,61 +143,141 @@
         <div v-else-if="recommendationsError" class="text-red-400 text-center flex flex-col items-center">
           <p class="text-xl mb-4">{{ recommendationsError }}</p>
           <button @click="sendData(selectedTags)"
-            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg"
+            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg cursor-pointer"
             title="Reintentar generar recomendaciones">
             Reintentar
           </button>
         </div>
-        <div v-else-if="recommendations.length > 0" class="w-full h-full flex flex-col items-center">
-          <h3 class="text-3xl font-extrabold mb-6">Tus Recomendaciones</h3>
-          <div class="grid grid-cols-1 gap-6 w-full flex-grow pb-4 px-2">
-            <div v-for="(item, index) in recommendations" :key="item.externalId || item.title"
-              class="bg-gray-700/60 rounded-xl p-4 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-lg transform transition-transform duration-300 hover:scale-105 hover:bg-gray-600/70 border border-gray-600 relative group">
-              <button @click="removeRecommendation(index)"
-                class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 z-10"
-                title="Eliminar esta recomendación de la lista">
-                <Icon name="material-symbols:close" size="1.2em" />
+        <div v-else-if="recommendations.length > 0" class="w-full h-full flex flex-col items-center relative pb-20">
+          <div class="flex items-center justify-between w-full mb-6">
+            <h3 class="text-3xl font-extrabold">Tus Recomendaciones</h3>
+            <!-- Botones de alternancia de modo -->
+            <div class="flex gap-2">
+              <button @click="toggleViewMode('horizontal')"
+                :class="[
+                  'p-2 rounded-lg transition-all duration-300 cursor-pointer',
+                  viewMode === 'horizontal'
+                    ? 'bg-purple-600 text-white shadow-lg'
+                    : 'bg-gray-700/60 text-gray-300 hover:bg-gray-600/70'
+                ]"
+                title="Vista horizontal (modo actual)">
+                <Icon name="material-symbols:view-list" size="1.5em" />
               </button>
+              <button @click="toggleViewMode('pinterest')"
+                :class="[
+                  'p-2 rounded-lg transition-all duration-300 cursor-pointer',
+                  viewMode === 'pinterest'
+                    ? 'bg-purple-600 text-white shadow-lg'
+                    : 'bg-gray-700/60 text-gray-300 hover:bg-gray-600/70'
+                ]"
+                title="Vista Pinterest (cards verticales)">
+                <Icon name="material-symbols:grid-view" size="1.5em" />
+              </button>
+            </div>
+          </div>
+          <div ref="recommendationsScrollRef" class="w-full flex-grow overflow-y-auto px-2 custom-main-scroll" @scroll="handleScroll">
+            <div :class="[
+              'pb-4 transition-all duration-500',
+              viewMode === 'horizontal' ? 'grid grid-cols-1 gap-6' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+            ]">
+              <div v-for="(item, index) in recommendations" :key="item.externalId || item.title"
+                :class="[
+                  'relative group transform transition-all duration-300 hover:scale-105 border border-gray-600',
+                  viewMode === 'horizontal'
+                    ? 'bg-gray-700/60 rounded-xl p-4 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-lg hover:bg-gray-600/70'
+                    : 'bg-gray-700/60 rounded-xl p-3 flex flex-col text-center shadow-lg hover:bg-gray-600/70 hover:shadow-xl'
+                ]">
+              <button @click="removeRecommendation(index)"
+                :class="[
+                  'absolute bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl z-10 cursor-pointer hover:scale-110 border-2 border-red-400/50 hover:border-red-300/70',
+                  viewMode === 'horizontal' ? 'top-2 right-2 w-10 h-10' : 'top-1 right-1 w-8 h-8'
+                ]"
+                title="Eliminar esta recomendación de la lista">
+                <Icon :size="viewMode === 'horizontal' ? '1.5em' : '1.2em'" name="material-symbols:close" />
+              </button>
+                <img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title || 'Cover'" loading="lazy" decoding="async"
+                  :class="[
+                    'object-cover rounded-lg flex-shrink-0 shadow-md border border-gray-500',
+                    viewMode === 'horizontal' ? 'w-32 h-32 mb-4 sm:mb-0 sm:mr-6' : 'w-full h-48 mb-3'
+                  ]" />
+                <div v-else
+                  :class="[
+                    'bg-gray-600 rounded-lg flex-shrink-0 flex items-center justify-center text-gray-400 text-sm border border-gray-500',
+                    viewMode === 'horizontal' ? 'w-32 h-32 mb-4 sm:mb-0 sm:mr-6' : 'w-full h-48 mb-3'
+                  ]">
+                  Sin portada
+                </div>
 
-              <img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title || 'Cover'" loading="lazy" decoding="async"
-                class="w-32 h-32 object-cover rounded-lg mb-4 sm:mb-0 sm:mr-4 flex-shrink-0 shadow-md border border-gray-500" />
-              <div v-else
-                class="w-32 h-32 bg-gray-600 rounded-lg mb-4 sm:mb-0 sm:mr-4 flex-shrink-0 flex items-center justify-center text-gray-400 text-sm border border-gray-500">
-                Sin portada
-              </div>
-
-              <div class="flex-grow flex flex-col justify-center items-center sm:items-start">
-                <h4 class="font-bold text-lg text-white mb-1">
-                  {{ item.title }}
-                </h4>
-                <p class="text-sm text-gray-300 capitalize mb-1">
-                  {{ item.type }}
-                  <span class="opacity-70">({{ item.externalSource }})</span>
-                </p>
-                <p v-if="item.releaseDate" class="text-xs text-gray-400 mb-1">
-                  Lanzamiento: {{ new Date(item.releaseDate).getFullYear() }}
-                </p>
-                <p v-if="item.avgRating" class="text-xs text-gray-400 mb-2">
-                  Valoración: {{ parseFloat(item.avgRating as string).toFixed(1) }} / 10
-                </p>
-                <a v-if="item.externalUrl" :href="item.externalUrl" target="_blank" rel="noopener noreferrer"
-                  class="text-blue-400 hover:underline text-sm font-semibold">
-                  Ver más
-                </a>
+                <div :class="[
+                  'flex flex-col',
+                  viewMode === 'horizontal' ? 'flex-grow justify-center items-center sm:items-start' : 'flex-grow'
+                ]">
+                  <h4 :class="[
+                    'font-bold text-white mb-1 line-clamp-2',
+                    viewMode === 'horizontal' ? 'text-lg' : 'text-sm'
+                  ]">
+                    {{ item.title }}
+                  </h4>
+                  <p :class="[
+                    'text-gray-300 capitalize mb-1',
+                    viewMode === 'horizontal' ? 'text-sm' : 'text-xs'
+                  ]">
+                    {{ item.type }}
+                    <span class="opacity-70">({{ item.externalSource }})</span>
+                  </p>
+                  <p v-if="item.releaseDate" :class="[
+                    'text-gray-400 mb-1',
+                    viewMode === 'horizontal' ? 'text-xs' : 'text-xs'
+                  ]">
+                    Lanzamiento: {{ new Date(item.releaseDate).getFullYear() }}
+                  </p>
+                  <p v-if="item.avgRating" :class="[
+                    'text-gray-400 mb-2',
+                    viewMode === 'horizontal' ? 'text-xs' : 'text-xs'
+                  ]">
+                    Valoración: {{ parseFloat(item.avgRating as string).toFixed(1) }} / 10
+                  </p>
+                  <a v-if="item.externalUrl" :href="item.externalUrl" target="_blank" rel="noopener noreferrer"
+                    :class="[
+                      'hover:underline font-semibold',
+                      viewMode === 'horizontal' ? 'text-blue-400 text-sm' : 'text-blue-400 text-xs'
+                    ]">
+                    Ver más
+                  </a>
+                </div>
               </div>
             </div>
           </div>
-          <div data-tutorial="action-buttons" class="flex max-md:flex-col justify-center gap-6 mt-8 pb-4">
-            <button @click="showPlaylistModal = true" :disabled="recommendations.length === 0"
-              class="bg-green-600 cursor-pointer hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Crear una nueva playlist con estas recomendaciones">
-              Aceptar ({{ recommendations.length }} items)
-            </button>
-            <button @click="sendData(selectedTags)"
-              class="bg-red-600 hover:bg-red-700 cursor-pointer text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg"
-              title="Generar nuevas recomendaciones con los mismos criterios">
-              Regenerar
-            </button>
+
+          <!-- Flecha de scroll -->
+          <Transition name="fade-bounce">
+            <div v-if="showScrollArrow"
+              class="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-20 cursor-pointer animate-bounce"
+              @click="scrollDown"
+              title="Desplázate hacia abajo para ver más recomendaciones">
+              <div class="bg-purple-600/90 backdrop-blur-sm rounded-full p-3 shadow-lg border border-purple-400/50 hover:bg-purple-500/90 transition-all duration-300 hover:scale-110">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" class="text-white">
+                  <path d="M7 10l5 5 5-5H7z"/>
+                </svg>
+              </div>
+            </div>
+          </Transition>
+
+          <!-- Botones flotantes -->
+          <div class="absolute bottom-0 left-0 right-0 floating-action-buttons p-4 shadow-2xl rounded-b-lg z-10">
+            <div data-tutorial="action-buttons" class="flex max-md:flex-col max-md:gap-4 justify-center gap-6">
+              <button @click="showPlaylistModal = true" :disabled="recommendations.length === 0"
+                class="bg-green-600 cursor-pointer hover:bg-green-700 text-white font-bold py-3 px-6 md:px-8 rounded-full shadow-lg transition-all duration-300 text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transform"
+                title="Crear una nueva playlist con estas recomendaciones">
+                <span class="max-md:hidden">Aceptar ({{ recommendations.length }} items)</span>
+                <span class="md:hidden">Aceptar ({{ recommendations.length }})</span>
+              </button>
+              <button @click="sendData(selectedTags)"
+                class="bg-red-600 hover:bg-red-700 cursor-pointer text-white font-bold py-3 px-6 md:px-8 rounded-full shadow-lg transition-all duration-300 text-base md:text-lg hover:scale-105 transform"
+                title="Generar nuevas recomendaciones con los mismos criterios">
+                Regenerar
+              </button>
+            </div>
           </div>
         </div>
         <div v-else class="text-center text-gray-400 text-2xl flex flex-col items-center">
@@ -213,7 +293,7 @@
           </div>
           <div class="flex flex-col sm:flex-row gap-4 items-center">
             <button @click="startTutorial"
-              class="glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center gap-2 text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm py-3 px-6 rounded-full font-semibold"
+              class="glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center gap-2 text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm py-3 px-6 rounded-full font-semibold cursor-pointer"
               title="Inicia un tutorial interactivo para aprender a usar Mediart Studio">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
@@ -232,7 +312,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch, nextTick } from "vue";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 import PlaylistModal from "~/components/ui/PlaylistModal.vue";
 import { useSuggestions } from "~/composables/studio/useSuggestions";
@@ -280,13 +360,27 @@ const {
 // Composable para el tutorial interactivo
 const { startTutorial } = useStudioTutorial();
 
+// Watcher para actualizar la flecha de scroll cuando cambian las recomendaciones
+watch(() => recommendations.value, () => {
+  nextTick(() => {
+    handleScroll();
+  });
+}, { immediate: true });
+
 const searchInput = ref<HTMLInputElement | null>(null);
 
 // Refs y estados para selects interactivos
 const searchTypeRef = ref<HTMLSelectElement | null>(null);
 const categoryRef = ref<HTMLSelectElement | null>(null);
+const recommendationsScrollRef = ref<HTMLDivElement | null>(null);
+
+// Estado para la flecha de scroll
+const showScrollArrow = ref(false);
 const searchTypeOpen = ref<boolean>(false);
 const categoryOpen = ref<boolean>(false);
+
+// Estado para el modo de visualización
+const viewMode = ref<'horizontal' | 'pinterest'>('horizontal');
 
 function focusSearchType() {
   if (searchTypeRef.value) searchTypeRef.value.focus();
@@ -301,6 +395,29 @@ function handleSearchTypeChange() {
   onChangeSearchType();
 }
 
+// Función para manejar el scroll en recomendaciones
+function handleScroll() {
+  if (recommendationsScrollRef.value) {
+    const element = recommendationsScrollRef.value;
+    const isScrollable = element.scrollHeight > element.clientHeight;
+    const isAtBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - 10;
+
+    showScrollArrow.value = isScrollable && !isAtBottom;
+  }
+}
+
+// Función para hacer scroll suave hacia abajo
+function scrollDown() {
+  if (recommendationsScrollRef.value) {
+    recommendationsScrollRef.value.scrollBy({ top: 200, behavior: 'smooth' });
+  }
+}
+
+// Función para alternar el modo de visualización
+function toggleViewMode(mode: 'horizontal' | 'pinterest') {
+  viewMode.value = mode;
+}
+
 // Event listener para clics fuera del dropdown
 onMounted(() => {
   const handleClickOutside = (event: Event) => {
@@ -313,6 +430,11 @@ onMounted(() => {
   };
 
   document.addEventListener('click', handleClickOutside);
+
+  // Verificar scroll inicial
+  nextTick(() => {
+    handleScroll();
+  });
 
   // Cleanup
   onUnmounted(() => {
@@ -358,8 +480,81 @@ select::after {
   transition: transform 0.3s;
 }
 
+/* Animaciones para la flecha de scroll */
+.fade-bounce-enter-active,
+.fade-bounce-leave-active {
+  transition: all 0.4s ease-out;
+}
+.fade-bounce-enter-from,
+.fade-bounce-leave-to {
+  opacity: 0;
+  transform: translateY(10px) translateX(-50%) scale(0.8);
+}
+.fade-bounce-enter-to,
+.fade-bounce-leave-from {
+  opacity: 1;
+  transform: translateY(0) translateX(-50%) scale(1);
+}
+
+/* Animación personalizada para la flecha */
+@keyframes gentle-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) translateX(-50%);
+  }
+  40% {
+    transform: translateY(-8px) translateX(-50%);
+  }
+  60% {
+    transform: translateY(-4px) translateX(-50%);
+  }
+}
+
+.animate-bounce {
+  animation: gentle-bounce 2s infinite;
+}
+
+/* Utilidad para truncar texto en múltiples líneas */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
 select:focus::after {
   transform: translateY(-50%) rotate(180deg);
+}
+
+/* Animación para botones flotantes */
+@keyframes slideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.floating-action-buttons {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(31, 41, 55, 0.7);
+  border-top: 1px solid rgba(75, 85, 99, 0.2);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+  animation: slideUpFadeIn 0.4s ease-out;
+}
+
+.floating-action-buttons::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
 }
 </style>
 
