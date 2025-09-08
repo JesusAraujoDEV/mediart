@@ -10,7 +10,7 @@ class VideogameRecommendation extends BaseRecommendation {
   }
 
   async searchOneQuery(query) {
-    const res = await this.searchService.searchIgdb(query);
+    const res = await this.searchService.searchRawg(query);
     return (res || []).filter(item => item.type === 'videogame');
   }
 
