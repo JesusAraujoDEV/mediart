@@ -1,7 +1,9 @@
 <template>
   <title>MediartStudio - Playlist: {{ playlist.name }}</title>
   <main class="w-screen h-fit min-h-dvh flex flex-col items-center justify-start p-4 text-white overflow-hidden">
-    <NavigationStudio />
+    <div data-tutorial="navbar">
+      <NavigationStudio />
+    </div>
 
     <div v-if="isLoading" class="flex flex-col items-center justify-center h-full">
       <p class="text-xl mb-4 text-gray-300">Cargando playlist...</p>
@@ -55,10 +57,10 @@
           <p class="text-sm text-gray-400 mb-1">
             Creada por: <span class="font-semibold">{{ playlist.owner?.username || 'Desconocido' }}</span>
           </p>
-          <p class="text-xs text-gray-500">
+          <p class="text-xs text-white">
             Última actualización: {{ formatDateTime(playlist.updatedAt) }}
           </p>
-          <div v-if="playlist.isCollaborative" class="mt-2 flex items-center text-green-400 text-sm font-medium">
+          <div v-if="playlist.isCollaborative" data-tutorial="collaborative-badge" class="mt-2 flex items-center text-green-400 text-sm font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd"
                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
@@ -72,19 +74,25 @@
             <span class="text-purple-300 font-semibold text-base">Modo edición activo: puedes eliminar elementos</span>
           </div>
           <!-- Botón de editar -->
-          <button @click="toggleEditMode"
+          <button @click="toggleEditMode" data-tutorial="edit-button"
             :class="['absolute cursor-pointer top-4 right-4 rounded-full p-2 shadow-md transition-colors', editMode ? 'bg-purple-600 text-white' : 'bg-gray-700 hover:bg-purple-600 text-white']"
             title="Editar playlist">
             <Icon name="material-symbols:edit" size="1.5em" />
           </button>
           <!-- Botón de configuraciones -->
-          <button @click="openSettingsModal"
+          <button @click="openSettingsModal" data-tutorial="settings-button"
             class="absolute cursor-pointer top-4 right-16 rounded-full p-2 shadow-md transition-colors bg-gray-700 hover:bg-purple-600 text-white"
             title="Configuraciones de la playlist">
             <Icon name="material-symbols:settings" size="1.5em" />
           </button>
-          <!-- Botón de guardar playlist -->
-          <button @click="toggleSavePlaylist" :disabled="isSavingPlaylist" :class="[
+          <!-- Botón de tutorial -->
+          <button @click="startTutorial" data-tutorial="tutorial-button"
+            class="absolute cursor-pointer top-4 right-40 rounded-full p-2 shadow-md transition-colors bg-gray-700 hover:bg-purple-600 text-white"
+            title="Mostrar tutorial de la playlist">
+            <Icon name="material-symbols:help" size="1.5em" />
+          </button>
+          <!-- Botón de guardar playlist (no renderizar si eres el owner) -->
+          <button v-if="!isOwner" @click="toggleSavePlaylist" data-tutorial="save-button" :disabled="isSavingPlaylist" :class="[
             'absolute cursor-pointer top-4 right-28 rounded-full p-2 shadow-md transition-colors',
             isSavingPlaylist ? 'bg-gray-600 text-gray-400' :
               isPlaylistSaved ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-700 hover:bg-purple-600 text-white'
@@ -103,9 +111,9 @@
         <!-- Buscador de ítems para agregar a la playlist (solo en modo edición) -->
         <div v-if="editMode" class="mb-8 p-4 bg-gray-700/40 rounded-lg border border-gray-600">
           <div class="flex flex-col md:flex-row md:items-end gap-4 mb-4">
-            <div class="flex flex-col flex-1">
+              <div class="flex flex-col flex-1">
               <label class="text-sm text-gray-300 mb-1">Buscar ítems</label>
-              <input v-model="itemSearchQuery" @input="debouncedSearchItems" type="text"
+              <input v-model="itemSearchQuery" @input="debouncedSearchItems" type="text" data-tutorial="playlist-add-search"
                 :placeholder="getItemSearchPlaceholder()"
                 class="p-3 w-full rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all" />
             </div>
@@ -141,7 +149,7 @@
                 <div class="text-xs text-gray-300 capitalize">{{ item.type }}</div>
                 <div v-if="item.description" class="text-xs text-gray-400 line-clamp-1">{{ item.description }}</div>
               </div>
-              <button @click="addSingleItemToPlaylist(item)"
+              <button @click="addSingleItemToPlaylist(item)" data-tutorial="add-item-button"
                 :disabled="!item.externalId || isAddingItemsMap[item.externalId] || isItemInPlaylist(item.externalId)"
                 class="ml-2 px-3 py-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                 :title="isItemInPlaylist(item.externalId) ? 'Ya está en la playlist' : 'Agregar a la playlist'">
@@ -278,7 +286,7 @@
             </div>
 
             <!-- Lista de colaboradores actuales -->
-            <div v-if="playlist.collaborators && playlist.collaborators.length > 0" class="space-y-3">
+            <div v-if="playlist.collaborators && playlist.collaborators.length > 0" data-tutorial="collaborators-section" class="space-y-3">
               <h4 class="text-sm font-semibold text-gray-300 border-b border-gray-600 pb-2">Colaboradores actuales:</h4>
               <div v-for="collaborator in playlist.collaborators" :key="collaborator.id"
                 class="flex items-center justify-between bg-gray-600 p-4 rounded-lg">
@@ -369,14 +377,16 @@
       </div>
     </div>
   </main>
+
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { getCache, setCache } from "~/utils/cache";
 import { useRoute } from "vue-router";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 import Swal from "sweetalert2";
+import { useStudioTutorial } from '~/composables/useStudioTutorial'
 
 definePageMeta({
   layout: "custom",
@@ -437,6 +447,7 @@ interface SearchItem {
   coverUrl?: string | null;
   type: string;
   externalId?: string | null;
+  externalSource?: string | null;
   description?: string | null;
   externalUrl?: string | null;
 }
@@ -467,6 +478,18 @@ const isSearching = ref(false);
 const showSearchResults = ref(false);
 const isSavingPlaylist = ref(false);
 const isPlaylistSaved = ref(false);
+// Obtener ID del usuario actual si existe en localStorage
+const currentUserId = ref<number | null>(null);
+try {
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  currentUserId.value = user?.id ?? null;
+} catch (e) {
+  currentUserId.value = null;
+}
+
+const isOwner = computed(() => {
+  return currentUserId.value !== null && playlist.value?.ownerUserId === currentUserId.value;
+});
 const coverFileInput = ref<HTMLInputElement | null>(null);
 const currentCoverPreview = ref<string | null>(null);
 const selectedCoverFile = ref<File | null>(null);
@@ -545,8 +568,9 @@ const internalSearchItems = async () => {
           ? `${raw.artist_name} - ${raw.album_name}`
           : null
       );
-      const externalUrl = raw?.externalUrl ?? raw?.external_url ?? null;
-      return { title, coverUrl, type, externalId, description, externalUrl };
+  const externalUrl = raw?.externalUrl ?? raw?.external_url ?? null;
+  const externalSource = raw?.externalSource ?? raw?.external_source ?? null;
+  return { title, coverUrl, type, externalId, description, externalUrl, externalSource };
     }
 
     function mergeCategory(arr: any[] | undefined, fallbackType: string) {
@@ -598,16 +622,24 @@ function isItemInPlaylist(externalId: string | undefined | null) {
 }
 
 async function addSingleItemToPlaylist(item: SearchItem) {
+  // Si la playlist es colaborativa, requerimos que el usuario tenga la playlist guardada
+  if (playlist.value.isCollaborative && !isPlaylistSaved.value) {
+    addItemsErrorMessage.value = 'Para agregar ítems a una playlist colaborativa debes primero guardarla en tu biblioteca.';
+    return;
+  }
+
   if (!item.externalId) {
     addItemsErrorMessage.value = 'El ítem no tiene un ID válido.';
     return;
   }
 
-  isAddingItemsMap.value = { ...isAddingItemsMap.value, [item.externalId]: true };
+  const key = String(item.externalId);
+  isAddingItemsMap.value = { ...isAddingItemsMap.value, [key]: true };
   addItemsSuccessMessage.value = "";
   addItemsErrorMessage.value = "";
   try {
     const playlistId = playlist.value.id;
+    // Enviar el objeto tal cual vino desde la búsqueda dentro de un array llamado `items`
     const body = { items: [item] };
     const response = await fetch(`${config.public.backend}/api/playlists/${playlistId}/items`, {
       method: "POST",
@@ -626,9 +658,12 @@ async function addSingleItemToPlaylist(item: SearchItem) {
   } catch (err: any) {
     addItemsErrorMessage.value = err.message || 'Error al agregar ítem.';
   } finally {
-    isAddingItemsMap.value = { ...isAddingItemsMap.value, [item.externalId]: false };
+    isAddingItemsMap.value = { ...isAddingItemsMap.value, [key]: false };
   }
 }
+
+// Driver.js tutorial composable
+const { startTutorial, stopTutorial, resetTutorial, isTutorialActive, forceStopTutorial } = useStudioTutorial()
 
 // Función para formatear la fecha y hora
 const formatDateTime = (dateString: string): string => {
