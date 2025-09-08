@@ -85,7 +85,7 @@ export const useRecommendations = () => {
         externalUrl: item.externalUrl || item.url || '',
         description: item.description || item.overview || '',
         releaseDate: item.releaseDate || item.release_date || item.year || '',
-        avgRating: item.avgRating ?? item.vote_average ?? item.rating ?? '',
+        avgRating: item.avgRating ?? item.vote_average ?? item.rating ?? 0,
       }));
 
       recommendations.value = mapped;

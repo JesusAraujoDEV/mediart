@@ -7,8 +7,9 @@
       <div class="flex items-center justify-center max-md:w-full">
           <div class="select-wrapper relative">
             <select ref="searchTypeRef" v-model="searchType" data-tutorial="search-type"
-              @focus="searchTypeOpen = true" @blur="searchTypeOpen = false"
-              class="p-2 pl-6 pr-12 rounded-full bg-gray-700/80 w-fit text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer">
+              @focus="searchTypeOpen = true" @blur="searchTypeOpen = false" @change="handleSearchTypeChange"
+              class="p-2 pl-6 pr-12 rounded-full bg-gray-700/80 w-fit text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer"
+              title="Selecciona el tipo de contenido que quieres buscar">
               <option value="general">Todo</option>
               <option value="song">Canciones</option>
               <option value="artist">Artistas</option>
@@ -20,7 +21,8 @@
             </select>
             <button type="button" aria-label="Abrir selector" class="select-arrow absolute right-3 top-1/2 -translate-y-1/2 text-white/90"
               @click="focusSearchType"
-              :aria-expanded="searchTypeOpen">
+              :aria-expanded="searchTypeOpen"
+              title="Haz clic para abrir el selector de tipo de búsqueda">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"
                 :class="{ 'rotate-180': searchTypeOpen }" class="transition-transform duration-200">
                 <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
@@ -47,16 +49,27 @@
           </span>
           <input ref="searchInput" type="text"
             class="bg-transparent flex-grow outline-none text-white placeholder-white/60 min-w-[120px] max-md:min-w-[80px]"
-            :placeholder="getSearchPlaceholder()" v-model="inputValue" @input="onInput" @focus="showDatalist = true"
-            @blur="hideDatalist" @keydown.enter="addTagFromInput" @keydown.tab.prevent="addTagFromInput" />
+            :placeholder="getSearchPlaceholder()" v-model="inputValue" @input="onInput" @focus="handleFocus"
+            @keydown.enter="addTagFromInput" @keydown.tab.prevent="addTagFromInput" />
         </div>
 
         <Transition name="fade-slide-down">
-          <ul v-if="showDatalist && filteredSuggestions.length > 0"
+          <ul v-if="showDatalist && (filteredSuggestions.length > 0 || isLoadingSuggestions)"
             class="absolute z-10 w-full bg-gray-800/90 backdrop-filter backdrop-blur-lg rounded-lg mt-2 max-h-48 overflow-y-auto shadow-xl border border-gray-700">
-            <li v-for="suggestion in filteredSuggestions" :key="suggestion.title"
+            <!-- Estado de carga -->
+            <li v-if="isLoadingSuggestions" class="p-4 text-center text-gray-400">
+              <div class="flex items-center justify-center gap-2">
+                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-sm">Buscando...</span>
+              </div>
+            </li>
+            <!-- Sugerencias -->
+            <li v-for="suggestion in filteredSuggestions" :key="suggestion.externalId || suggestion.title"
               @mousedown.prevent="selectSuggestion(suggestion)"
-              class="p-2 cursor-pointer hover:bg-gray-700/70 text-white text-sm flex items-center">
+              class="p-2 cursor-pointer hover:bg-gray-700/70 text-white text-sm flex items-center transition-colors duration-150">
               <img v-if="suggestion.coverUrl" :src="suggestion.coverUrl" :alt="suggestion.title"
                 class="w-8 h-8 object-cover rounded mr-3 flex-shrink-0" />
               <div v-else
@@ -68,6 +81,12 @@
                 <p v-if="suggestion.description" class="text-xs text-gray-400 truncate">{{ suggestion.description }}</p>
               </div>
             </li>
+            <!-- Mensaje cuando no hay resultados -->
+            <li v-if="!isLoadingSuggestions && filteredSuggestions.length === 0 && inputValue.trim().length >= 2"
+              class="p-4 text-center text-gray-400 text-sm">
+              <Icon name="material-symbols:search-off" size="1.5em" class="mx-auto mb-2 text-gray-500" />
+              No se encontraron resultados
+            </li>
           </ul>
         </Transition>
       </div>
@@ -75,7 +94,8 @@
         <div class="select-wrapper relative w-full">
           <select ref="categoryRef" v-model="selectedCategory" data-tutorial="category-selector"
             @focus="categoryOpen = true" @blur="categoryOpen = false"
-            class="p-2 pl-6 pr-12 rounded-full bg-gray-700/80 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer">
+            class="p-2 pl-6 pr-12 rounded-full bg-gray-700/80 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer"
+            title="Elige el tipo de lista de recomendaciones que quieres generar">
             <option value="mix">Tipo de lista: Mezcla</option>
             <option value="songs">Tipo de lista: Canciones</option>
             <option value="artists">Tipo de lista: Artistas</option>
@@ -87,7 +107,8 @@
           </select>
           <button type="button" aria-label="Abrir selector" class="select-arrow absolute right-3 top-1/2 -translate-y-1/2 text-white/90"
             @click="focusCategory"
-            :aria-expanded="categoryOpen">
+            :aria-expanded="categoryOpen"
+            title="Haz clic para abrir el selector de tipo de lista">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"
               :class="{ 'rotate-180': categoryOpen }" class="transition-transform duration-200">
               <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
@@ -96,7 +117,8 @@
         </div>
         <button @click="sendData(selectedTags)" data-tutorial="send-button"
           class="ml-3 p-2 rounded-full cursor-pointer glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm"
-          aria-label="Generar recomendaciones">
+          aria-label="Generar recomendaciones"
+          title="Haz clic para generar recomendaciones basadas en tus selecciones">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"
             class="drop-shadow-sm">
             <path d="M3 20v-6l8-2l-8-2V4l19 8z" />
@@ -121,7 +143,8 @@
         <div v-else-if="recommendationsError" class="text-red-400 text-center flex flex-col items-center">
           <p class="text-xl mb-4">{{ recommendationsError }}</p>
           <button @click="sendData(selectedTags)"
-            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg">
+            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg"
+            title="Reintentar generar recomendaciones">
             Reintentar
           </button>
         </div>
@@ -132,7 +155,7 @@
               class="bg-gray-700/60 rounded-xl p-4 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left shadow-lg transform transition-transform duration-300 hover:scale-105 hover:bg-gray-600/70 border border-gray-600 relative group">
               <button @click="removeRecommendation(index)"
                 class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 z-10"
-                title="Eliminar de la playlist">
+                title="Eliminar esta recomendación de la lista">
                 <Icon name="material-symbols:close" size="1.2em" />
               </button>
 
@@ -166,11 +189,13 @@
           </div>
           <div data-tutorial="action-buttons" class="flex max-md:flex-col justify-center gap-6 mt-8 pb-4">
             <button @click="showPlaylistModal = true" :disabled="recommendations.length === 0"
-              class="bg-green-600 cursor-pointer hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+              class="bg-green-600 cursor-pointer hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Crear una nueva playlist con estas recomendaciones">
               Aceptar ({{ recommendations.length }} items)
             </button>
             <button @click="sendData(selectedTags)"
-              class="bg-red-600 hover:bg-red-700 cursor-pointer text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg">
+              class="bg-red-600 hover:bg-red-700 cursor-pointer text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 text-lg"
+              title="Generar nuevas recomendaciones con los mismos criterios">
               Regenerar
             </button>
           </div>
@@ -188,7 +213,8 @@
           </div>
           <div class="flex flex-col sm:flex-row gap-4 items-center">
             <button @click="startTutorial"
-              class="glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center gap-2 text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm py-3 px-6 rounded-full font-semibold">
+              class="glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center gap-2 text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm py-3 px-6 rounded-full font-semibold"
+              title="Inicia un tutorial interactivo para aprender a usar Mediart Studio">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
               </svg>
@@ -206,7 +232,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import NavigationStudio from "~/components/navigation/NavigationStudio.vue";
 import PlaylistModal from "~/components/ui/PlaylistModal.vue";
 import { useSuggestions } from "~/composables/studio/useSuggestions";
@@ -226,6 +252,7 @@ const {
   showDatalist,
   searchType,
   filteredSuggestions,
+  isLoadingSuggestions,
   getSearchPlaceholder,
   onInput,
   selectSuggestion,
@@ -233,6 +260,8 @@ const {
   removeTag,
   focusInput,
   hideDatalist,
+  handleFocus,
+  onChangeSearchType,
 } = useSuggestions();
 
 // Composable para la lógica de recomendaciones y playlists
@@ -266,6 +295,30 @@ function focusSearchType() {
 function focusCategory() {
   if (categoryRef.value) categoryRef.value.focus();
 }
+
+// Función para manejar cambios en el tipo de búsqueda
+function handleSearchTypeChange() {
+  onChangeSearchType();
+}
+
+// Event listener para clics fuera del dropdown
+onMounted(() => {
+  const handleClickOutside = (event: Event) => {
+    const target = event.target as HTMLElement;
+    const searchContainer = document.querySelector('.relative.flex-grow');
+
+    if (searchContainer && !searchContainer.contains(target)) {
+      hideDatalist();
+    }
+  };
+
+  document.addEventListener('click', handleClickOutside);
+
+  // Cleanup
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+  });
+});
 
 </script>
 

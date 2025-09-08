@@ -30,8 +30,20 @@
             <img v-if="playlist.playlistCoverUrl" :src="playlist.playlistCoverUrl" alt="Playlist Cover" loading="lazy" decoding="async"
             class="w-full h-full object-cover" />
           <div v-else class="w-full h-full grid grid-cols-2 grid-rows-2 gap-0 bg-gray-700">
-            <img v-for="i in 4" :key="i" :src="playlist.items?.[i - 1]?.coverUrl || '/resources/item-placeholder.webp'"
-              :alt="playlist.items?.[i - 1]?.title || 'Item Cover'" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+            <div v-for="i in 4" :key="i" class="relative">
+              <img v-if="playlist.items && playlist.items[i - 1]?.coverUrl"
+                :src="playlist.items[i - 1].coverUrl || '/resources/plPreview.webp'"
+                :alt="(playlist.items[i - 1]?.title || 'Item Cover')"
+                loading="lazy" decoding="async"
+                class="w-full h-full object-cover"
+                @error="handleImageError" />
+              <img v-else
+                :src="'/resources/plPreview.webp'"
+                alt="Playlist Preview"
+                loading="lazy" decoding="async"
+                class="w-full h-full object-cover"
+                @error="handleImageError" />
+            </div>
           </div>
         </div>
 
@@ -130,10 +142,10 @@
                 <div v-if="item.description" class="text-xs text-gray-400 line-clamp-1">{{ item.description }}</div>
               </div>
               <button @click="addSingleItemToPlaylist(item)"
-                :disabled="isAddingItemsMap[item.externalId] || isItemInPlaylist(item.externalId)"
+                :disabled="!item.externalId || isAddingItemsMap[item.externalId] || isItemInPlaylist(item.externalId)"
                 class="ml-2 px-3 py-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                 :title="isItemInPlaylist(item.externalId) ? 'Ya está en la playlist' : 'Agregar a la playlist'">
-                <Icon v-if="isAddingItemsMap[item.externalId]" name="material-symbols:sync" size="1.2em"
+                <Icon v-if="item.externalId && isAddingItemsMap[item.externalId]" name="material-symbols:sync" size="1.2em"
                   class="animate-spin" />
                 <Icon v-else name="material-symbols:add" size="1.2em" />
               </button>
@@ -170,7 +182,7 @@
                   Lanzamiento: {{ new Date(item.releaseDate).getFullYear() }}
                 </p>
                 <p v-if="item.avgRating !== null && item.avgRating !== undefined" class="text-xs text-gray-400 mb-2">
-                  Valoración: {{ parseFloat(item.avgRating.toString()).toFixed(1) }} / 10
+                  Valoración: {{ parseFloat(String(item.avgRating)) }} / 10
                 </p>
                 <span v-if="item.externalUrl" class="text-blue-400 text-sm font-semibold mt-1">
                   Ver más en {{ item.externalSource }}
@@ -420,6 +432,15 @@ interface UserSearchResult {
   profilePictureUrl?: string;
 }
 
+interface SearchItem {
+  title: string;
+  coverUrl?: string | null;
+  type: string;
+  externalId?: string | null;
+  description?: string | null;
+  externalUrl?: string | null;
+}
+
 const playlist = ref<Playlist>({
   id: 0,
   ownerUserId: 0,
@@ -460,7 +481,7 @@ const settingsForm = ref({
 // --- Buscador de ítems para agregar a la playlist ---
 const itemSearchQuery = ref("");
 const itemSearchType = ref("general");
-const itemSearchResults = ref<any[]>([]);
+const itemSearchResults = ref<SearchItem[]>([]);
 const isItemSearching = ref(false);
 const selectedItemIds = ref<string[]>([]);
 const isAddingItems = ref(false);
@@ -511,14 +532,14 @@ const internalSearchItems = async () => {
       signal,
     });
     if (signal.aborted) return;
-    if (error.value) throw new Error(error.value.data?.message || error.value.message || 'Error al buscar ítems');
+    if (error.value) throw new Error(error.value?.data?.message || error.value?.message || 'Error al buscar ítems');
     const newResults: any[] = [];
 
-    function normalizeSearchItem(raw: any, fallbackType: string): any {
+    function normalizeSearchItem(raw: any, fallbackType: string): SearchItem {
       const title = raw?.title ?? raw?.name ?? '';
       const coverUrl = raw?.coverUrl ?? raw?.thumbnail_url ?? raw?.poster_url ?? raw?.image_url ?? raw?.cover_url ?? null;
       const type = (raw?.type ?? fallbackType) as string;
-      const externalId = (raw?.externalId ?? raw?.id)?.toString?.();
+      const externalId = (raw?.externalId ?? raw?.id)?.toString?.() ?? '';
       const description = raw?.description ?? raw?.overview ?? (
         (type === 'song' && raw?.artist_name && raw?.album_name)
           ? `${raw.artist_name} - ${raw.album_name}`
@@ -571,11 +592,17 @@ const internalSearchItems = async () => {
 
 const debouncedSearchItems = debounce(internalSearchItems, 300);
 
-function isItemInPlaylist(externalId: string) {
+function isItemInPlaylist(externalId: string | undefined | null) {
+  if (!externalId) return false;
   return playlist.value.items?.some(item => String(item.externalId) === String(externalId));
 }
 
-async function addSingleItemToPlaylist(item: any) {
+async function addSingleItemToPlaylist(item: SearchItem) {
+  if (!item.externalId) {
+    addItemsErrorMessage.value = 'El ítem no tiene un ID válido.';
+    return;
+  }
+
   isAddingItemsMap.value = { ...isAddingItemsMap.value, [item.externalId]: true };
   addItemsSuccessMessage.value = "";
   addItemsErrorMessage.value = "";
@@ -606,15 +633,20 @@ async function addSingleItemToPlaylist(item: any) {
 // Función para formatear la fecha y hora
 const formatDateTime = (dateString: string): string => {
   if (!dateString) return 'Fecha desconocida';
-  const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  };
-  return new Date(dateString).toLocaleDateString('es-ES', options);
+  try {
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    };
+    return new Date(dateString).toLocaleDateString('es-ES', options);
+  } catch (error) {
+    console.error('Error al formatear fecha:', error);
+    return 'Fecha inválida';
+  }
 };
 
 const fetchPlaylist = async () => {
@@ -649,7 +681,7 @@ const fetchPlaylist = async () => {
 
     if (error.value) {
       console.error("Error al obtener la playlist:", error.value);
-      throw new Error(error.value.data?.message || error.value.message || "No se pudo cargar la playlist.");
+      throw new Error(error.value?.data?.message || error.value?.message || "No se pudo cargar la playlist.");
     }
 
     if (data.value) {
@@ -712,7 +744,7 @@ const toggleSavePlaylist = async () => {
     );
 
     if (error.value) {
-      throw new Error(error.value.data?.message || error.value.message || 'Error al guardar la playlist');
+      throw new Error(error.value?.data?.message || error.value?.message || 'Error al guardar la playlist');
     }
 
     isPlaylistSaved.value = true;
@@ -768,7 +800,7 @@ async function deleteItemFromPlaylist(itemId: number, idx: number) {
       }
     );
     if (error.value) {
-      throw new Error(error.value.data?.message || error.value.message || "No se pudo eliminar el item.");
+      throw new Error(error.value?.data?.message || error.value?.message || "No se pudo eliminar el item.");
     }
     // Eliminar del array local
     playlist.value.items?.splice(idx, 1);
@@ -873,7 +905,7 @@ async function savePlaylistSettings() {
     );
 
     if (error.value) {
-      throw new Error(error.value.data?.message || error.value.message || 'Error al guardar los cambios');
+      throw new Error(error.value?.data?.message || error.value?.message || 'Error al guardar los cambios');
     }
 
     // Actualizar datos locales
@@ -927,7 +959,7 @@ async function searchUsers(query: string) {
     );
 
     if (error.value) {
-      throw new Error(error.value.data?.message || error.value.message || 'Error al buscar usuarios');
+      throw new Error(error.value?.data?.message || error.value?.message || 'Error al buscar usuarios');
     }
 
     searchResults.value = data.value || [];
@@ -959,7 +991,7 @@ async function addCollaborator(userId: number, username: string) {
     );
 
     if (error.value) {
-      throw new Error(error.value.data?.message || error.value.message || 'Error al agregar colaborador');
+      throw new Error(error.value?.data?.message || error.value?.message || 'Error al agregar colaborador');
     }
 
     // Actualizar la lista de colaboradores obteniendo los datos más recientes
@@ -1045,7 +1077,7 @@ async function removeCollaborator(collaboratorId: number) {
     );
 
     if (error.value) {
-      throw new Error(error.value.data?.message || error.value.message || 'Error al eliminar colaborador');
+      throw new Error(error.value?.data?.message || error.value?.message || 'Error al eliminar colaborador');
     }
 
     // Actualizar la lista de colaboradores obteniendo los datos más recientes
@@ -1070,6 +1102,14 @@ async function removeCollaborator(collaboratorId: number) {
 onMounted(() => {
   fetchPlaylist();
 });
+
+// Función para manejar errores de carga de imágenes
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  if (img) {
+    img.src = '/resources/plPreview.webp';
+  }
+};
 </script>
 
 <style scoped>

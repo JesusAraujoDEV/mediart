@@ -19,6 +19,7 @@ export const useSuggestions = () => {
   const suggestions: Ref<SearchItem[]> = ref([]);
   const showDatalist = ref(false);
   const searchType = ref('general');
+  const isLoadingSuggestions = ref(false);
 
   // Simple cache para mejorar latencia percibida: key = `${type}:${query}`
   const suggestionsCache = new Map<string, { ts: number; data: SearchItem[] }>();
@@ -40,9 +41,13 @@ export const useSuggestions = () => {
 
   let debounceHandle: ReturnType<typeof setTimeout> | null = null;
   const fetchSuggestions = async (query: string) => {
-    if (!query) return;
-    const url = `${config.public.backend}/api/search?q=${encodeURIComponent(query)}&type=${searchType.value}`;
+    if (!query) {
+      isLoadingSuggestions.value = false;
+      return;
+    }
+
     try {
+      const url = `${config.public.backend}/api/search?q=${encodeURIComponent(query)}&type=${searchType.value}`;
       const resp = await fetch(url, {
         method: "GET",
         headers: {
@@ -50,80 +55,106 @@ export const useSuggestions = () => {
           "Authorization": `Bearer ${localStorage.getItem("token")}`,
         },
       });
+
       if (!resp.ok) throw new Error("Error fetching suggestions");
+
       const data = await resp.json();
-      // Extraer el array correcto basado en el tipo de búsqueda
+
+      // Procesar datos según el tipo de búsqueda
+      let processedSuggestions: SearchItem[] = [];
+
       if (searchType.value === 'general') {
-        // Si el backend devuelve un array plano (como en el ejemplo), úsalo directamente
         if (Array.isArray(data)) {
-          suggestions.value = data as any[];
+          processedSuggestions = data as SearchItem[];
         } else {
-          // Si viene por claves, combinar todas las categorías conocidas
           const keys = ['songs','artists','albums','movies','tvshows','books','videogames'];
-          const combined: any[] = [];
           for (const k of keys) {
-            if (Array.isArray((data as any)[k])) combined.push(...(data as any)[k]);
+            if (Array.isArray((data as any)[k])) {
+              processedSuggestions.push(...(data as any)[k]);
+            }
           }
-          suggestions.value = combined;
         }
       } else {
-        // No-general: intenta plural/singular; si llega array plano, filtra por type
         const byKey = (data as any)[searchType.value + 's'] || (data as any)[searchType.value];
         if (Array.isArray(byKey)) {
-          suggestions.value = byKey;
+          processedSuggestions = byKey;
         } else if (Array.isArray(data)) {
-          suggestions.value = (data as any[]).filter((it: any) => it?.type === searchType.value);
-        } else {
-          suggestions.value = [];
+          processedSuggestions = (data as any[]).filter((it: any) => it?.type === searchType.value);
         }
       }
-      // almacenar resultado en cache
+
+      suggestions.value = processedSuggestions;
+
+      // Actualizar estado del dropdown
+      showDatalist.value = processedSuggestions.length > 0;
+
+      // Almacenar en cache
       try {
         const key = `${searchType.value}:${query.toLowerCase()}`;
-        suggestionsCache.set(key, { ts: Date.now(), data: suggestions.value.slice() });
+        suggestionsCache.set(key, { ts: Date.now(), data: processedSuggestions.slice() });
       } catch (_) {
-        // ignore cache errors
+        // Ignorar errores de cache
       }
+
     } catch (e) {
       console.error("Error fetching suggestions:", e);
       suggestions.value = [];
+      showDatalist.value = false;
+    } finally {
+      isLoadingSuggestions.value = false;
     }
   };
 
   const onInput = () => {
     const q = inputValue.value.trim();
+
+    // Limpiar timeout anterior
     if (debounceHandle) clearTimeout(debounceHandle);
+
     if (q.length < 2) {
       suggestions.value = [];
+      showDatalist.value = false;
+      isLoadingSuggestions.value = false;
       return;
     }
 
+    // Verificar cache primero para respuesta inmediata
     const key = `${searchType.value}:${q.toLowerCase()}`;
     const cached = suggestionsCache.get(key);
     if (cached && (Date.now() - cached.ts) < CACHE_TTL) {
-      // respuesta inmediata desde cache
       suggestions.value = cached.data.slice();
       showDatalist.value = true;
+      isLoadingSuggestions.value = false;
       return;
     }
 
-    // reducir debounce para mejorar sensación de velocidad
-    debounceHandle = setTimeout(() => fetchSuggestions(q), 150);
+    // Mostrar loading state inmediatamente
+    isLoadingSuggestions.value = true;
+    showDatalist.value = true;
+
+    // Reducir debounce para mejor sensación de velocidad
+    debounceHandle = setTimeout(() => fetchSuggestions(q), 100);
   };
 
   const selectSuggestion = (suggestion: SearchItem) => {
+    // Limpiar timeout para evitar conflictos
+    if (debounceHandle) clearTimeout(debounceHandle);
+
     if (!selectedTags.value.some(tag => tag.externalId === suggestion.externalId)) {
       selectedTags.value.push(suggestion);
     }
+
+    // Limpiar estado inmediatamente
     inputValue.value = '';
     suggestions.value = [];
-    hideDatalist();
+    showDatalist.value = false;
+    isLoadingSuggestions.value = false;
   };
 
   const addTagFromInput = () => {
     const trimmedInput = inputValue.value.trim();
-    if (trimmedInput && suggestions.value.length === 0) {
-      // Si no hay sugerencias, crea un tag genérico
+    if (trimmedInput && suggestions.value.length === 0 && !isLoadingSuggestions.value) {
+      // Si no hay sugerencias y no está cargando, crea un tag genérico
       const newTag: SearchItem = {
         title: trimmedInput,
         type: searchType.value,
@@ -131,6 +162,7 @@ export const useSuggestions = () => {
       };
       selectedTags.value.push(newTag);
       inputValue.value = '';
+      showDatalist.value = false;
     } else if (suggestions.value.length > 0) {
       selectSuggestion(suggestions.value[0]);
     }
@@ -148,11 +180,33 @@ export const useSuggestions = () => {
   );
 
   const focusInput = (el: HTMLInputElement | null) => el?.focus();
-  const hideDatalist = () => setTimeout(() => showDatalist.value = false, 150);
+
+  // Optimizar hideDatalist para evitar conflictos con clics
+  const hideDatalist = () => {
+    // Pequeño delay para permitir que los clics se procesen
+    setTimeout(() => {
+      if (!isLoadingSuggestions.value) {
+        showDatalist.value = false;
+      }
+    }, 200);
+  };
+
+  // Nueva función para manejar focus sin delay
+  const handleFocus = () => {
+    if (inputValue.value.trim().length >= 2 && suggestions.value.length > 0) {
+      showDatalist.value = true;
+    }
+  };
+
   const onChangeSearchType = () => {
+    // Limpiar timeout
+    if (debounceHandle) clearTimeout(debounceHandle);
+
     selectedTags.value = [];
     inputValue.value = '';
     suggestions.value = [];
+    showDatalist.value = false;
+    isLoadingSuggestions.value = false;
   };
 
   watch(searchType, () => {
@@ -166,6 +220,7 @@ export const useSuggestions = () => {
     showDatalist,
     searchType,
     filteredSuggestions,
+    isLoadingSuggestions,
     getSearchPlaceholder,
     fetchSuggestions,
     onInput,
@@ -174,6 +229,7 @@ export const useSuggestions = () => {
     removeTag,
     focusInput,
     hideDatalist,
+    handleFocus,
     onChangeSearchType,
   };
 };

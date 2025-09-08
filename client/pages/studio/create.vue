@@ -351,7 +351,7 @@ async function createPlaylist() {
         externalSource: item.externalSource || 'custom',
         externalUrl: item.externalUrl || null,
         releaseDate: item.releaseDate || null,
-        avgRating: item.avgRating || null
+        avgRating: item.avgRating ? parseFloat(item.avgRating as string) : 0
       }))
     }
 
@@ -432,7 +432,7 @@ function addItem(s: SearchSuggestion) {
       externalSource: s.externalSource || 'custom',
       externalUrl: s.externalUrl || null,
       releaseDate: s.releaseDate || null,
-      avgRating: s.avgRating || null
+      avgRating: s.avgRating ? parseFloat(s.avgRating as string) : 0
     }
     
     // Agregar el ítem
