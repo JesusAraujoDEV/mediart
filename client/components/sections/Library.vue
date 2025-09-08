@@ -1,6 +1,16 @@
 <template>
   <section class="w-2/3 glassEffect overflow-y-scroll h-full rounded-lg max-md:min-h-screen max-md:w-full p-6 custom-main-scroll">
-    <h2 class="text-4xl font-extrabold mb-8 text-center">Mis Playlists Guardadas</h2>
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-4xl font-extrabold text-center md:text-left">Mis Playlists Guardadas</h2>
+      <div data-tutorial="library-view-mode" class="flex items-center gap-2">
+        <button @click="toggleViewMode('horizontal')" :class="['p-2 rounded-md', viewMode === 'horizontal' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-200']" title="Vista lista (horizontal)">
+          <Icon name="material-symbols:view-list" size="1.2em" />
+        </button>
+        <button @click="toggleViewMode('pinterest')" :class="['p-2 rounded-md', viewMode === 'pinterest' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-200']" title="Vista tipo Pinterest">
+          <Icon name="material-symbols:grid-view" size="1.2em" />
+        </button>
+      </div>
+    </div>
 
     <!-- Search Bar -->
     <div class="mb-6">
@@ -35,16 +45,69 @@
     </div>
 
     <!-- Playlists List -->
-    <div v-else-if="displayPlaylists.length > 0" class="space-y-4">
-      <div 
-        v-for="playlist in displayPlaylists" 
-        :key="playlist.id"
-        @click="viewPlaylist(playlist)"
-        class="bg-gray-800/70 rounded-xl p-4 cursor-pointer hover:bg-gray-700/80 transition-all duration-200 border border-gray-600"
-      >
-        <div class="flex gap-4">
-          <!-- Playlist Image -->
-          <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-700 flex-shrink-0">
+    <div v-else-if="displayPlaylists.length > 0">
+      <!-- Lista (horizontal) -->
+      <div v-if="viewMode === 'horizontal'" class="space-y-4">
+        <div 
+          v-for="playlist in displayPlaylists" 
+          :key="playlist.id"
+          @click="viewPlaylist(playlist)"
+          class="bg-gray-800/70 rounded-xl p-4 cursor-pointer hover:bg-gray-700/80 transition-all duration-200 border border-gray-600"
+        >
+          <div class="flex gap-4">
+            <!-- Playlist Image -->
+            <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-700 flex-shrink-0">
+              <img loading="lazy" decoding="async"
+                :src="coverCandidates(playlist)[0]"
+                :data-alt-src="coverCandidates(playlist)[1] || ''"
+                :alt="playlist.name || 'Playlist cover'"
+                class="w-full h-full object-cover"
+                @error="handleImageError"
+              />
+            </div>
+
+            <!-- Playlist Info -->
+            <div class="flex-1 min-w-0">
+              <h3 class="text-lg font-bold text-white truncate">{{ playlist.name }}</h3>
+              <p v-if="playlist.description" class="text-gray-300 text-sm mt-1 line-clamp-2">
+                {{ playlist.description }}
+              </p>
+              <p class="text-xs text-gray-400 mt-2">
+                Colaborativa: {{ playlist.isCollaborative ? 'Sí' : 'No' }}
+              </p>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col gap-2">
+              <button 
+                v-if="canRemovePlaylist(playlist)"
+                @click.stop="removePlaylist(playlist)"
+                :disabled="removingPlaylist === playlist.id"
+                class="bg-gray-700 hover:bg-gray-600 text-white font-bold text-sm px-3 py-1 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <Icon name="material-symbols:delete" size="16" />
+              </button>
+              <button 
+                @click.stop="viewPlaylist(playlist)"
+                :disabled="loadingPlaylist === playlist.id"
+                class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold text-sm px-3 py-1 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                Ver más
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pinterest (grid) -->
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div 
+          v-for="playlist in displayPlaylists" 
+          :key="playlist.id"
+          @click="viewPlaylist(playlist)"
+          class="bg-gray-800/70 rounded-xl p-4 cursor-pointer hover:bg-gray-700/80 transition-all duration-200 border border-gray-600 flex flex-col"
+        >
+          <div class="w-full h-44 rounded-md overflow-hidden bg-gray-700 mb-3">
             <img loading="lazy" decoding="async"
               :src="coverCandidates(playlist)[0]"
               :data-alt-src="coverCandidates(playlist)[1] || ''"
@@ -53,35 +116,33 @@
               @error="handleImageError"
             />
           </div>
-
-          <!-- Playlist Info -->
           <div class="flex-1 min-w-0">
             <h3 class="text-lg font-bold text-white truncate">{{ playlist.name }}</h3>
             <p v-if="playlist.description" class="text-gray-300 text-sm mt-1 line-clamp-2">
               {{ playlist.description }}
             </p>
-            <p class="text-xs text-gray-400 mt-2">
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <p class="text-xs text-gray-400">
               Colaborativa: {{ playlist.isCollaborative ? 'Sí' : 'No' }}
             </p>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex flex-col gap-2">
-            <button 
-              v-if="canRemovePlaylist(playlist)"
-              @click.stop="removePlaylist(playlist)"
-              :disabled="removingPlaylist === playlist.id"
-              class="bg-gray-700 hover:bg-gray-600 text-white font-bold text-sm px-3 py-1 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              <Icon name="material-symbols:delete" size="16" />
-            </button>
-            <button 
-              @click.stop="viewPlaylist(playlist)"
-              :disabled="loadingPlaylist === playlist.id"
-              class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold text-sm px-3 py-1 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              Ver más
-            </button>
+            <div class="flex items-center gap-2">
+              <button 
+                v-if="canRemovePlaylist(playlist)"
+                @click.stop="removePlaylist(playlist)"
+                :disabled="removingPlaylist === playlist.id"
+                class="bg-gray-700 hover:bg-gray-600 text-white font-bold text-sm px-3 py-1 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <Icon name="material-symbols:delete" size="16" />
+              </button>
+              <button 
+                @click.stop="viewPlaylist(playlist)"
+                :disabled="loadingPlaylist === playlist.id"
+                class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold text-sm px-3 py-1 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                Ver más
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -95,10 +156,10 @@
     <!-- Empty State -->
     <div v-else class="text-center py-12">
       <p class="text-gray-400 text-lg">
-        {{ searchQuery ? 'No se encontraron playlists' : 'Tu biblioteca está vacía' }}
+        {{ searchQuery ? 'No se encontraron playlists' : (isOwnLibrary ? 'Tu biblioteca está vacía' : 'Esta biblioteca está vacía') }}
       </p>
       <p v-if="!searchQuery" class="text-gray-500 text-sm mt-2">
-        Guarda algunas playlists desde las recomendaciones
+        {{ isOwnLibrary ? 'Guarda algunas playlists desde las recomendaciones' : 'Este usuario no tiene playlists guardadas' }}
       </p>
     </div>
   </section>
@@ -125,6 +186,13 @@ const loadingPlaylist = ref<number | null>(null)
 const currentPage = ref(1)
 const hasMore = ref(true)
 const itemsPerPage = 10
+
+// View mode for library (horizontal list | pinterest grid)
+const viewMode = ref<'horizontal' | 'pinterest'>('horizontal')
+
+function toggleViewMode(mode: 'horizontal' | 'pinterest') {
+  viewMode.value = mode
+}
 
 // Computed
 const filteredPlaylists = computed(() => {
@@ -155,6 +223,15 @@ const currentUser = computed(() => {
     return JSON.parse(localStorage.getItem('user') || '{}')
   } catch {
     return {}
+  }
+})
+
+const isOwnLibrary = computed(() => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    return user && String(user.username) === String(username.value)
+  } catch {
+    return false
   }
 })
 
@@ -355,5 +432,18 @@ onMounted(() => {
 
 .custom-main-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(150, 150, 150, 0.7);
+}
+
+/* Estilos para vista tipo Pinterest */
+.pinterest-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.pinterest-grid img {
+  transition: transform 0.25s ease;
+}
+.pinterest-grid img:hover {
+  transform: scale(1.03) translateY(-3px);
 }
 </style>

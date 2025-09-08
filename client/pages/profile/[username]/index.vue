@@ -2,10 +2,12 @@
   <title>{{ pageTitle }}</title>
   <NuxtLayout>
     <main
-      class="w-screen h-fit md:h-dvh flex gap-4 justify-center items-center p-10 max-md:my-20 max-md:p-5 max-md:flex-col">
+      class="w-screen h-fit md:h-dvh flex gap-4 justify-center md:items-stretch items-center p-10 max-md:my-20 max-md:p-5 max-md:flex-col">
       <NavigationStudio />
-      <ProfileComponents :username="usernameFromUrl" />
-      <Library />
+      <div class="flex flex-col md:flex-row w-full max-w-6xl gap-4 items-stretch">
+        <ProfileComponents :username="usernameFromUrl" />
+        <Library />
+      </div>
     </main>
   </NuxtLayout>
 </template>

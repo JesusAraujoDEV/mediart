@@ -1,5 +1,5 @@
 <template>
-  <section class="w-full md:w-1/3 h-auto md:h-auto rounded-lg p-6 sm:p-8 md:p-12 flex flex-col items-center gap-6 sm:gap-8 md:gap-10 profile-section">
+  <section class="w-full md:w-1/3 h-auto md:h-full rounded-lg p-6 sm:p-8 md:p-12 flex flex-col items-center gap-6 sm:gap-8 md:gap-10 profile-section">
     <ProfileAvatar 
       :avatar-url="userProfile?.profilePictureUrl" 
       :backend-base="runtimeConfig.public.backend"

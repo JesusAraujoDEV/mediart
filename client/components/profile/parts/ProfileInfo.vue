@@ -1,6 +1,6 @@
 <template>
   <div class="w-full text-center space-y-5">
-    <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white break-words leading-tight max-w-[85vw] sm:max-w-sm md:max-w-md mx-auto">@{{ username }}</h2>
+    <h2 class="text-2xl sm:text-3xl md:text-3xl font-bold text-white break-words leading-tight max-w-[85vw] sm:max-w-sm md:max-w-md mx-auto">@{{ username }}</h2>
     <!-- Share actions -->
     <div class="flex items-center justify-center mt-1">
       <button

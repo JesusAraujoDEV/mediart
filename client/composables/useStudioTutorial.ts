@@ -169,6 +169,73 @@ export function useStudioTutorial() {
           }
         }
       ]
+    } else if (currentPath.includes('/studio/playlists/')) {
+      // Pasos específicos para la vista de una playlist
+      steps = [
+        {
+          element: '[data-tutorial="navbar"]',
+          popover: {
+            title: '🧭 Navegación',
+            description: 'Accede a tu perfil, ajustes y centro de ayuda desde la barra superior.',
+            side: 'bottom' as const,
+            align: 'center' as const
+          }
+        },
+        {
+          element: '[data-tutorial="collaborative-badge"]',
+          popover: {
+            title: '👥 Playlist colaborativa',
+            description: 'Esta playlist está marcada como colaborativa. Para añadir ítems u operar como colaborador necesitas primero tenerla guardada en tu biblioteca.',
+            side: 'right' as const,
+            align: 'center' as const
+          }
+        },
+        {
+          element: '[data-tutorial="save-button"]',
+          popover: {
+            title: '💾 Guardar en tu biblioteca',
+            description: 'Haz clic aquí para guardar esta playlist en tu biblioteca. Sólo los usuarios que la tengan guardada podrán colaborar en ella.',
+            side: 'left' as const,
+            align: 'center' as const
+          }
+        },
+        {
+          element: '[data-tutorial="playlist-add-search"]',
+          popover: {
+            title: '🔍 Buscar ítems',
+            description: 'Busca canciones, películas, libros y más para añadir a la playlist (modo edición). Recuerda que necesitas tener la playlist guardada si es colaborativa.',
+            side: 'bottom' as const,
+            align: 'center' as const
+          }
+        },
+        {
+          element: '[data-tutorial="add-item-button"]',
+          popover: {
+            title: '➕ Añadir ítem',
+            description: 'Haz clic aquí para agregar el ítem seleccionado a la playlist. Si no puedes agregar, asegúrate de tener la playlist guardada.',
+            side: 'left' as const,
+            align: 'center' as const
+          }
+        },
+        {
+          element: '[data-tutorial="collaborators-section"]',
+          popover: {
+            title: '🧑‍🤝‍🧑 Colaboradores',
+            description: 'Aquí puedes ver y gestionar colaboradores. Sólo el owner o usuarios con permisos pueden añadir o quitar colaboradores.',
+            side: 'top' as const,
+            align: 'center' as const
+          }
+        },
+        {
+          element: '[data-tutorial="settings-button"]',
+          popover: {
+            title: '⚙️ Configuraciones',
+            description: 'Cambia nombre, descripción y portada de la playlist desde aquí. Ten cuidado con la visibilidad y la colaboración.',
+            side: 'left' as const,
+            align: 'center' as const
+          }
+        }
+      ]
     } else {
       // Pasos para la página principal (index.vue)
       steps = [
