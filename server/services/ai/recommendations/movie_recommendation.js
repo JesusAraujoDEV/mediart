@@ -27,19 +27,9 @@ class MovieRecommendation extends BaseRecommendation {
     const usedCanonical = new Set();
     const usedIds = new Set();
 
-    // Fetch input movie to get genres for relevance filtering
-    let inputGenres = new Set();
-    try {
-      const inputResults = await this.searchService.searchTmdb(itemName);
-      const inputMovie = inputResults.find(x => x.type === 'movie' && !this.droppedPattern.test(x.title || ''));
-      if (inputMovie) {
-        inputGenres = new Set(inputMovie.genre_ids || []);
-      }
-    } catch (e) {
-      // If can't fetch input, proceed without genre filter
-    }
+    // Note: Genre filtering removed since TMDB /search/multi doesn't provide genre_ids
 
-    // Rank by similarity + rating + genre overlap bonus
+    // Rank by similarity + rating
     const ranked = this.rank(candidates, (x) => {
       const titleNorm = normalize(x.title);
       const qNorm = normalize(queries[0] || itemName || '');
@@ -48,16 +38,7 @@ class MovieRecommendation extends BaseRecommendation {
       if (titleNorm === qNorm) sim += 3;
       if (titleNorm.startsWith(qNorm)) sim += 2;
       if (titleNorm.includes(qNorm)) sim += 1;
-
-      // Genre overlap bonus for relevance
-      let genreBonus = 0;
-      if (inputGenres.size > 0 && x.genre_ids) {
-        const candGenres = new Set(x.genre_ids);
-        const overlap = [...inputGenres].some(g => candGenres.has(g));
-        if (overlap) genreBonus = 5; // Boost for shared genres
-      }
-
-      return sim * 10 + rating + genreBonus;
+      return sim * 10 + rating;
     });
 
     const finalItems = [];
