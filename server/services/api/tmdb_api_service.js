@@ -89,7 +89,8 @@ class TmdbApiService {
                 externalId: item.id.toString(),
                 externalSource: 'TMDB',
                 avgRating: item.vote_average ? parseFloat(item.vote_average.toFixed(1)) : 0,
-                externalUrl: `https://www.themoviedb.org/movie/${item.id}`
+                externalUrl: `https://www.themoviedb.org/movie/${item.id}`,
+                genre_ids: item.genres ? item.genres.map(g => g.id) : []
             };
         } catch (error) {
             console.error(`Error fetching TMDB movie details for ID ${tmdbId}:`, error.response ? error.response.data : error.message);

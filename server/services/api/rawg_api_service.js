@@ -25,7 +25,6 @@ class RawgApiService {
 
             const gamesData = response.data.results || [];
 
-            console.log('RAWG Raw Response Data:', JSON.stringify(gamesData, null, 2));
 
             // Filter out DLCs, bundles, etc. (RAWG doesn't have explicit categories like IGDB)
             // We'll filter based on name patterns and check if it's a main game
@@ -37,7 +36,6 @@ class RawgApiService {
                 return true;
             });
 
-            console.log('RAWG Filtered Data:', JSON.stringify(filteredData, null, 2));
 
             const videogames = filteredData.map(game => {
                 return {
@@ -52,12 +50,10 @@ class RawgApiService {
                     externalUrl: game.website || (game.slug ? `https://rawg.io/games/${game.slug}` : null),
                     genres: game.genres ? game.genres.map(g => g.name).join(', ') : 'N/A',
                     platforms: game.platforms ? game.platforms.map(p => p.platform.name).join(', ') : 'N/A',
-                    totalRatingCount: game.ratings_count || 0,
-                    metacritic: game.metacritic || null
+                    totalRatingCount: game.ratings_count || 0
                 };
             });
 
-            console.log('RAWG Mapped Videogames:', JSON.stringify(videogames, null, 2));
 
             // Sort by rating and ratings_count, similar to IGDB
             videogames.sort((a, b) => {
@@ -66,12 +62,10 @@ class RawgApiService {
                 return scoreB - scoreA;
             });
 
-            console.log('RAWG Sorted Videogames:', JSON.stringify(videogames, null, 2));
 
             // Remove internal fields like genres and platforms arrays, keep only strings
             const cleanedVideogames = videogames.map(({ genres, platforms, ...rest }) => rest);
 
-            console.log('RAWG Final Cleaned Videogames:', JSON.stringify(cleanedVideogames, null, 2));
 
             return cleanedVideogames;
 

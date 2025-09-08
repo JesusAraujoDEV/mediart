@@ -4,8 +4,9 @@ const { config } = require('../../config/config');
 class GeminiAiService {
   constructor() {
     this.primaryApiKey = config.apiKeys.googleGemini;
-    this.fallbackApiKey = config.apiKeys.googleGemini2;
-    if (!this.primaryApiKey && !this.fallbackApiKey) {
+    this.secondaryApiKey = config.apiKeys.googleGemini2;
+    this.tertiaryApiKey = config.apiKeys.googleGemini3;
+    if (!this.primaryApiKey && !this.secondaryApiKey && !this.tertiaryApiKey) {
       console.error('No Google Gemini API Keys configured.');
       throw new Error('Google Gemini API Keys are missing.');
     }
@@ -129,7 +130,7 @@ class GeminiAiService {
     if (debug) {
       console.log('Sending prompt to Gemini API:', promptText);
     }
-    console.log('[Gemini] Prompt category:', itemType, 'name:', itemName, 'ctx:', itemContext || '');
+    console.log('[Gemini] Request - Category:', itemType, 'Name:', itemName, 'Context:', itemContext || 'none');
 
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -160,44 +161,61 @@ class GeminiAiService {
   }
 
   async generateRecommendations(itemType, itemName, itemContext = '') {
-    if (!this.primaryApiKey && !this.fallbackApiKey) {
+    if (!this.primaryApiKey && !this.secondaryApiKey && !this.tertiaryApiKey) {
       console.error('No Gemini API Keys configured. Gemini AI service will be unavailable.');
       return [];
     }
 
     const promptText = this._buildDomainPrompt(itemType, itemName, itemContext);
+    const apiKeys = [
+      { key: this.primaryApiKey, name: 'Primary' },
+      { key: this.secondaryApiKey, name: 'Secondary' },
+      { key: this.tertiaryApiKey, name: 'Tertiary' }
+    ];
 
-    // Try primary API key first
-    if (this.primaryApiKey) {
+    // Try each API key in sequence with retry logic
+    for (const [index, { key, name }] of apiKeys.entries()) {
+      if (!key) {
+        console.warn(`${name} Gemini API Key not configured, skipping...`);
+        continue;
+      }
+
       try {
-        const rawResponseText = await this._makeGeminiRequest(this.primaryApiKey, promptText, itemType, itemName, itemContext);
+        console.log(`[Gemini] Attempting with ${name} API Key (attempt ${index + 1}/3)...`);
+        const rawResponseText = await this._makeGeminiRequest(key, promptText, itemType, itemName, itemContext);
+        console.log(`[Gemini] ${name} API Key succeeded.`);
         return this._processResponse(rawResponseText, itemType, itemName);
       } catch (error) {
-        console.error('Primary Gemini API Key failed:', error.message);
-        if (String(error.message || '').includes('429')) {
-          console.warn('Primary Gemini API quota exceeded. Trying fallback key.');
+        console.error(`[Gemini] ${name} API Key failed:`, error.message);
+
+        // Check for specific error types and provide appropriate handling
+        const errorMessage = String(error.message || '').toLowerCase();
+        if (errorMessage.includes('429') || errorMessage.includes('quota')) {
+          console.warn(`[Gemini] ${name} API quota exceeded. Trying next key...`);
+        } else if (errorMessage.includes('403') || errorMessage.includes('unauthorized')) {
+          console.warn(`[Gemini] ${name} API key unauthorized or invalid. Trying next key...`);
+        } else if (errorMessage.includes('500') || errorMessage.includes('502') || errorMessage.includes('503')) {
+          console.warn(`[Gemini] ${name} API server error. Trying next key...`);
+        } else if (errorMessage.includes('timeout') || errorMessage.includes('network')) {
+          console.warn(`[Gemini] ${name} API network/timeout error. Trying next key...`);
+        } else {
+          console.warn(`[Gemini] ${name} API unknown error: ${error.message}. Trying next key...`);
         }
+
+        // Add a small delay between retries to be respectful
+        if (index < apiKeys.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+        }
+
+        // Continue to next key
+        continue;
       }
     }
 
-    // Try fallback API key if primary failed or not available
-    if (this.fallbackApiKey) {
-      try {
-        console.log('Attempting with fallback Gemini API Key...');
-        const rawResponseText = await this._makeGeminiRequest(this.fallbackApiKey, promptText, itemType, itemName, itemContext);
-        return this._processResponse(rawResponseText, itemType, itemName);
-      } catch (error) {
-        console.error('Fallback Gemini API Key also failed:', error.message);
-        if (String(error.message || '').includes('429')) {
-          console.warn('Fallback Gemini API quota exceeded. Please wait or check your plan.');
-        }
-        throw error;
-      }
-    }
-
-    // If we reach here, both keys failed
-    console.error('Both Gemini API Keys failed. Service unavailable.');
-    return [];
+    // If we reach here, all keys failed
+    console.error('[Gemini] All API Keys failed. Service unavailable.');
+    console.error('[Gemini] Recommendation request failed for:', { itemType, itemName, itemContext });
+    throw new Error('All Gemini API Keys exhausted. Service temporarily unavailable. Please try again later or check API key configurations.');
   }
 
   _processResponse(rawResponseText, itemType, itemName) {

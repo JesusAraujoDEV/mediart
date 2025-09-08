@@ -42,11 +42,9 @@ router.get(
             break;
           case 'videogame':
             results = { videogames: await searchService.searchIgdb(q) };
-            console.log('Search endpoint videogame (IGDB) results:', JSON.stringify(results, null, 2));
             break;
           case 'rawg':
             results = { videogames: await searchService.searchRawg(q) };
-            console.log('Search endpoint rawg results:', JSON.stringify(results, null, 2));
             break;
           case 'book':
             results = { books: await searchService.searchGoogleBooks(q) };
