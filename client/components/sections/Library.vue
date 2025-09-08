@@ -278,7 +278,7 @@ const viewPlaylist = async (playlist: Playlist) => {
   try {
     await router.push(`/studio/playlists/${playlist.id}`)
   } catch (err) {
-    console.error('Error al navegar:', err)
+  // navigation error; logging removed
   } finally {
     loadingPlaylist.value = null
   }
@@ -336,7 +336,7 @@ const removePlaylist = async (playlist: Playlist) => {
       })
     )
   } catch (err: any) {
-    console.error('Error:', err)
+  // error; logging removed
     await import('sweetalert2').then(({ default: Swal }) =>
       Swal.fire('Error', err.message || 'No se pudo quitar la playlist', 'error')
     )

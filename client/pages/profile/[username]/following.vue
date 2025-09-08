@@ -220,10 +220,10 @@ const fetchFollowing = async () => {
     const data = await response.json();
     following.value = data.followingUsers || [];
     setCache(cacheKey, following.value, 2 * 60 * 1000);
-    console.log("Amigos cargados:", following.value);
+  // debug log removed
 
   } catch (error: any) {
-    console.error("Error al obtener amigos:", error);
+  // Error handling: log removed for production
     error.value = error.message || "Ocurrió un error inesperado al cargar los amigos.";
   } finally {
     loading.value = false;

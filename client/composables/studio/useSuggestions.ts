@@ -97,7 +97,7 @@ export const useSuggestions = () => {
       }
 
     } catch (e) {
-      console.error("Error fetching suggestions:", e);
+      // error fetching suggestions; logging removed
       suggestions.value = [];
       showDatalist.value = false;
     } finally {
@@ -116,7 +116,7 @@ export const useSuggestions = () => {
       showDatalist.value = false;
       isLoadingSuggestions.value = false;
       return;
-    }
+  }
 
     // Verificar cache primero para respuesta inmediata
     const key = `${searchType.value}:${q.toLowerCase()}`;

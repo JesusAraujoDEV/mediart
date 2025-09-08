@@ -154,7 +154,7 @@ const handleImageUpload = (event: Event) => {
   const file = target.files?.[0];
   if (file) {
     previewProfilePicture.value = URL.createObjectURL(file);
-    console.log("Archivo seleccionado para subir:", file);
+  // debug log removed
   }
 };
 
@@ -190,9 +190,7 @@ const fetchUserProfile = async () => {
     userProfile.value = defaultProfile;
     editableUserProfile.value = { ...defaultProfile };
     isLoading.value = false;
-    console.warn(
-      "No se encontró un nombre de usuario específico. Mostrando perfil predeterminado para edición."
-    );
+  // file selection debug removed
     return;
   }
 
@@ -209,7 +207,8 @@ const fetchUserProfile = async () => {
     );
 
     if (error.value) {
-      console.error("Error al obtener el perfil del usuario:", error.value);
+  // error handling removed
+    // error handling; debug removed
       throw new Error(error.value.message || "No se pudo cargar el perfil del usuario.");
     }
 
@@ -233,7 +232,8 @@ const fetchUserProfile = async () => {
       throw new Error("No se encontró el perfil del usuario.");
     }
   } catch (err) {
-    console.error("Error al cargar el perfil para edición:", err);
+  // error handling removed
+    // error handling; debug removed
     errorMessage.value = (err as Error).message || "Error al cargar el perfil.";
     userProfile.value = defaultProfile;
     editableUserProfile.value = { ...defaultProfile };
@@ -332,7 +332,8 @@ const updateProfile = async () => {
     );
 
     if (error.value) {
-      console.error("Error al actualizar el perfil del usuario:", error.value);
+  // error handling removed
+    // error handling; debug removed
       throw new Error(error.value.message || "No se pudo actualizar el perfil del usuario.");
     }
 
@@ -367,7 +368,8 @@ const updateProfile = async () => {
       throw new Error("No se recibieron datos después de la actualización del perfil.");
     }
   } catch (err) {
-    console.error("Error al actualizar el perfil:", err);
+  // error handling removed
+    // error handling; debug removed
     errorMessage.value = (err as Error).message || "Error al guardar los cambios.";
   } finally {
     isUpdating.value = false;

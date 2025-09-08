@@ -42,6 +42,6 @@ function handleImageError(event: Event) {
   if (img && !img.src.includes(PLACEHOLDER)) {
     img.src = PLACEHOLDER
   }
-  console.warn('Error loading profile image, using placeholder')
+  // image load warning removed
 }
 </script>

@@ -56,7 +56,7 @@ export const usePasswordForgot = () => {
       const genericErrorMessage = 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde.';
       error.value = genericErrorMessage;
       showNotification('Error', genericErrorMessage, 'error');
-      console.error('Request password reset error:', err);
+  // request password reset error; logging removed
     } finally {
       loading.value = false;
     }

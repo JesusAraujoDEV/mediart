@@ -58,7 +58,6 @@ export const useRecommendations = () => {
   
 
     if (!useLastPayload && (!effectiveTags || effectiveTags.length === 0)) {
-      console.warn('[useRecommendations] No effectiveTags and not using lastPayload, showing alert');
       Swal.fire('Atención', 'Por favor, selecciona al menos un elemento o genera recomendaciones primero.', 'warning');
       return;
     }
@@ -112,12 +111,7 @@ export const useRecommendations = () => {
         return;
       }
   const url = `${config.public.backend}/api/recommendation/${categoryToUse}`;
-      const token = localStorage.getItem('token');
-
-      
-      if (!token) {
-        console.warn('[useRecommendations] No authentication token found');
-      }
+  const token = localStorage.getItem('token');
 
       // Guardar el payload para permitir regenerar exactamente la misma petición posteriormente
       lastPayload = { seedItems: seedItemsForRequest.slice(), itemName: itemNameForRequest, category: categoryToUse };
@@ -136,7 +130,6 @@ export const useRecommendations = () => {
 
       if (!resp.ok) {
         const errBody = await resp.json().catch(() => ({}));
-        console.error('[useRecommendations] API Error:', errBody);
         throw new Error(errBody.message || `Error ${resp.status}: ${resp.statusText}`);
       }
 
@@ -168,20 +161,14 @@ export const useRecommendations = () => {
         recommendationsError.value = 'No se encontraron recomendaciones para los criterios seleccionados.';
       }
 
-      try { 
-  recommendationsCache.set(payloadKey, { ts: Date.now(), data: mapped.slice() });
-      } catch (e) { 
-        console.warn('[useRecommendations] Cache error:', e);
+      try {
+        recommendationsCache.set(payloadKey, { ts: Date.now(), data: mapped.slice() });
+      } catch (e) {
+        // cache failures are non-fatal; ignore in production
       }
     } catch (error: any) {
-  console.error('[useRecommendations] Error occurred:', error);
-  console.error('[useRecommendations] Error message:', error?.message);
-  console.error('[useRecommendations] Error stack:', error?.stack);
-  console.error('[useRecommendations] Error type:', error?.constructor?.name);
-  console.error('[useRecommendations] Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
       recommendationsError.value = error?.message || 'Ocurrió un error inesperado.';
     } finally {
-      
       recommendationsLoading.value = false;
     }
   };
@@ -213,17 +200,9 @@ export const useRecommendations = () => {
       const username = user.username || user.email?.split('@')[0] || 'user';
       router.push(`/profile/${username}`);
     } catch (error: any) {
-      console.error('useRecommendations: createPlaylist error', error);
       Swal.fire('Error', error?.message || 'Ocurrió un error inesperado al crear la playlist.', 'error');
     } finally { playlistSaving.value = false; }
   };
-
-  // Dev helper: devuelve una copia del último payload enviado (para debug)
-  const getLastPayload = () => {
-    if (!lastPayload) return null;
-    return { seedItems: lastPayload.seedItems.slice(), itemName: lastPayload.itemName, category: lastPayload.category };
-  };
-
   return {
     recommendations,
     recommendationsLoading,
@@ -233,7 +212,6 @@ export const useRecommendations = () => {
     newPlaylist,
     playlistSaving,
     sendData,
-  getLastPayload,
     removeRecommendation,
     createPlaylist,
   };

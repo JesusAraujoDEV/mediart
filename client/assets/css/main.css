@@ -10,3 +10,13 @@
 
 /* Import existing styles */
 @import '../../styles/float.css';
+
+/* Ensure all buttons show pointer cursor for discoverability */
+button, .btn {
+  cursor: pointer;
+}
+
+/* Icons inside selects shouldn't change cursor */
+.select-wrapper .select-icon {
+  cursor: default;
+}

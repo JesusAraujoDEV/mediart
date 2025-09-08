@@ -280,7 +280,7 @@ async function handleSearch() {
     if (!response.ok) throw new Error(`Error: ${response.statusText}`)
     
     const data = await response.json()
-    console.log('Respuesta de búsqueda:', data)
+  // debug log removed
     
     // Normalizar los datos de búsqueda
     if (Array.isArray(data)) {
@@ -298,9 +298,9 @@ async function handleSearch() {
       suggestions.value = []
     }
     
-    console.log('Sugerencias normalizadas:', suggestions.value)
+  // debug log removed
   } catch (error) {
-    console.error('Error en búsqueda:', error)
+  // search error: logging removed
     suggestions.value = []
   }
 }
@@ -364,7 +364,7 @@ async function createPlaylist() {
       }))
     }
 
-    console.log('Enviando playlist:', body)
+  // debug log removed
 
     const resp = await fetch(`${config.public.backend}/api/playlists`, {
       method: 'POST',
@@ -399,7 +399,7 @@ async function createPlaylist() {
       router.push(`/profile/${username}`)
     }
   } catch (err: any) {
-    console.error('Error creando playlist:', err)
+  // playlist creation error: logging removed
     await import('sweetalert2').then(({ default: Swal }) => Swal.fire({
       icon: 'error',
       title: 'Error al crear playlist',

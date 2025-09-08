@@ -62,7 +62,7 @@ export const useSearch = () => {
         await searchForGeneralItems(q);
       }
     } catch (e: any) {
-      console.error("Error en búsqueda:", e);
+  // error in search; logging removed for production
       searchError.value = true;
       searchMessage.value = e?.message || "Error al realizar la búsqueda.";
     } finally {

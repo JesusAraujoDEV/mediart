@@ -57,7 +57,7 @@ export function useItem() {
       );
 
       if (error.value) {
-        console.error('Error al obtener el ítem:', error.value);
+  // item fetch error; logging removed
         throw new Error(
           (error.value as any).data?.message || (error.value as any).message || 'No se pudo cargar el ítem.'
         );
@@ -69,7 +69,7 @@ export function useItem() {
         throw new Error('No se encontró el ítem con el ID proporcionado.');
       }
     } catch (err) {
-      console.error('Error en fetchItem:', err);
+  // fetchItem exception; logging removed
       errorMessage.value = (err as Error).message || 'Error al cargar el ítem.';
     } finally {
       isLoading.value = false;

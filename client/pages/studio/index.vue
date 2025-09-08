@@ -145,10 +145,6 @@
           </button>
         </div>
         <div v-else-if="recommendations.length > 0" class="w-full h-full flex flex-col items-center relative pb-20">
-          <!-- Debug info (temporal) -->
-          <div class="text-xs text-gray-500 mb-2">
-            Debug: {{ recommendations.length }} recomendaciones, loading: {{ recommendationsLoading }}, error: {{ recommendationsError }}
-          </div>
           <div class="flex items-center justify-between w-full mb-6">
             <h3 class="text-3xl font-extrabold">Tus Recomendaciones</h3>
             <!-- Botones de alternancia de modo -->
@@ -358,7 +354,6 @@ const {
   showPlaylistModal,
   playlistSaving,
   sendData,
-  getLastPayload,
   removeRecommendation,
   createPlaylist,
 } = useRecommendations();
@@ -441,7 +436,7 @@ function retryGenerateRecommendations() {
 // Wrapper local para el botón Regenerar (garantiza scope y logging)
 function regenerate() {
   if (recommendations.value.length === 0) {
-    console.warn('[studio] No recommendations to regenerate from');
+  // no recommendations to regenerate from
     return;
   }
 

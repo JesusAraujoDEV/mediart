@@ -679,7 +679,7 @@ const formatDateTime = (dateString: string): string => {
     };
     return new Date(dateString).toLocaleDateString('es-ES', options);
   } catch (error) {
-    console.error('Error al formatear fecha:', error);
+  // date format error; logging removed
     return 'Fecha inválida';
   }
 };
@@ -715,7 +715,7 @@ const fetchPlaylist = async () => {
     );
 
     if (error.value) {
-      console.error("Error al obtener la playlist:", error.value);
+  // playlist fetch error; logging removed
       throw new Error(error.value?.data?.message || error.value?.message || "No se pudo cargar la playlist.");
     }
 
@@ -732,7 +732,7 @@ const fetchPlaylist = async () => {
       throw new Error("No se encontró la playlist con el ID proporcionado.");
     }
   } catch (err) {
-    console.error("Error en fetchPlaylist:", err);
+  // fetchPlaylist error; logging removed
     errorMessage.value = (err as Error).message || "Error al cargar la playlist.";
   } finally {
     isLoading.value = false;
@@ -758,7 +758,7 @@ const checkIfPlaylistSaved = async () => {
       isPlaylistSaved.value = savedPlaylists.some((p: any) => p.id === playlist.value.id);
     }
   } catch (err) {
-    console.error('Error al verificar si la playlist está guardada:', err);
+  // check saved playlist error; logging removed
   }
 };
 
@@ -1000,7 +1000,7 @@ async function searchUsers(query: string) {
     searchResults.value = data.value || [];
     showSearchResults.value = searchResults.value.length > 0;
   } catch (err) {
-    console.error('Error al buscar usuarios:', err);
+  // user search error; logging removed
     searchResults.value = [];
     showSearchResults.value = false;
   } finally {
@@ -1070,7 +1070,7 @@ async function refreshCollaboratorsList() {
     );
 
     if (error.value) {
-      console.error("Error al actualizar la lista de colaboradores:", error.value);
+  // collaborators update error; logging removed
       return;
     }
 
@@ -1078,7 +1078,7 @@ async function refreshCollaboratorsList() {
       playlist.value.collaborators = data.value.collaborators;
     }
   } catch (err) {
-    console.error("Error al refrescar la lista de colaboradores:", err);
+  // collaborators refresh error; logging removed
   }
 }
 

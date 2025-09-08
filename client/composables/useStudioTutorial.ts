@@ -40,7 +40,7 @@ export function useStudioTutorial() {
 
       isTutorialActive.value = false
     } catch (err) {
-      console.warn('Error during ensureCleanState:', err)
+  // ensureCleanState: debug removed
     }
   }
 
@@ -315,7 +315,7 @@ export function useStudioTutorial() {
           if (doneButton && doneButton.textContent?.includes('¡Entendido!') && !doneButton.hasAttribute('data-tutorial-listener')) {
             doneButton.setAttribute('data-tutorial-listener', 'true')
             doneButton.addEventListener('click', () => {
-              console.log('Botón Entendido clickeado desde onHighlightStarted')
+              // debug log removed
               stopTutorial()
             })
           }
@@ -373,7 +373,7 @@ export function useStudioTutorial() {
         if (txt.includes('entendido') || isLast || hasDoneAttr || isCloseBtn) {
           try { e.preventDefault() } catch {}
           try { e.stopPropagation() } catch {}
-          console.log('Delegated listener: detected final action or close — closing tutorial', { txt, isLast, hasDoneAttr, isCloseBtn })
+          // debug log removed
           forceStopTutorial()
           try { document.removeEventListener('click', onDocumentClick, true) } catch {}
           try { delete (window as any).__mediart_driver_done_listener } catch {}
@@ -401,7 +401,7 @@ export function useStudioTutorial() {
                 b.addEventListener('click', (ev) => {
                   try { ev.preventDefault() } catch {}
                   try { ev.stopPropagation() } catch {}
-                  console.log('Popover observer: Entendido or Close clicked — closing tutorial')
+                  // debug log removed
                   forceStopTutorial()
                 })
               }
@@ -421,7 +421,7 @@ export function useStudioTutorial() {
       try {
         driverInstance.value.destroy()
       } catch (error) {
-        console.warn('Error destroying driver instance:', error)
+  // destroy driver: debug removed
       }
       driverInstance.value = null
     }
@@ -450,7 +450,7 @@ export function useStudioTutorial() {
       try {
         driverInstance.value.destroy()
       } catch (error) {
-        console.warn('Error destroying driver instance:', error)
+  // destroy driver: debug removed
       }
       driverInstance.value = null
     }

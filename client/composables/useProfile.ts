@@ -82,7 +82,7 @@ export function useProfile() {
         }
       );
       if (error.value) {
-        console.error("Error al cargar el perfil del usuario:", error.value);
+  // error handling; logging removed
         userProfile.value = defaultProfile;
         return;
       }
@@ -99,7 +99,7 @@ export function useProfile() {
         userProfile.value = defaultProfile;
       }
     } catch (e) {
-      console.error("Excepción inesperada al cargar el perfil:", e);
+  // unexpected exception; logging removed
       userProfile.value = defaultProfile;
     } finally {
       isLoading.value = false;
@@ -123,7 +123,7 @@ export function useProfile() {
       const data = await resp.json();
       isFriend.value = Array.isArray(data) && data.some((u: any) => u.id === userProfile.value.id);
     } catch (e) {
-      console.error("Error al verificar si ya sigues a este usuario:", e);
+  // follow check error; logging removed
       isFriend.value = false;
     }
   }
@@ -223,7 +223,7 @@ export function useProfile() {
         },
       });
       if (error.value) {
-        console.error(`Error al ${action === "add" ? "agregar" : "eliminar"} amigo:`, error.value);
+  // follow/unfollow error; logging removed
         friendActionError.value = true;
         friendActionMessage.value =
           (error.value as any).data?.message ||
@@ -270,7 +270,7 @@ export function useProfile() {
         }
       }
     } catch (e) {
-      console.error(`Excepción al ${action === "add" ? "agregar" : "eliminar"} amigo:`, e);
+  // follow/unfollow exception; logging removed
       friendActionError.value = true;
       friendActionMessage.value = `Error inesperado al ${action === "add" ? "agregar" : "eliminar"} amigo.`;
       isFriend.value = action === "remove";

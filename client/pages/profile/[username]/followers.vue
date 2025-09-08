@@ -220,10 +220,10 @@ const fetchFollowers = async () => {
     const data = await response.json();
     followers.value = data.followersUsers || [];
     setCache(cacheKey, followers.value, 2 * 60 * 1000);
-    console.log("Seguidores cargados:", followers.value);
+  // debug log removed
 
   } catch (error: any) {
-    console.error("Error al obtener seguidores:", error);
+  // Error handling: log removed for production
     error.value = error.message || "Ocurrió un error inesperado al cargar los seguidores.";
   } finally {
     loading.value = false;

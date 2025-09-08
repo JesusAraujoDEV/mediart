@@ -263,7 +263,7 @@ const loadUserProfile = async () => {
     );
 
     if (error.value) {
-      console.error("Error al cargar el perfil del usuario:", error.value);
+  // error loading user profile; logging removed
       return;
     }
 
@@ -275,7 +275,7 @@ const loadUserProfile = async () => {
       };
     }
   } catch (err) {
-    console.error("Excepción inesperada al cargar el perfil:", err);
+  // unexpected exception loading profile; logging removed
   } finally {
     isLoading.value = false;
   }

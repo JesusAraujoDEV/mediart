@@ -56,7 +56,7 @@ export const useAuthLogin = () => {
     } catch (err: any) {
       error.value = err.message || 'Ocurrió un error inesperado durante el inicio de sesión.';
       showNotification('Error de Inicio de Sesión', error.value || 'Ocurrió un error inesperado durante el inicio de sesión.', 'error');
-      console.error('Login error:', err);
+  // login error; logging removed
     } finally {
       loading.value = false;
     }

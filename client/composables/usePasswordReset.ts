@@ -92,7 +92,7 @@ export const usePasswordReset = () => {
     } catch (err: any) {
       error.value = err.message || 'Ocurrió un error inesperado al restablecer la contraseña. Intenta de nuevo.';
       showNotification('Error', error.value || 'Ocurrió un error inesperado al restablecer la contraseña. Intenta de nuevo.', 'error');
-      console.error('Reset password error:', err);
+  // reset password error; logging removed
     } finally {
       loading.value = false;
     }
