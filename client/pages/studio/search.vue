@@ -279,25 +279,31 @@ const { startTutorial } = useStudioTutorial();
 }
 
 .driver-popover-custom .driver-popover-close-btn {
-  top: 0.75rem !important; /* Ajustar posición vertical del botón de cerrar */
-  right: 0.75rem !important; /* Ajustar posición horizontal */
-  width: 24px !important; /* Tamaño consistente */
-  height: 24px !important;
-  background: rgba(139, 92, 246, 0.2) !important; /* Fondo más visible */
-  border-radius: 50% !important; /* Circular para mejor UX */
+  top: 0.75rem !important;
+  right: 0.75rem !important;
+  width: 28px !important; /* Aumentar tamaño */
+  height: 28px !important; /* Aumentar tamaño */
+  background: rgba(139, 92, 246, 0.3) !important; /* Fondo un poco más opaco */
+  border: 1px solid rgba(139, 92, 246, 0.4) !important; /* Borde para más contraste */
+  border-radius: 50% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 14px !important; /* Tamaño del ícono */
-  opacity: 0.8 !important;
-  transition: opacity 0.2s ease !important;
+  font-size: 18px !important; /* Ícono más grande */
+  line-height: 1 !important; /* Asegurar centrado vertical del texto */
+  transition: all 0.2s ease !important; /* Transición para todo */
+  color: #fff !important; /* Asegurar que la X sea blanca */
+  padding: 0 !important; /* Resetear padding */
 }
 
 .driver-popover-custom .driver-popover-close-btn:hover {
-  opacity: 1 !important;
-  background: rgba(139, 92, 246, 0.4) !important;
+  background: rgba(139, 92, 246, 0.5) !important; /* Fondo más opaco en hover */
+  border-color: rgba(139, 92, 246, 0.6) !important;
+  transform: scale(1.1); /* Efecto de zoom en hover */
 }
 
+.driver-popover-custom .driver-popover-next-btn,
+.driver-popover-custom .driver-popover-prev-btn,
 .driver-popover-custom .driver-popover-next-btn,
 .driver-popover-custom .driver-popover-prev-btn,
 .driver-popover-custom .driver-popover-done-btn {
@@ -309,19 +315,18 @@ const { startTutorial } = useStudioTutorial();
   font-weight: 600 !important;
   padding: 0.5rem 1rem !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.1) !important;
+  box-shadow: none !important;
+  text-shadow: none !important; /* Eliminar sombra de texto */
   margin: 0 0.25rem !important; /* Espaciado entre botones */
 }
-
 .driver-popover-custom .driver-popover-next-btn:hover,
 .driver-popover-custom .driver-popover-prev-btn:hover,
 .driver-popover-custom .driver-popover-done-btn:hover {
   background: rgba(139, 92, 246, 0.2) !important;
   border-color: rgba(139, 92, 246, 0.5) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 6px 8px -1px rgba(139, 92, 246, 0.2) !important;
+  box-shadow: none !important;
 }
-
 .driver-popover-custom .driver-popover-progress-text {
   color: #9ca3af !important;
   font-weight: 500 !important;

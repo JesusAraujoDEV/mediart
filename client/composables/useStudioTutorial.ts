@@ -8,8 +8,46 @@ export function useStudioTutorial() {
   const driverInstance = ref<Driver | null>(null)
   let popoverObserver: MutationObserver | null = null
 
+  // Limpieza defensiva: elimina instancias y listeners previos para evitar popovers duplicados
+  function ensureCleanState() {
+    try {
+      // Destruir instancia previa si existe
+      if (driverInstance.value) {
+        try { driverInstance.value.destroy() } catch (e) { /* ignore */ }
+        driverInstance.value = null
+      }
+
+      // Quitar overlays y popovers remanentes
+      const overlays = document.querySelectorAll('.driver-overlay, .driver-popover, .driver-popover-custom')
+      overlays.forEach(el => el.remove())
+
+      // Remover resaltados
+      const highlighted = document.querySelectorAll('.driver-highlighted-element')
+      highlighted.forEach(el => el.classList.remove('driver-highlighted-element'))
+
+      // Remover listener delegado si existe
+      const globalL = (window as any).__mediart_driver_done_listener as ((e: MouseEvent) => void) | undefined
+      if (globalL) {
+        try { document.removeEventListener('click', globalL, true) } catch (err) { /* ignore */ }
+        try { delete (window as any).__mediart_driver_done_listener } catch (err) { /* ignore */ }
+      }
+
+      // Desconectar observer si existe
+      if (popoverObserver) {
+        try { popoverObserver.disconnect() } catch (err) { /* ignore */ }
+        popoverObserver = null
+      }
+
+      isTutorialActive.value = false
+    } catch (err) {
+      console.warn('Error during ensureCleanState:', err)
+    }
+  }
+
   const startTutorial = async () => {
-    await nextTick()
+  // Asegurar que no haya una instancia previa corriendo (evita popovers/btns duplicados)
+  ensureCleanState()
+  await nextTick()
 
     // Detectar la página actual
     const currentPath = window.location.pathname
@@ -277,9 +315,9 @@ export function useStudioTutorial() {
       }
     }
 
-    // Exponer el listener globalmente para poder limpiarlo desde stop/forceStop
-    ;(window as any).__mediart_driver_done_listener = onDocumentClick
-    document.addEventListener('click', onDocumentClick, true)
+  // Exponer el listener globalmente para poder limpiarlo desde stop/forceStop
+  ;(window as any).__mediart_driver_done_listener = onDocumentClick
+  document.addEventListener('click', onDocumentClick, true)
 
     // MutationObserver: cuando se cree un popover, buscar y enlazar directamente
     popoverObserver = new MutationObserver((mutations) => {
@@ -326,8 +364,14 @@ export function useStudioTutorial() {
     const overlays = document.querySelectorAll('.driver-overlay')
     overlays.forEach(overlay => overlay.remove())
 
-    const popovers = document.querySelectorAll('.driver-popover')
+    const popovers = document.querySelectorAll('.driver-popover, .driver-popover-custom')
     popovers.forEach(popover => popover.remove())
+
+    // Desconectar observer si está activo
+    if (popoverObserver) {
+      try { popoverObserver.disconnect() } catch (err) { /* ignore */ }
+      popoverObserver = null
+    }
   }
 
   const forceStopTutorial = () => {
@@ -345,12 +389,18 @@ export function useStudioTutorial() {
     }
 
     // Limpiar elementos del DOM
-  const overlays = document.querySelectorAll('.driver-overlay, .driver-popover, .driver-popover-custom')
+    const overlays = document.querySelectorAll('.driver-overlay, .driver-popover, .driver-popover-custom')
     overlays.forEach(element => {
       if (element.parentNode) {
         element.parentNode.removeChild(element)
       }
     })
+
+    // Desconectar observer si está activo
+    if (popoverObserver) {
+      try { popoverObserver.disconnect() } catch (err) { /* ignore */ }
+      popoverObserver = null
+    }
 
     // Remover clases de resaltado
     const highlightedElements = document.querySelectorAll('.driver-highlighted-element')

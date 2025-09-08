@@ -12,7 +12,7 @@
             </div>
             <div>
               <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Detalles de la Playlist</h1>
-              <p class="text-sm text-gray-400">Dale un nombre y personalidad a tu nueva creación.</p>
+              <p class="text-sm text-white">Dale un nombre y personalidad a tu nueva creación.</p>
             </div>
             <button @click="startTutorial" 
               class="glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center gap-2 text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm py-2 px-4 rounded-full font-semibold text-sm ml-auto"
@@ -59,7 +59,7 @@
             </div>
             <div>
               <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">Agrega Contenido</h2>
-              <p class="text-sm text-gray-400">Busca y añade canciones, películas, libros y más.</p>
+              <p class="text-sm text-white">Busca y añade canciones, películas, libros y más.</p>
             </div>
           </div>
           
@@ -119,19 +119,27 @@
   
               <div class="w-full md:w-44 flex-shrink-0">
                 <label for="itemType" class="block text-sm font-semibold text-gray-200 mb-2">Filtrar por tipo</label>
-                <select id="itemType" v-model="searchType" @change="onChangeSearchType"
-                  class="w-full p-3 rounded-lg bg-gray-700/80 text-white border border-gray-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 cursor-pointer appearance-none bg-no-repeat bg-right-3"
-                  style="background-image: url('data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%239CA3AF%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22/%3E%3C/svg%3E');"
-                  data-tutorial="item-type">
-                  <option value="general">Todo</option>
-                  <option value="song">Canciones</option>
-                  <option value="artist">Artistas</option>
-                  <option value="album">Álbumes</option>
-                  <option value="movie">Películas</option>
-                  <option value="tvshow">Series</option>
-                  <option value="book">Libros</option>
-                  <option value="videogame">Videojuegos</option>
-                </select>
+                <div class="relative">
+                  <select id="itemType" v-model="searchType" @change="onChangeSearchType" @focus="itemTypeOpen = true" @blur="itemTypeOpen = false"
+                    class="w-full p-3 pr-10 rounded-lg bg-gray-700/80 text-white border border-gray-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 cursor-pointer appearance-none"
+                    data-tutorial="item-type">
+                    <option value="general">Todo</option>
+                    <option value="song">Canciones</option>
+                    <option value="artist">Artistas</option>
+                    <option value="album">Álbumes</option>
+                    <option value="movie">Películas</option>
+                    <option value="tvshow">Series</option>
+                    <option value="book">Libros</option>
+                    <option value="videogame">Videojuegos</option>
+                  </select>
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" 
+                      :class="['text-gray-400 transition-transform duration-200', { 'rotate-180': itemTypeOpen }]"
+                      class="transition-transform duration-200">
+                      <path d="M7 10l5 5 5-5H7z"/>
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
   
@@ -226,6 +234,7 @@ const playlistForm = reactive({
 
 const selectedItems = ref<SearchSuggestion[]>([])
 const isAddingItem = ref(false)
+const itemTypeOpen = ref(false)
 
 // Composable para el tutorial interactivo
 const { startTutorial } = useStudioTutorial()

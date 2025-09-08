@@ -129,7 +129,7 @@
 
     <div class="flex-grow flex w-full max-w-6xl items-center justify-center p-4">
       <div data-tutorial="recommendations-area"
-        class="w-full h-full glassEffect max-h-[80vh] bg-gray-800/50 rounded-lg p-6 flex flex-col items-center justify-center text-white text-xl shadow-2xl overflow-hidden relative custom-main-scroll">
+        class="w-full h-full glassEffect max-h-[80vh] bg-gray-800/50 rounded-lg p-6 flex flex-col items-center justify-center text-white text-xl shadow-2xl overflow-visible relative custom-main-scroll">
         <div v-if="recommendationsLoading" class="flex flex-col items-center text-center">
           <p class="text-xl mb-4 text-gray-300">Generando recomendaciones...</p>
           <svg class="animate-spin h-10 w-10 text-purple-400 mt-4" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -175,7 +175,7 @@
               </button>
             </div>
           </div>
-          <div ref="recommendationsScrollRef" class="w-full flex-grow overflow-y-auto px-2 custom-main-scroll" @scroll="handleScroll">
+          <div ref="recommendationsScrollRef" class="w-full flex-grow overflow-y-auto p-4 custom-main-scroll" @scroll="handleScroll">
             <div :class="[
               'pb-4 transition-all duration-500',
               viewMode === 'horizontal' ? 'grid grid-cols-1 gap-6' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
@@ -586,26 +586,6 @@ select:focus::after {
   margin-bottom: 1rem !important; /* Más margen inferior */
 }
 
-.driver-popover-custom .driver-popover-close-btn {
-  top: 0.75rem !important; /* Ajustar posición vertical del botón de cerrar */
-  right: 0.75rem !important; /* Ajustar posición horizontal */
-  width: 24px !important; /* Tamaño consistente */
-  height: 24px !important;
-  background: rgba(139, 92, 246, 0.2) !important; /* Fondo más visible */
-  border-radius: 50% !important; /* Circular para mejor UX */
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 14px !important; /* Tamaño del ícono */
-  opacity: 0.8 !important;
-  transition: opacity 0.2s ease !important;
-}
-
-.driver-popover-custom .driver-popover-close-btn:hover {
-  opacity: 1 !important;
-  background: rgba(139, 92, 246, 0.4) !important;
-}
-
 .driver-popover-custom .driver-popover-next-btn,
 .driver-popover-custom .driver-popover-prev-btn,
 .driver-popover-custom .driver-popover-done-btn {
@@ -617,57 +597,47 @@ select:focus::after {
   font-weight: 600 !important;
   padding: 0.5rem 1rem !important;
   transition: all 0.3s ease !important;
-  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.1) !important;
+  box-shadow: none !important; /* quitar sombra según pedido */
+  text-shadow: none !important; /* Eliminar sombra de texto */
   margin: 0 0.25rem !important; /* Espaciado entre botones */
 }
-
 .driver-popover-custom .driver-popover-next-btn:hover,
 .driver-popover-custom .driver-popover-prev-btn:hover,
 .driver-popover-custom .driver-popover-done-btn:hover {
   background: rgba(139, 92, 246, 0.2) !important;
   border-color: rgba(139, 92, 246, 0.5) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 6px 8px -1px rgba(139, 92, 246, 0.2) !important;
+  box-shadow: none !important; /* evitar sombra en hover */
 }
 
-.driver-popover-custom .driver-popover-progress-text {
-  color: #9ca3af !important;
-  font-weight: 500 !important;
-  margin-bottom: 0.5rem !important; /* Espacio antes de la barra */
+.driver-popover-custom .driver-popover-close-btn {
+  top: 0.75rem !important;
+  right: 0.75rem !important;
+  width: 28px !important; /* Aumentar tamaño */
+  height: 28px !important; /* Aumentar tamaño */
+  background: rgba(139, 92, 246, 0.3) !important; /* Fondo un poco más opaco */
+  border: 1px solid rgba(139, 92, 246, 0.4) !important; /* Borde para más contraste */
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 18px !important; /* Ícono más grande */
+  line-height: 1 !important; /* Asegurar centrado vertical del texto */
+  transition: all 0.2s ease !important; /* Transición para todo */
+  color: #fff !important; /* Asegurar que la X sea blanca */
+  padding: 0 !important; /* Resetear padding */
 }
 
-.driver-popover-custom .driver-popover-progress-bar {
-  background: rgba(139, 92, 246, 0.2) !important;
-  height: 6px !important; /* Altura más visible */
-  border-radius: 3px !important;
+.driver-popover-custom .driver-popover-close-btn:hover {
+  background: rgba(139, 92, 246, 0.5) !important; /* Fondo más opaco en hover */
+  border-color: rgba(139, 92, 246, 0.6) !important;
+  transform: scale(1.1); /* Efecto de zoom en hover */
 }
 
-.driver-popover-custom .driver-popover-progress-bar-fill {
-  background: linear-gradient(90deg, #8b5cf6, #ec4899) !important;
-  border-radius: 3px !important;
-  transition: width 0.3s ease !important; /* Transición suave */
-}
-
-/* Animación de entrada suave */
-.driver-popover-custom {
-  animation: fadeInUp 0.4s ease-out !important;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Estilos para el overlay */
-.driver-overlay {
-  background: rgba(0, 0, 0, 0.7) !important;
-  backdrop-filter: blur(2px) !important;
+.driver-popover-arrow-side-top.driver-popover-arrow,
+.driver-popover-arrow-side-bottom.driver-popover-arrow {
+  /* Estilos existentes */
+  display: none !important;
 }
 
 /* Resaltar elementos durante el tutorial */
