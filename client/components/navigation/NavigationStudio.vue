@@ -10,11 +10,11 @@
     }"
   >
     <div
-      class="flex items-center justify-between w-full md:flex-col md:flex-grow"
+      class="flex items-center justify-start w-full md:flex-col md:flex-grow"
     >
-      <div class="flex items-center gap-3 md:flex-col md:items-center md:gap-4">
+      <div class="flex items-center gap-3 md:flex-col md:items-start md:gap-4">
         <NuxtLink
-          class="flex items-center justify-center hover:scale-110 transition-transform duration-200 ease-in-out"
+          class="flex items-center md:flex md:items-center md:justify-start md:w-full hover:scale-110 transition-transform duration-200 ease-in-out"
           to="/studio"
         >
           <img
@@ -23,10 +23,11 @@
             src="/mediart/mediartLogo.webp"
             alt="Logo"
           />
+          <span v-show="!isCollapsed" class="nav-text text-sm font-semibold md:ml-2">Inicio</span>
         </NuxtLink>
 
         <NuxtLink
-          class="items-center justify-center hidden hover:scale-110 transition-transform duration-200 ease-in-out md:flex"
+          class="items-center hidden hover:scale-110 transition-transform duration-200 ease-in-out md:flex md:items-center md:justify-start md:w-full"
           :to="`/profile/${actualUser ? actualUser : 'anonymous'}`"
         >
           <img
@@ -48,6 +49,7 @@
             @error="handleImageError"
             alt="Profile Preview"
           />
+          <span v-show="!isCollapsed" class="nav-text text-sm md:ml-2">Perfil</span>
         </NuxtLink>
 
         <button
@@ -56,18 +58,20 @@
           aria-label="Abrir menú"
         >
           <Icon name="material-symbols:menu" size="2em" />
+          
         </button>
       </div>
 
       <div class="hidden md:flex flex-col items-start w-full gap-3 mt-8">
         <NuxtLink
-          to="/studio/help"
-          class="nav-link"
-          title="Ayuda"
-          aria-label="Ayuda"
+          to="/studio/create"
+          class="nav-link nav-link-create"
+          aria-label="Crear Playlist"
         >
-          <Icon name="material-symbols:help" size="1.5em" />
-          <span v-show="!isCollapsed" class="nav-text text-sm">Ayuda</span>
+          <Icon name="material-symbols:add-circle-outline" size="1.5em" />
+          <span v-show="!isCollapsed" class="nav-text text-sm font-semibold"
+            >Crear Playlist</span
+          >
         </NuxtLink>
         <NuxtLink
           to="/studio/search"
@@ -79,14 +83,13 @@
           <span v-show="!isCollapsed" class="nav-text text-sm">Buscar</span>
         </NuxtLink>
         <NuxtLink
-          to="/studio/create"
-          class="nav-link nav-link-create"
-          aria-label="Crear Playlist"
+          to="/studio/help"
+          class="nav-link"
+          title="Ayuda"
+          aria-label="Ayuda"
         >
-          <Icon name="material-symbols:add-circle-outline" size="1.5em" />
-          <span v-show="!isCollapsed" class="nav-text text-sm font-semibold"
-            >Crear Playlist</span
-          >
+          <Icon name="material-symbols:help" size="1.5em" />
+          <span v-show="!isCollapsed" class="nav-text text-sm">Ayuda</span>
         </NuxtLink>
       </div>
 
@@ -159,17 +162,15 @@
         <hr />
         <NuxtLink
           @click="closeMenu"
-          class="flex items-center gap-4 p-4 rounded-xl hover:bg-purple-50 hover:shadow-md transition-all duration-200 group"
-          :to="`/studio/help`"
+          class="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 group"
+          :to="`/studio/create`"
         >
           <Icon
-            name="material-symbols:help"
+            name="material-symbols:add"
             size="2em"
-            class="text-gray-600 group-hover:text-purple-600"
+            class="transition-transform group-hover:scale-110"
           />
-          <span class="font-medium text-gray-800 group-hover:text-purple-800"
-            >Ayuda</span
-          >
+          <span class="font-semibold">Crear Playlist</span>
         </NuxtLink>
         <NuxtLink
           @click="closeMenu"
@@ -185,17 +186,20 @@
             >Buscar</span
           >
         </NuxtLink>
+
         <NuxtLink
           @click="closeMenu"
-          class="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 group"
-          :to="`/studio/create`"
+          class="flex items-center gap-4 p-4 rounded-xl hover:bg-purple-50 hover:shadow-md transition-all duration-200 group"
+          :to="`/studio/help`"
         >
           <Icon
-            name="material-symbols:add"
+            name="material-symbols:help"
             size="2em"
-            class="transition-transform group-hover:scale-110"
+            class="text-gray-600 group-hover:text-purple-600"
           />
-          <span class="font-semibold">Crear Playlist</span>
+          <span class="font-medium text-gray-800 group-hover:text-purple-800"
+            >Ayuda</span
+          >
         </NuxtLink>
         <div
           @click="logout"

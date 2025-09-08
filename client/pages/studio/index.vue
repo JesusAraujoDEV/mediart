@@ -4,11 +4,12 @@
     <NavigationStudio />
 
     <div class="flex max-md:flex-col gap-4 items-center justify-center w-full mb-4 px-4 max-w-4xl max-md:mt-20">
-      <div class="flex items-center justify-center max-md:w-full">
-          <div class="select-wrapper relative">
-            <select ref="searchTypeRef" v-model="searchType" data-tutorial="search-type"
+        <div class="flex items-center justify-center max-md:w-full">
+          <div class="select-wrapper relative w-full">
+            <label for="searchTypeSelect" class="block text-sm font-medium text-gray-200 mb-2">Tipo de búsqueda</label>
+    <select id="searchTypeSelect" ref="searchTypeRef" v-model="searchType" data-tutorial="search-type"
               @focus="searchTypeOpen = true" @blur="searchTypeOpen = false" @change="handleSearchTypeChange"
-              class="p-2 pl-6 pr-12 rounded-full bg-gray-700/80 w-fit text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer"
+  class="p-2 pl-6 pr-12 rounded-full bg-gray-700/80 w-full max-md:w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer"
               title="Selecciona el tipo de contenido que quieres buscar">
               <option value="general">Todo</option>
               <option value="song">Canciones</option>
@@ -19,15 +20,12 @@
               <option value="book">Libros</option>
               <option value="videogame">Videojuegos</option>
             </select>
-            <button type="button" aria-label="Abrir selector" class="select-arrow absolute right-3 top-1/2 -translate-y-1/2 text-white/90 cursor-pointer"
-              @click="focusSearchType"
-              :aria-expanded="searchTypeOpen"
-              title="Haz clic para abrir el selector de tipo de búsqueda">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"
-                :class="{ 'rotate-180': searchTypeOpen }" class="transition-transform duration-200">
-                <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
-              </svg>
-            </button>
+              <span class="select-icon absolute right-4 top-12 -translate-y-1/2 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4 text-white transition-transform duration-200"
+                  :class="{ 'rotate-180': searchTypeOpen }">
+                  <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+                </svg>
+              </span>
           </div>
         </div>
 
@@ -90,9 +88,10 @@
           </ul>
         </Transition>
       </div>
-      <div class="flex items-center justify-center max-md:w-full max-md:max-w-4xl">
+        <div class="flex items-center justify-center max-md:w-full max-md:max-w-4xl">
         <div class="select-wrapper relative w-full">
-          <select ref="categoryRef" v-model="selectedCategory" data-tutorial="category-selector"
+          <label for="categorySelect" class="block text-sm font-medium text-gray-200 mb-2">Tipo de lista</label>
+          <select id="categorySelect" ref="categoryRef" v-model="selectedCategory" data-tutorial="category-selector"
             @focus="categoryOpen = true" @blur="categoryOpen = false"
             class="p-2 pl-6 pr-12 rounded-full bg-gray-700/80 w-full text-white border border-gray-600 focus:outline-none focus:border-blue-500 shadow-md appearance-none hover:bg-gray-600/80 transition-all duration-200 ease-in-out hover:scale-105 cursor-pointer"
             title="Elige el tipo de lista de recomendaciones que quieres generar">
@@ -105,15 +104,12 @@
             <option value="books">Tipo de lista: Libros</option>
             <option value="videogames">Tipo de lista: Videojuegos</option>
           </select>
-          <button type="button" aria-label="Abrir selector" class="select-arrow absolute right-3 top-1/2 -translate-y-1/2 text-white/90 cursor-pointer"
-            @click="focusCategory"
-            :aria-expanded="categoryOpen"
-            title="Haz clic para abrir el selector de tipo de lista">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"
-              :class="{ 'rotate-180': categoryOpen }" class="transition-transform duration-200">
+          <span class="select-icon absolute right-4 top-12 -translate-y-1/2 pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4 text-white transition-transform duration-200"
+              :class="{ 'rotate-180': categoryOpen }">
               <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
             </svg>
-          </button>
+          </span>
         </div>
         <button @click="sendData(selectedTags)" data-tutorial="send-button"
           class="ml-3 p-2 rounded-full cursor-pointer glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm"
@@ -300,11 +296,7 @@
             </p>
           </div>
           <div class="flex flex-col sm:flex-row gap-4 items-center">
-            <button @click="testUI"
-              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-colors text-lg cursor-pointer"
-              title="Probar UI con datos simulados">
-              Probar UI
-            </button>
+            <!-- Test UI removed -->
             <button @click="startTutorial"
               class="glassEffect hover:from-purple-600 hover:via-pink-600 hover:to-blue-600 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center gap-2 text-white hover:scale-110 transform border border-purple-400/30 hover:border-purple-300/50 backdrop-blur-sm py-3 px-6 rounded-full font-semibold cursor-pointer"
               title="Inicia un tutorial interactivo para aprender a usar Mediart Studio">
@@ -366,6 +358,7 @@ const {
   showPlaylistModal,
   playlistSaving,
   sendData,
+  getLastPayload,
   removeRecommendation,
   createPlaylist,
 } = useRecommendations();
@@ -432,76 +425,29 @@ function toggleViewMode(mode: 'horizontal' | 'pinterest') {
 }
 
 // Función para probar la UI con datos simulados
-function testUI() {
-  console.info('[studio] Testing UI with mock data');
-  recommendations.value = [
-    {
-      title: 'Test Movie',
-      type: 'movie',
-      coverUrl: undefined,
-      externalSource: 'tmdb',
-      externalId: '123',
-      externalUrl: 'https://example.com',
-      description: 'This is a test movie',
-      releaseDate: '2023-01-01',
-      avgRating: 8.5
-    },
-    {
-      title: 'Test Song',
-      type: 'song',
-      coverUrl: undefined,
-      externalSource: 'spotify',
-      externalId: '456',
-      externalUrl: 'https://example.com',
-      description: 'This is a test song',
-      releaseDate: '2023-01-01',
-      avgRating: 9.0
-    }
-  ];
-  console.info('[studio] Mock recommendations set:', recommendations.value.length);
-}
+// testUI removed
 
 // Función para reintentar generar recomendaciones
 function retryGenerateRecommendations() {
-  console.info('[studio] retry generate recommendations triggered');
-  console.info('[studio] current state:', {
-    recommendationsLength: recommendations.value.length,
-    selectedTagsLength: selectedTags.value.length,
-    recommendationsLoading: recommendationsLoading.value,
-    recommendationsError: recommendationsError.value
-  });
+  
 
   // Si hay tags seleccionados, usarlos; si no, usar las recomendaciones existentes
   const tagsToUse = selectedTags.value.length > 0 ? selectedTags.value : recommendations.value;
-  console.info('[studio] Retry using tags from:', selectedTags.value.length > 0 ? 'selectedTags' : 'recommendations');
-  console.info('[studio] tagsToUse length:', tagsToUse.length);
-  console.info('[studio] tagsToUse sample:', tagsToUse.slice(0, 2));
+  
 
   sendData(tagsToUse);
 }
 
 // Wrapper local para el botón Regenerar (garantiza scope y logging)
 function regenerate() {
-  console.info('[studio] regenerate triggered');
-  console.info('[studio] current state:', {
-    recommendationsLength: recommendations.value.length,
-    selectedTagsLength: selectedTags.value.length,
-    recommendationsLoading: recommendationsLoading.value,
-    recommendationsError: recommendationsError.value
-  });
-
   if (recommendations.value.length === 0) {
     console.warn('[studio] No recommendations to regenerate from');
     return;
   }
 
-  // Si hay tags seleccionados, usarlos; si no, usar las recomendaciones existentes
+  // Llamar exactamente igual que el botón de "Generar recomendaciones" y forzar re-fetch
   const tagsToUse = selectedTags.value.length > 0 ? selectedTags.value : recommendations.value;
-  console.info('[studio] Using tags from:', selectedTags.value.length > 0 ? 'selectedTags' : 'recommendations');
-  console.info('[studio] tagsToUse length:', tagsToUse.length);
-  console.info('[studio] tagsToUse sample:', tagsToUse.slice(0, 2));
-
-  sendData(tagsToUse);
+  sendData(tagsToUse, { force: true }).catch(() => { /* ignore errors here; UI shows feedback */ });
 }
 
 // Event listener para clics fuera del dropdown
@@ -556,14 +502,11 @@ onMounted(() => {
   transform: translateY(-10px);
 }
 
-select::after {
-  content: '▼';
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  transition: transform 0.3s;
+/* Icono dentro del select */
+.select-wrapper .select-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Animaciones para la flecha de scroll */
