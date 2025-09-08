@@ -36,9 +36,11 @@ const config = {
     googleBooks: process.env.GOOGLE_BOOKS_API_KEY,
     igdbClientId: process.env.VIDEOGAMES_CLIENT_ID,
     igdbClientSecret: process.env.VIDEOGAMES_CLIENT_SECRET,
+    rawgApiKey: process.env.RAWG_API_KEY,
     googleGemini: process.env.GOOGLE_GEMINI_API_KEY,
     deepseek: process.env.DEEPSEEK_API_KEY,
-    imgbbApiKey: process.env.IMGBB_API_KEY  
+    imgbbApiKey: process.env.IMGBB_API_KEY,
+    rawgApiKey: process.env.RAWG_API_KEY,
   },
 
 /*

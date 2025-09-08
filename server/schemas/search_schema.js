@@ -11,7 +11,8 @@ const allowedTypes = [
   'album',
   'videogame',
   'book',
-  'general'
+  'general',
+  'rawg'
 ];
 
 const searchQuerySchema = Joi.object({

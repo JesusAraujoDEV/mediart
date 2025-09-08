@@ -73,6 +73,8 @@ class IgdbApiService {
 
             const gamesData = response.data;
 
+            console.log('IGDB Raw Response Data:', JSON.stringify(gamesData, null, 2));
+
             // Debug logs gated by env flag
             const debug = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
             if (debug) {
@@ -95,6 +97,8 @@ class IgdbApiService {
                 return true;
             });
 
+            console.log('IGDB Filtered Data:', JSON.stringify(filteredData, null, 2));
+
             const videogames = filteredData.map(game => {
                 let coverUrl = null;
                 if (game.cover && game.cover.url) {
@@ -116,6 +120,8 @@ class IgdbApiService {
                     totalRatingCount: game.total_rating_count || 0 // Used for popularity sorting
                 };
             });
+
+            console.log('IGDB Mapped Videogames:', JSON.stringify(videogames, null, 2));
 
             // Relevance score: popularity + rating + keyword boosts for team/cosmic/science vibes
             const boostKeywords = [
@@ -157,7 +163,11 @@ class IgdbApiService {
                 return countB - countA;
             });
 
+            console.log('IGDB Sorted Videogames:', JSON.stringify(videogames, null, 2));
+
             const cleanedVideogames = videogames.map(({ genres, platforms, totalRatingCount, ...rest }) => rest);
+
+            console.log('IGDB Final Cleaned Videogames:', JSON.stringify(cleanedVideogames, null, 2));
 
             if (debug) {
                 const sample = cleanedVideogames.slice(0, 5).map(v => v.title);
