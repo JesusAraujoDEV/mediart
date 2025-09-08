@@ -121,7 +121,6 @@ class IgdbApiService {
                 };
             });
 
-            console.log('IGDB Mapped Videogames:', JSON.stringify(videogames, null, 2));
 
             // Relevance score: popularity + rating + keyword boosts for team/cosmic/science vibes
             const boostKeywords = [
@@ -163,11 +162,9 @@ class IgdbApiService {
                 return countB - countA;
             });
 
-            console.log('IGDB Sorted Videogames:', JSON.stringify(videogames, null, 2));
 
             const cleanedVideogames = videogames.map(({ genres, platforms, totalRatingCount, ...rest }) => rest);
 
-            console.log('IGDB Final Cleaned Videogames:', JSON.stringify(cleanedVideogames, null, 2));
 
             if (debug) {
                 const sample = cleanedVideogames.slice(0, 5).map(v => v.title);
