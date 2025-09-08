@@ -24,8 +24,14 @@ class SongRecommendation extends BaseRecommendation {
   async recommend(itemName, queries, limit = 10) {
     console.log(`[SongRecommendation] Processing ${queries.length} queries`);
 
-    // Search for each query and collect results
-    const candidates = await this.searchMany(queries);
+    // Search for each query and take only the first result
+    const results = await Promise.allSettled(queries.map(q => this.searchOneQuery(q)));
+    const candidates = [];
+    for (const r of results) {
+      if (r.status === 'fulfilled' && Array.isArray(r.value) && r.value.length > 0) {
+        candidates.push(r.value[0]); // Only first result
+      }
+    }
 
     console.log(`[SongRecommendation] Found ${candidates.length} total results`);
 

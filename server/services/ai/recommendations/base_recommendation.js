@@ -14,17 +14,6 @@ class BaseRecommendation {
     throw new Error('searchOneQuery(query) must be implemented by subclass');
   }
 
-  // Run searches for multiple queries concurrently with Promise.allSettled
-  async searchMany(queries, mapper = (v) => v) {
-    const results = await Promise.allSettled(queries.map(q => this.searchOneQuery(q)));
-    const out = [];
-    for (const r of results) {
-      if (r.status === 'fulfilled' && Array.isArray(r.value)) {
-        out.push(...mapper(r.value));
-      }
-    }
-    return out;
-  }
 
   // Generic dedupe by unique key generator
   dedupe(items, getKey) {
