@@ -14,13 +14,16 @@ class RawgApiService {
                 throw new Error('RAWG API key missing.');
             }
 
-            // RAWG search endpoint: GET /games?search=query&key=API_KEY&page_size=50
+            // RAWG search endpoint: GET /games?search=query&key=API_KEY&page_size=25
+            // Reduced page_size for faster response times
             const response = await axios.get(`${this.baseUrl}/games`, {
                 params: {
                     search: query,
                     key: this.apiKey,
-                    page_size: 50 // Similar to IGDB's limit 50
-                }
+                    page_size: 25, // Reduced from 50 for better performance
+                    exclude_additions: true // Exclude DLCs and additions
+                },
+                timeout: 5000 // 5 second timeout for faster failure detection
             });
 
             const gamesData = response.data.results || [];
@@ -68,10 +71,10 @@ class RawgApiService {
 
             console.log('RAWG Sorted Videogames:', JSON.stringify(videogames, null, 2));
 
-            // Remove internal fields like genres and platforms arrays, keep only strings
-            const cleanedVideogames = videogames.map(({ genres, platforms, ...rest }) => rest);
+            // Keep all fields for compatibility with recommendation system
+            const cleanedVideogames = videogames;
 
-            console.log('RAWG Final Cleaned Videogames:', JSON.stringify(cleanedVideogames, null, 2));
+            console.log('RAWG Final Processed Videogames:', JSON.stringify(cleanedVideogames, null, 2));
 
             return cleanedVideogames;
 
