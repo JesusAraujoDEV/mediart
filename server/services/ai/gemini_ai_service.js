@@ -3,13 +3,13 @@ const { config } = require('../../config/config');
 
 class GeminiAiService {
   constructor() {
-    this.apiKey = config.apiKeys.googleGemini;
-    if (!this.apiKey) {
-      console.error('Google Gemini API Key not configured.');
-      throw new Error('Google Gemini API Key is missing.');
+    this.primaryApiKey = config.apiKeys.googleGemini;
+    this.fallbackApiKey = config.apiKeys.googleGemini2;
+    if (!this.primaryApiKey && !this.fallbackApiKey) {
+      console.error('No Google Gemini API Keys configured.');
+      throw new Error('Google Gemini API Keys are missing.');
     }
     this.modelName = 'gemini-2.0-flash';
-    this.apiUrl = `https://generativelanguage.googleapis.com/v1/models/${this.modelName}:generateContent?key=${this.apiKey}`;
   }
 
   /**
@@ -109,112 +109,144 @@ class GeminiAiService {
    * Generates a list of recommended queries (strings) for a given category.
    * Keeps existing return type (string[]). Only prompt changed to reduce bias.
    */
+  async _makeGeminiRequest(apiKey, promptText, itemType, itemName, itemContext) {
+    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/${this.modelName}:generateContent?key=${apiKey}`;
+
+    const requestBody = {
+      contents: [{
+        parts: [{ text: promptText }]
+      }],
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 220,
+        topP: 0.9,
+        topK: 40
+      }
+    };
+
+    // Gate noisy logs by env flag
+    const debug = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
+    if (debug) {
+      console.log('Sending prompt to Gemini API:', promptText);
+    }
+    console.log('[Gemini] Prompt category:', itemType, 'name:', itemName, 'ctx:', itemContext || '');
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Gemini API Error Response:', errorData);
+      throw new Error(errorData.error?.message || `Error en la API de Gemini: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const rawResponseText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (!rawResponseText) {
+      console.error('Invalid response from Gemini API:', JSON.stringify(data, null, 2));
+      throw new Error('Respuesta inválida de la API de Gemini: Estructura inesperada.');
+    }
+
+    const debug2 = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
+    if (debug2) {
+      console.log('Gemini raw response:', rawResponseText);
+    }
+    console.log('[Gemini] Parsed response (raw line):', rawResponseText.replace(/\s+/g, ' ').trim());
+
+    return rawResponseText;
+  }
+
   async generateRecommendations(itemType, itemName, itemContext = '') {
-    if (!this.apiKey) {
-      console.error('Gemini API Key not configured. Gemini AI service will be unavailable.');
+    if (!this.primaryApiKey && !this.fallbackApiKey) {
+      console.error('No Gemini API Keys configured. Gemini AI service will be unavailable.');
       return [];
     }
 
-    try {
-      const promptText = this._buildDomainPrompt(itemType, itemName, itemContext);
+    const promptText = this._buildDomainPrompt(itemType, itemName, itemContext);
 
-      const requestBody = {
-        contents: [{
-          parts: [{ text: promptText }]
-        }],
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 220,
-          topP: 0.9,
-          topK: 40
+    // Try primary API key first
+    if (this.primaryApiKey) {
+      try {
+        const rawResponseText = await this._makeGeminiRequest(this.primaryApiKey, promptText, itemType, itemName, itemContext);
+        return this._processResponse(rawResponseText, itemType, itemName);
+      } catch (error) {
+        console.error('Primary Gemini API Key failed:', error.message);
+        if (String(error.message || '').includes('429')) {
+          console.warn('Primary Gemini API quota exceeded. Trying fallback key.');
         }
-      };
-
-      // Gate noisy logs by env flag
-      const debug = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
-      if (debug) {
-        console.log('Sending prompt to Gemini API:', promptText);
       }
-      console.log('[Gemini] Prompt category:', itemType, 'name:', itemName, 'ctx:', itemContext || '');
+    }
 
-      const response = await fetch(this.apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
+    // Try fallback API key if primary failed or not available
+    if (this.fallbackApiKey) {
+      try {
+        console.log('Attempting with fallback Gemini API Key...');
+        const rawResponseText = await this._makeGeminiRequest(this.fallbackApiKey, promptText, itemType, itemName, itemContext);
+        return this._processResponse(rawResponseText, itemType, itemName);
+      } catch (error) {
+        console.error('Fallback Gemini API Key also failed:', error.message);
+        if (String(error.message || '').includes('429')) {
+          console.warn('Fallback Gemini API quota exceeded. Please wait or check your plan.');
+        }
+        throw error;
+      }
+    }
+
+    // If we reach here, both keys failed
+    console.error('Both Gemini API Keys failed. Service unavailable.');
+    return [];
+  }
+
+  _processResponse(rawResponseText, itemType, itemName) {
+    // Normalize single-line comma-separated output into array of strings
+    const variantRegex = /\b(remix|live|acoustic|cover|re-?record|taylor'?s version|sped ?up|slowed|extended|edit|karaoke|instrumental|piano|lullaby|kids|parody|diss|version|versión)\b/i;
+
+    // Strip any years like "(2015)" that the model may still include
+    const cleanedLine = rawResponseText
+      .replace(/\r?\n/g, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\(\s*\d{4}\s*\)/g, '')
+      .trim();
+
+    const tokens = cleanedLine.split(',').map(s => s.trim()).filter(Boolean);
+
+    const seen = new Set();
+    let results = tokens
+      .map(t => t.replace(/(\d+\.\s*|["'*`_])/g, '').trim())
+      .map(t => t.replace(/\s+-\s+/g, ' - '))
+      .map(t => t.replace(/\s+\(\s*(\d{4})\s*\)\s*$/i, ' ($1)'))
+      .filter(t => t.length > 0)
+      .filter(t => t.toLowerCase() !== String(itemName || '').toLowerCase())
+      .filter(t => !variantRegex.test(t))
+      .filter(t => {
+        const key = t.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Gemini API Error Response:', errorData);
-        throw new Error(errorData.error?.message || `Error en la API de Gemini: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const rawResponseText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      if (!rawResponseText) {
-        console.error('Invalid response from Gemini API:', JSON.stringify(data, null, 2));
-        throw new Error('Respuesta inválida de la API de Gemini: Estructura inesperada.');
-      }
-
-      const debug2 = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
-      if (debug2) {
-        console.log('Gemini raw response:', rawResponseText);
-      }
-      console.log('[Gemini] Parsed response (raw line):', rawResponseText.replace(/\s+/g, ' ').trim());
-
-      // Normalize single-line comma-separated output into array of strings
-      const variantRegex = /\b(remix|live|acoustic|cover|re-?record|taylor'?s version|sped ?up|slowed|extended|edit|karaoke|instrumental|piano|lullaby|kids|parody|diss|version|versión)\b/i;
-
-      // Strip any years like "(2015)" that the model may still include
-      const cleanedLine = rawResponseText
-        .replace(/\r?\n/g, ' ')
-        .replace(/\s{2,}/g, ' ')
-        .replace(/\(\s*\d{4}\s*\)/g, '')
-        .trim();
-
-      const tokens = cleanedLine.split(',').map(s => s.trim()).filter(Boolean);
-
-      const seen = new Set();
-      let results = tokens
-        .map(t => t.replace(/(\d+\.\s*|["'*`_])/g, '').trim())
-        .map(t => t.replace(/\s+-\s+/g, ' - '))
-        .map(t => t.replace(/\s+\(\s*(\d{4})\s*\)\s*$/i, ' ($1)'))
-        .filter(t => t.length > 0)
-        .filter(t => t.toLowerCase() !== String(itemName || '').toLowerCase())
-        .filter(t => !variantRegex.test(t))
-        .filter(t => {
-          const key = t.toLowerCase();
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
-
-      // For "artistas" category: additional cleanup to reduce false positives like "Lord Huron" for "Lorde"
-      const categoryLc = String(itemType || '').toLowerCase();
-      if (categoryLc === 'artistas' || categoryLc === 'artists') {
-        const seed = String(itemName || '').toLowerCase();
-        // Remove entries that only share prefix with seed word like "lord" vs "lorde" unless exact canonical names
-        const seedWord = seed.split(/\s|\(|-|\./)[0].replace(/[^a-z0-9]/g, '');
-        results = results.filter(name => {
-          const n = name.toLowerCase();
-          const nWord = n.split(/\s|\(|-|\./)[0].replace(/[^a-z0-9]/g, '');
-          if (!seedWord || seedWord.length < 3) return true;
-          // If startsWith but diverges early and isn't the exact seed artist, keep only if edit distance suggests close match
-          if (nWord.startsWith(seedWord.slice(0, Math.max(3, seedWord.length - 1)))) return true;
-          return true;
-        })
-        // Basic whitelist for mainstream pop-ish context: prefer names with spaces or known casing patterns, drop one-off strange tokens
-        .filter(name => /^[a-z0-9].*/i.test(name) && name.length >= 3);
-      }
-
-      return results;
-    } catch (error) {
-      console.error('Error generating recommendations with Gemini AI:', error.message);
-      if (String(error.message || '').includes('429')) {
-        console.warn('Gemini API quota exceeded. Please wait or check your plan.');
-      }
-      throw error;
+    // For "artistas" category: additional cleanup to reduce false positives like "Lord Huron" for "Lorde"
+    const categoryLc = String(itemType || '').toLowerCase();
+    if (categoryLc === 'artistas' || categoryLc === 'artists') {
+      const seed = String(itemName || '').toLowerCase();
+      // Remove entries that only share prefix with seed word like "lord" vs "lorde" unless exact canonical names
+      const seedWord = seed.split(/\s|\(|-|\./)[0].replace(/[^a-z0-9]/g, '');
+      results = results.filter(name => {
+        const n = name.toLowerCase();
+        const nWord = n.split(/\s|\(|-|\./)[0].replace(/[^a-z0-9]/g, '');
+        if (!seedWord || seedWord.length < 3) return true;
+        // If startsWith but diverges early and isn't the exact seed artist, keep only if edit distance suggests close match
+        if (nWord.startsWith(seedWord.slice(0, Math.max(3, seedWord.length - 1)))) return true;
+        return true;
+      })
+      // Basic whitelist for mainstream pop-ish context: prefer names with spaces or known casing patterns, drop one-off strange tokens
+      .filter(name => /^[a-z0-9].*/i.test(name) && name.length >= 3);
     }
+
+    return results;
   }
 }
 
