@@ -15,7 +15,7 @@ class TmdbApiService {
         }
 
         try {
-            const response = await axios.get(`${this.baseUrl}/search/multi`, {
+            const response = await axios.get(`${this.baseUrl}/search/movie`, {
                 params: {
                     api_key: this.apiKey,
                     query: query,
@@ -24,41 +24,22 @@ class TmdbApiService {
             });
 
             const data = response.data.results;
-            let allItems = []; // Aquí acumularemos todas las películas y series
+            let allItems = []; // Aquí acumularemos todas las películas
 
             data.forEach(item => {
-                // Solo procesamos 'movie' y 'tv' del multi-search
-                if (item.media_type === 'movie') {
-                    allItems.push({
-                        title: item.title,
-                        type: 'movie', // Ya es el tipo correcto 'movie'
-                        description: item.overview,
-                        coverUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
-                        releaseDate: item.release_date,
-                        externalId: String(item.id),
-                        externalSource: 'TMDB',
-                        avgRating: item.vote_average ? parseFloat(item.vote_average.toFixed(1)) : 0,
-                        externalUrl: `https://www.themoviedb.org/movie/${item.id}`,
-                    });
-                } else if (item.media_type === 'tv') {
-                    allItems.push({
-                        title: item.name,
-                        type: 'tvshow', // Ya es el tipo correcto 'tvshow'
-                        description: item.overview,
-                        coverUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
-                        releaseDate: item.first_air_date,
-                        externalId: String(item.id),
-                        externalSource: 'TMDB',
-                        avgRating: item.vote_average ? parseFloat(item.vote_average.toFixed(1)) : 0,
-                        externalUrl: `https://www.themoviedb.org/tv/${item.id}`,
-                    });
-                }
-                // Si quieres incluir 'person' o otros tipos, puedes hacerlo aquí también,
-                // mapeándolos a tu ItemSchema.
+                allItems.push({
+                    title: item.title,
+                    type: 'movie',
+                    description: item.overview,
+                    coverUrl: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
+                    releaseDate: item.release_date,
+                    externalId: String(item.id),
+                    externalSource: 'TMDB',
+                    avgRating: item.vote_average ? parseFloat(item.vote_average.toFixed(1)) : 0,
+                    externalUrl: `https://www.themoviedb.org/movie/${item.id}`,
+                    genre_ids: item.genre_ids || []
+                });
             });
-
-            // Opcional: ordenar los resultados combinados por popularidad si deseas una priorización.
-            // allItems.sort((a, b) => b.popularity - a.popularity); // Asegúrate de que 'popularity' esté presente en los objetos si la usas aquí.
 
             return allItems; // ¡Ahora devuelve un array plano!
 
@@ -89,7 +70,8 @@ class TmdbApiService {
                 externalId: item.id.toString(),
                 externalSource: 'TMDB',
                 avgRating: item.vote_average ? parseFloat(item.vote_average.toFixed(1)) : 0,
-                externalUrl: `https://www.themoviedb.org/movie/${item.id}`
+                externalUrl: `https://www.themoviedb.org/movie/${item.id}`,
+                genre_ids: item.genres ? item.genres.map(g => g.id) : []
             };
         } catch (error) {
             console.error(`Error fetching TMDB movie details for ID ${tmdbId}:`, error.response ? error.response.data : error.message);

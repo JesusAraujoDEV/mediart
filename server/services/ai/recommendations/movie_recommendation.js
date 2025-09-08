@@ -18,8 +18,21 @@ class MovieRecommendation extends BaseRecommendation {
     const candidates = await this.searchMany(queries);
     const usedFranchises = new Set();
     const usedCanonical = new Set();
+    const usedIds = new Set();
 
-    // Rank by similarity + rating
+    // Fetch input movie to get genres for relevance filtering
+    let inputGenres = new Set();
+    try {
+      const inputResults = await this.searchService.searchTmdb(itemName);
+      const inputMovie = inputResults.find(x => x.type === 'movie' && !this.droppedPattern.test(x.title || ''));
+      if (inputMovie) {
+        inputGenres = new Set(inputMovie.genre_ids || []);
+      }
+    } catch (e) {
+      // If can't fetch input, proceed without genre filter
+    }
+
+    // Rank by similarity + rating + genre overlap bonus
     const ranked = this.rank(candidates, (x) => {
       const titleNorm = normalize(x.title);
       const qNorm = normalize(queries[0] || itemName || '');
@@ -28,7 +41,16 @@ class MovieRecommendation extends BaseRecommendation {
       if (titleNorm === qNorm) sim += 3;
       if (titleNorm.startsWith(qNorm)) sim += 2;
       if (titleNorm.includes(qNorm)) sim += 1;
-      return sim * 10 + rating;
+
+      // Genre overlap bonus for relevance
+      let genreBonus = 0;
+      if (inputGenres.size > 0 && x.genre_ids) {
+        const candGenres = new Set(x.genre_ids);
+        const overlap = [...inputGenres].some(g => candGenres.has(g));
+        if (overlap) genreBonus = 5; // Boost for shared genres
+      }
+
+      return sim * 10 + rating + genreBonus;
     });
 
     const finalItems = [];
@@ -36,20 +58,30 @@ class MovieRecommendation extends BaseRecommendation {
       const title = cand.title || '';
       const canonicalKey = this.canonicalKeyByTitle(title);
       const franchiseKey = canonicalKey.split(' ').slice(0, 4).join(' ');
+
+      // Skip if already used by canonical or franchise
       if (usedCanonical.has(canonicalKey)) continue;
       if (usedFranchises.has(franchiseKey)) continue;
+
+      // Skip if no TMDB ID or already used
+      if (!cand.externalId || usedIds.has(cand.externalId)) continue;
+
       usedCanonical.add(canonicalKey);
       usedFranchises.add(franchiseKey);
+      usedIds.add(cand.externalId);
       finalItems.push(cand);
       if (finalItems.length >= limit) break;
     }
 
-    // If not enough, fill from remaining unique canonicals
+    // If not enough, fill from remaining unique canonicals and IDs
     if (finalItems.length < limit) {
       for (const cand of ranked) {
         const canonicalKey = this.canonicalKeyByTitle(cand.title);
         if (usedCanonical.has(canonicalKey)) continue;
+        if (!cand.externalId || usedIds.has(cand.externalId)) continue;
+
         usedCanonical.add(canonicalKey);
+        usedIds.add(cand.externalId);
         finalItems.push(cand);
         if (finalItems.length >= limit) break;
       }
