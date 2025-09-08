@@ -3,6 +3,7 @@ const TmdbApiService = require('./api/tmdb_api_service');
 const SpotifyApiService = require('./api/spotify_api_service');
 const GoogleBooksApiService = require('./api/googlebooks_api_service');
 const IgdbApiService = require('./api/igdb_api_service');
+const RawgApiService = require('./api/rawg_api_service');
 const UserService = require('./user_service');
 const { Op } = require('sequelize');
 
@@ -12,6 +13,7 @@ class SearchService {
         this.spotifyApiService = new SpotifyApiService();
         this.googleBooksApiService = new GoogleBooksApiService();
         this.igdbApiService = new IgdbApiService();
+        this.rawgApiService = new RawgApiService();
         this.userService = new UserService();
     }
 
@@ -114,6 +116,7 @@ class SearchService {
     async searchIgdb(query) {
         try {
             const result = await this.igdbApiService.search(query);
+            console.log('SearchService searchIgdb result:', JSON.stringify(result, null, 2));
             const debug = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
             if (debug) {
                 const titles = Array.isArray(result) ? result.slice(0, 5).map(r => r.title) : [];
@@ -122,6 +125,27 @@ class SearchService {
             return result || []; // Asegurarse de que sea un array
         } catch (error) {
             console.error('Error in searchIgdb:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Busca videojuegos en RAWG.
+     * @param {string} query
+     * @returns {Promise<Array>}
+     */
+    async searchRawg(query) {
+        try {
+            const result = await this.rawgApiService.search(query);
+            console.log('SearchService searchRawg result:', JSON.stringify(result, null, 2));
+            const debug = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
+            if (debug) {
+                const titles = Array.isArray(result) ? result.slice(0, 5).map(r => r.title) : [];
+                console.log(`searchRawg("${query}") -> ${Array.isArray(result) ? result.length : 0} items (sample: ${titles.join(', ')})`);
+            }
+            return result || []; // Asegurarse de que sea un array
+        } catch (error) {
+            console.error('Error in searchRawg:', error);
             return [];
         }
     }
