@@ -33,7 +33,6 @@ class SpotifyApiService {
 
       this.accessToken = response.data.access_token;
       this.tokenExpiry = Date.now() + (response.data.expires_in * 1000);
-      console.log('Spotify access token obtained/refreshed successfully.');
 
     } catch (error) {
       console.error('Error obtaining/refreshing Spotify access token:', error.response ? error.response.data : error.message);
@@ -90,16 +89,23 @@ class SpotifyApiService {
       // Mapear Artists (Artistas)
       if (data.artists && data.artists.items && (type.includes('artist') || type === 'artist')) {
           data.artists.items.forEach(artist => {
+              const genres = artist.genres && artist.genres.length > 0 ? artist.genres.join(', ') : 'N/A';
+              const followers = artist.followers ? artist.followers.total.toLocaleString() : 'N/A';
+              const popularity = artist.popularity ? `${artist.popularity}%` : 'N/A';
+
               formattedResults.push({
                   title: artist.name,
                   type: 'artist',
-                  description: `Géneros: ${artist.genres.join(', ') || 'N/A'}. Seguidores: ${artist.followers.total.toLocaleString()}.`,
+                  description: `Géneros: ${genres}. Seguidores: ${followers}. Popularidad: ${popularity}.`,
                   coverUrl: artist.images.length > 0 ? artist.images[0].url : null,
                   releaseDate: null,
                   externalId: artist.id,
                   externalSource: 'Spotify',
                   avgRating: null,
-                  externalUrl: artist.external_urls.spotify
+                  externalUrl: artist.external_urls.spotify,
+                  genres: genres,
+                  followers: artist.followers ? artist.followers.total : 0,
+                  popularity: artist.popularity || 0
               });
           });
       }
@@ -192,16 +198,23 @@ class SpotifyApiService {
       const artist = response.data;
       if (!artist) return null;
 
+      const genres = artist.genres && artist.genres.length > 0 ? artist.genres.join(', ') : 'N/A';
+      const followers = artist.followers ? artist.followers.total.toLocaleString() : 'N/A';
+      const popularity = artist.popularity ? `${artist.popularity}%` : 'N/A';
+
       return {
         title: artist.name,
         type: 'artist',
-        description: `Géneros: ${artist.genres.join(', ') || 'N/A'}. Seguidores: ${artist.followers.total.toLocaleString()}. Popularidad: ${artist.popularity}%.`,
+        description: `Géneros: ${genres}. Seguidores: ${followers}. Popularidad: ${popularity}.`,
         coverUrl: artist.images.length > 0 ? artist.images[0].url : null,
         releaseDate: null,
         externalId: artist.id,
         externalSource: 'Spotify',
         avgRating: null,
-        externalUrl: artist.external_urls.spotify
+        externalUrl: artist.external_urls.spotify,
+        genres: genres,
+        followers: artist.followers ? artist.followers.total : 0,
+        popularity: artist.popularity || 0
       };
     } catch (error) {
       console.error(`Error fetching Spotify artist details for ID ${artistId}:`, error.response ? error.response.data : error.message);
