@@ -7,6 +7,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "start": "npx serve -s .output/public",
     "postinstall": "nuxt prepare",
     "push-client": "git push & git push gitlab devClient",
     "push-server": "git push & git push gitlab devServer",
