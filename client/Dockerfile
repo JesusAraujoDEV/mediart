@@ -26,15 +26,12 @@ WORKDIR /app
 # Usamos el PORT de tu .env (8010)
 ARG PORT=8010
 ENV PORT=${PORT}
-# Importante para Nuxt/Nitro
-ENV NITRO_PORT=${PORT} 
 
-COPY --from=builder /app/.output ./
-COPY --from=builder /app/package.json ./package.json
+# Copiamos solo el build estático
+COPY --from=builder /app/.output/public ./public
 
-RUN npm install --omit=dev --no-fund --no-audit
 RUN npm install -g serve
 
 EXPOSE ${PORT}
 
-CMD [ "sh", "-c", "serve -s .output/public -l ${PORT}" ]
+CMD [ "sh", "-c", "serve -s /app/public -l ${PORT}" ]
