@@ -11,7 +11,7 @@ COPY . .
 
 # --- AQUÍ DEFINIMOS LOS ARGUMENTOS QUE VIENEN DEL .ENV ---
 ARG BACKEND_URL
-ARG NITRO_PRESET
+ARG NITRO_PRESET=static
 # Hacemos que estén disponibles como variables de entorno en el build
 ENV BACKEND_URL=${BACKEND_URL}
 ENV NITRO_PRESET=${NITRO_PRESET}
@@ -33,7 +33,8 @@ COPY --from=builder /app/.output ./
 COPY --from=builder /app/package.json ./package.json
 
 RUN npm install --omit=dev --no-fund --no-audit
+RUN npm install -g serve
 
 EXPOSE ${PORT}
 
-CMD [ "node", ".output/server/index.mjs" ]
+CMD [ "sh", "-c", "serve -s .output/public -l ${PORT}" ]
