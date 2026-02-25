@@ -19,7 +19,7 @@ class TmdbApiService {
                 params: {
                     api_key: this.apiKey,
                     query: query,
-                    language: 'es-MX'
+                    language: 'en-US'
                 }
             });
 
@@ -77,7 +77,7 @@ class TmdbApiService {
         }
         try {
             const response = await axios.get(`${this.baseUrl}/movie/${tmdbId}`, {
-                params: { api_key: this.apiKey, language: 'es-MX' }
+                params: { api_key: this.apiKey, language: 'en-US' }
             });
             const item = response.data;
             return {
@@ -105,7 +105,7 @@ class TmdbApiService {
         }
         try {
             const response = await axios.get(`${this.baseUrl}/tv/${tmdbId}`, {
-                params: { api_key: this.apiKey, language: 'es-MX' }
+                params: { api_key: this.apiKey, language: 'en-US' }
             });
             const item = response.data;
             return {
