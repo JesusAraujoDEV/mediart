@@ -8,8 +8,8 @@ class OpenRouterAiService {
   }
 
   /**
-   * Build a domain-specific strict JSON prompt for OpenRouter.
-   * We keep prompt construction consistent with Gemini to reduce bias.
+   * Build a domain-specific prompt para OpenRouter.
+   * Sin reglas de JSON para coincidir con la lógica simple de Gemini.
    */
   _buildDomainPrompt(itemCategory, itemName, itemContext = '') {
     const category = String(itemCategory || '').toLowerCase();
@@ -108,8 +108,9 @@ class OpenRouterAiService {
         { role: 'user', content: promptText }
       ],
       temperature: 0.3,
-      max_tokens: 220,
-      top_p: 0.9
+      max_tokens: 4096, // <--- ¡Aumentamos drásticamente el límite para que termine de pensar!
+      top_p: 0.9,
+      reasoning: { exclude: true }
     };
 
     const debug = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
@@ -130,7 +131,21 @@ class OpenRouterAiService {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('OpenRouter API Error Response:', errorData);
-      throw new Error(errorData.error?.message || `Error en la API de OpenRouter: ${response.status} ${response.statusText}`);
+      
+      // Manejo de error mejorado para leer metadata.raw de OpenRouter
+      let detailedMessage = errorData.error?.message || '';
+      if (errorData.error?.metadata?.raw) {
+        try {
+          const rawMetadata = JSON.parse(errorData.error.metadata.raw);
+          if (rawMetadata.error?.message) {
+            detailedMessage += ` - ${rawMetadata.error.message}`;
+          }
+        } catch (e) {
+          // Ignorar si el raw no es parseable
+        }
+      }
+
+      throw new Error(detailedMessage || `Error en la API de OpenRouter: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
@@ -140,8 +155,7 @@ class OpenRouterAiService {
       throw new Error('Respuesta inválida de la API de OpenRouter: Estructura inesperada.');
     }
 
-    const debug2 = String(process.env.SEARCH_DEBUG || '').toLowerCase() === 'true';
-    if (debug2) {
+    if (debug) {
       console.log('OpenRouter raw response:', rawResponseText);
     }
     console.log('[OpenRouter] Parsed response (raw line):', rawResponseText.replace(/\s+/g, ' ').trim());
@@ -156,8 +170,23 @@ class OpenRouterAiService {
     }
 
     const promptText = this._buildDomainPrompt(itemType, itemName, itemContext);
-    const rawResponseText = await this._makeOpenRouterRequest(this.openRouterApiKey, promptText, itemType, itemName, itemContext);
-    return this._processResponse(rawResponseText, itemType, itemName);
+    
+    try {
+      // Petición mucho más limpia y directa
+      const rawResponseText = await this._makeOpenRouterRequest(
+        this.openRouterApiKey,
+        promptText,
+        itemType,
+        itemName,
+        itemContext
+      );
+      
+      return this._processResponse(rawResponseText, itemType, itemName);
+    } catch (error) {
+      console.error(`[OpenRouter] Request failed:`, error.message);
+      // Lanzamos el error directamente, permitiendo que la capa superior haga el fallback hacia Gemini de manera limpia
+      throw error; 
+    }
   }
 
   _processResponse(rawResponseText, itemType, itemName) {
