@@ -132,4 +132,4 @@ Estas tecnologías permiten crear una experiencia de usuario moderna, eficiente 
 
 ---
 
-**© 2025 Mediart. Todos los derechos reservados.**
+**© 2026 Mediart. Todos los derechos reservados.**

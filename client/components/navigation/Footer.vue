@@ -122,7 +122,7 @@
         <!-- Footer inferior -->
         <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p class="text-gray-500 text-sm mb-4 md:mb-0">
-            © 2025 Mediart. Todos los derechos reservados.
+            © {{ currentYear }} Mediart. Todos los derechos reservados.
           </p>
           <div class="flex space-x-6 text-sm">
             <NuxtLink to="/terms" class="text-gray-500 hover:text-purple-600 transition-colors duration-200">
@@ -142,6 +142,7 @@
 </template>
 
 <script setup lang="ts">
+const currentYear = new Date().getFullYear();
 </script>
 
 <style scoped>
