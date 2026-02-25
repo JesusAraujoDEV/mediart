@@ -1,5 +1,6 @@
  // services/ai/recommendation_service.js
 const SearchService = require('./../search_service');
+const OpenRouterAiService = require('./openrouter_ai_service');
 const GeminiAiService = require('./gemini_ai_service');
 const DeepSeekAiService = require('./deepseek_ai_service');
 
@@ -17,6 +18,7 @@ const { cleanAndDedupeQueries } = require('./recommendations/utils/text');
 class RecommendationService {
   constructor() {
     this.searchService = new SearchService();
+    this.openRouterAiService = new OpenRouterAiService();
     this.geminiAiService = new GeminiAiService();
     this.deepSeekAiService = new DeepSeekAiService();
 
@@ -33,16 +35,22 @@ class RecommendationService {
   async _getRecommendedQueries(itemCategory, itemName, itemContext) {
     let queries = [];
     try {
-      queries = await this.geminiAiService.generateRecommendations(itemCategory, itemName, itemContext);
-      console.log(`[Gemini] Raw recommendations for ${itemCategory} ("${itemName}") ctx="${itemContext || ''}":`, queries);
-    } catch (geminiError) {
-      console.warn(`Gemini LLM failed for ${itemCategory}. Falling back to DeepSeek.`, geminiError?.message || geminiError);
+      queries = await this.openRouterAiService.generateRecommendations(itemCategory, itemName, itemContext);
+      console.log(`[OpenRouter] Raw recommendations for ${itemCategory} ("${itemName}") ctx="${itemContext || ''}":`, queries);
+    } catch (openRouterError) {
+      console.warn(`OpenRouter LLM failed for ${itemCategory}. Falling back to Gemini.`, openRouterError?.message || openRouterError);
       try {
-        queries = await this.deepSeekAiService.generateRecommendations(itemCategory, itemName, itemContext);
-        console.log(`[DeepSeek] Fallback recommendations for ${itemCategory} ("${itemName}") ctx="${itemContext || ''}":`, queries);
-      } catch (deepSeekError) {
-        console.error(`DeepSeek also failed for ${itemCategory}.`, deepSeekError?.message || deepSeekError);
-        throw deepSeekError;
+        queries = await this.geminiAiService.generateRecommendations(itemCategory, itemName, itemContext);
+        console.log(`[Gemini] Fallback recommendations for ${itemCategory} ("${itemName}") ctx="${itemContext || ''}":`, queries);
+      } catch (geminiError) {
+        console.warn(`Gemini LLM failed for ${itemCategory}. Falling back to DeepSeek.`, geminiError?.message || geminiError);
+        try {
+          queries = await this.deepSeekAiService.generateRecommendations(itemCategory, itemName, itemContext);
+          console.log(`[DeepSeek] Fallback recommendations for ${itemCategory} ("${itemName}") ctx="${itemContext || ''}":`, queries);
+        } catch (deepSeekError) {
+          console.error(`DeepSeek also failed for ${itemCategory}.`, deepSeekError?.message || deepSeekError);
+          throw deepSeekError;
+        }
       }
     }
 

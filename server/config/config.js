@@ -30,6 +30,7 @@ const config = {
 
   // Claves de API
   apiKeys: {
+    openrouter: process.env.OPENROUTER_API_KEY,
     tmdb: process.env.TMDB_API_KEY,
     spotifyClientId: process.env.SPOTIFY_CLIENT_ID,
     spotifyClientSecret: process.env.SPOTIFY_CLIENT_SECRET,
